@@ -10,8 +10,9 @@ export type Station = {
 export type IndexDataPoint = {
   date: string; // ISO string
   stationId: Station['id'];
-  indexValue: number;
+  indexValue: number | null; // Allow null before interpolation
   isInterpolated: boolean;
+  temperature: number | null;
 };
 
 export type KpiData = {

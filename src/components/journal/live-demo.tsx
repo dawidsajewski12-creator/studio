@@ -4,11 +4,12 @@ import type { IndexDataPoint, KpiData, Project, Station } from '@/lib/types';
 import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
+import { parseISO } from 'date-fns';
 
 // Helper function to find the latest valid reading
 const getLatestReading = (data: IndexDataPoint[], stationId: Station['id']) => {
   return data
-    .filter(d => d.stationId === stationId && d.indexValue !== -1)
+    .filter(d => d.stationId === stationId && !d.isInterpolated) // Only consider real observations
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 };
 
@@ -19,8 +20,10 @@ export default async function LiveDemo() {
     notFound();
   }
 
+  // Fetch the fused satellite and weather data
   const indexData = await getProjectData(project);
   
+  // KPI data is derived from the fetched data
   const kpiData: KpiData[] = project.stations.map(station => {
     const latestReading = getLatestReading(indexData, station.id);
     return {

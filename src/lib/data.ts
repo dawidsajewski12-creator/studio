@@ -102,6 +102,7 @@ async function getToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
+    next: { revalidate: 3600 } // Cache the token fetch itself for an hour
   });
 
   if (!response.ok) {
@@ -117,19 +118,36 @@ async function getToken(): Promise<string> {
   return tokenCache.access_token;
 }
 
-function getBoundingBox(station: Station, bufferKm = 0.5) {
+export function getBoundingBox(station: Station, bufferKm = 0.5): [number, number, number, number] {
     const { lat, lng } = station.location;
     const buffer = bufferKm / 111.32; // Approx conversion of km to degrees
     return [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
 }
 
-// This function fetches data from the Copernicus API for a given project.
-export async function getProjectData(project: Project): Promise<IndexDataPoint[]> {
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    console.error("Copernicus credentials are not set. Please provide them in your environment variables. Falling back to empty data.");
-    return [];
+async function fetchWeatherHistory(station: Station, startDate: string, endDate: string): Promise<Map<string, number>> {
+  const { lat, lng } = station.location;
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_mean`;
+  
+  try {
+    const response = await fetch(url, { next: { revalidate: 86400 } }); // Cache weather data for a day
+    if (!response.ok) {
+      console.error(`Failed to fetch weather data for station ${station.id}: ${response.statusText}`);
+      return new Map();
+    }
+    const data = await response.json();
+    const weatherMap = new Map<string, number>();
+    data.daily.time.forEach((time: string, index: number) => {
+      weatherMap.set(time, data.daily.temperature_2m_mean[index]);
+    });
+    return weatherMap;
+  } catch (error) {
+    console.error(`Error fetching weather data for station ${station.id}:`, error);
+    return new Map();
   }
+}
 
+// This function fetches and processes data from the Copernicus and Open-Meteo APIs.
+export async function getProjectData(project: Project): Promise<IndexDataPoint[]> {
   try {
     const token = await getToken();
     const today = new Date();
@@ -141,9 +159,10 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     }
 
     const stationPromises = project.stations.map(async (station) => {
-        const requestBody = {
+        // --- 1. Fetch Satellite Data ---
+        const satelliteRequestBody = {
             input: {
-                bounds: { bbox: getBoundingBox(station) },
+                bounds: { bbox: getBoundingBox(station, 0.5) },
                 data: [{ dataFilter: { timeRange: { from: yearAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
             },
             aggregation: {
@@ -155,52 +174,51 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             },
         };
 
-        const response = await fetch(STATS_URL, {
+        const satelliteResponse = await fetch(STATS_URL, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(requestBody),
+            body: JSON.stringify(satelliteRequestBody),
+            // Default Next.js caching will apply here
         });
 
-        if (!response.ok) {
-            console.error(`Failed to fetch data for station ${station.id}: ${response.statusText}`, await response.text());
+        if (!satelliteResponse.ok) {
+            console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
             return [];
         }
         
-        const apiResponse = await response.json();
-        
+        const apiResponse = await satelliteResponse.json();
         const sparseData: { date: Date; value: number }[] = apiResponse.data
             .map((item: any) => {
                 const stats = item.outputs.index.bands.B0.stats;
-                // Ensure there is valid data to process
                 if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
-                    return {
-                        date: parseISO(item.interval.from),
-                        // Clamp values to the valid range for most indices
-                        value: Math.max(-1, Math.min(stats.mean, 1)),
-                    };
+                    return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
                 }
                 return null;
             })
             .filter((item: any): item is { date: Date; value: number } => item !== null)
             .sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 
-        if (sparseData.length === 0) {
-            return [];
-        }
+        // --- 2. Fetch Weather Data ---
+        const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
+
+        // --- 3. Fuse and Interpolate Data ---
+        if (sparseData.length === 0) return [];
 
         const allDays = eachDayOfInterval({ start: yearAgo, end: today });
-        const dailySeries: (IndexDataPoint & { indexValue: number | null })[] = [];
+        const dailySeries: IndexDataPoint[] = [];
         let sparseIndex = 0;
 
-        // Create a full daily series, marking real data points
+        // Create a full daily series, marking real data points and adding weather
         for (const day of allDays) {
-            let pointToAdd: (IndexDataPoint & { indexValue: number | null });
+            const dateStr = format(day, 'yyyy-MM-dd');
+            let pointToAdd: IndexDataPoint;
             if (sparseIndex < sparseData.length && isSameDay(day, sparseData[sparseIndex].date)) {
                 pointToAdd = {
                     date: day.toISOString(),
                     stationId: station.id,
                     indexValue: sparseData[sparseIndex].value,
                     isInterpolated: false,
+                    temperature: weatherDataMap.get(dateStr) ?? null,
                 };
                 sparseIndex++;
             } else {
@@ -209,23 +227,19 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                     stationId: station.id,
                     indexValue: null,
                     isInterpolated: true,
+                    temperature: weatherDataMap.get(dateStr) ?? null,
                 };
             }
             dailySeries.push(pointToAdd);
         }
 
-        // Linear interpolation
+        // Linear interpolation for indexValue
         for (let i = 0; i < dailySeries.length; i++) {
             if (dailySeries[i].indexValue === null) {
                 let prevIndex = i - 1;
-                while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) {
-                    prevIndex--;
-                }
-
+                while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) prevIndex--;
                 let nextIndex = i + 1;
-                while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) {
-                    nextIndex++;
-                }
+                while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) nextIndex++;
                 
                 if (prevIndex >= 0 && nextIndex < dailySeries.length) {
                     const prevPoint = dailySeries[prevIndex];
@@ -235,26 +249,23 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                     const prevTime = parseISO(prevPoint.date).getTime();
                     const nextTime = parseISO(nextPoint.date).getTime();
                     const currentTime = parseISO(dailySeries[i].date).getTime();
-
                     const fraction = (currentTime - prevTime) / (nextTime - prevTime);
                     dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
-                } else if (prevIndex >= 0) { // Extrapolate start
+                } else if (prevIndex >= 0) {
                     dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
-                } else if (nextIndex < dailySeries.length) { // Extrapolate end
+                } else if (nextIndex < dailySeries.length) {
                     dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
-                } else { // No data at all
-                    dailySeries[i].indexValue = 0;
                 }
             }
         }
-        return dailySeries as IndexDataPoint[];
+        return dailySeries;
     });
 
     const results = await Promise.all(stationPromises);
-    return results.flat();
+    return results.flat().filter(p => p.indexValue !== null) as IndexDataPoint[];
 
   } catch (error) {
-    console.error("An error occurred while fetching Copernicus data:", error);
+    console.error("An error occurred in the main data pipeline:", error);
     return [];
   }
 }

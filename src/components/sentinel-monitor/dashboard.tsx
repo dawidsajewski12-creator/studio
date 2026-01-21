@@ -7,6 +7,7 @@ import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getBoundingBox } from '@/lib/data'; // Assuming you move getBoundingBox here or to utils
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
@@ -65,11 +66,20 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
 
+  // Augment stations with their bounding boxes for the map
+  const stationsWithBbox = useMemo(() => {
+    return project.stations.map(station => ({
+      ...station,
+      bbox: getBoundingBox(station, 0.5)
+    }));
+  }, [project.stations]);
+
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
       <Card className="xl:col-span-3 w-full h-[400px] xl:h-auto min-h-[400px] p-0 overflow-hidden shadow-lg">
         <MonitorMap
-          stations={project.stations}
+          stations={stationsWithBbox}
           center={mapCenter}
           selectedStationId={selectedStation}
           onMarkerClick={(stationId) => setSelectedStation(prev => prev === stationId ? 'all' : stationId)}

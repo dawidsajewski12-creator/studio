@@ -1,12 +1,15 @@
 "use client";
 
 import type { Station } from '@/lib/types';
-import Map, { Marker, Popup } from 'react-map-gl/maplibre';
+import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import { Satellite } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import type { FeatureCollection } from 'geojson';
+
+type StationWithBbox = Station & { bbox: [number, number, number, number] };
 
 type MonitorMapProps = {
-  stations: Station[];
+  stations: StationWithBbox[];
   center: { lat: number; lng: number };
   selectedStationId: Station['id'] | 'all';
   onMarkerClick: (stationId: Station['id']) => void;
@@ -15,9 +18,32 @@ type MonitorMapProps = {
 export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
 
+  const geojson: FeatureCollection = useMemo(() => ({
+    type: 'FeatureCollection',
+    features: stations.map(station => {
+      const [minLng, minLat, maxLng, maxLat] = station.bbox;
+      return {
+        type: 'Feature',
+        properties: { id: station.id },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [minLng, minLat],
+              [maxLng, minLat],
+              [maxLng, maxLat],
+              [minLng, maxLat],
+              [minLng, minLat]
+            ]
+          ]
+        }
+      };
+    })
+  }), [stations]);
+
   return (
     <Map
-      key={`${center.lat}-${center.lng}`} // Force re-render on center change
+      key={`${center.lat}-${center.lng}-${selectedStationId}`} // Force re-render
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
@@ -32,13 +58,41 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
             tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
             tileSize: 256,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          },
+          'station-bboxes': {
+            type: 'geojson',
+            data: geojson
           }
         },
         layers: [
+          { id: 'osm-tiles', type: 'raster', source: 'osm-tiles' },
           {
-            id: 'osm-tiles',
-            type: 'raster',
-            source: 'osm-tiles',
+            id: 'bboxes-fill',
+            type: 'fill',
+            source: 'station-bboxes',
+            paint: {
+              'fill-color': [
+                'case',
+                ['==', ['get', 'id'], selectedStationId],
+                'hsl(var(--accent))', // Selected color
+                'hsl(var(--primary))'   // Default color
+              ],
+              'fill-opacity': 0.2
+            }
+          },
+          {
+            id: 'bboxes-outline',
+            type: 'line',
+            source: 'station-bboxes',
+            paint: {
+              'line-color': [
+                'case',
+                ['==', ['get', 'id'], selectedStationId],
+                'hsl(var(--accent))', // Selected color
+                'hsl(var(--primary))'   // Default color
+              ],
+              'line-width': 1.5
+            }
           }
         ]
       }}
