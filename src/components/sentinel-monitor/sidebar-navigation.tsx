@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Satellite, FileText, Mail } from 'lucide-react';
+import VisualProof from "./visual-proof";
+import { Suspense } from "react";
+import { Skeleton } from "../ui/skeleton";
+
 
 const navigationItems = [
     { id: 'live-demo', name: '🏔️ Alpine Snow Watch (Live)', href: '/?view=live-demo', icon: <Satellite /> },
@@ -10,7 +14,7 @@ const navigationItems = [
     { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
 ]
 
-export default function SidebarNavigation({ activeView }: { activeView: string }) {
+export default function SidebarNavigation({ activeView, visualProof }: { activeView: string, visualProof: React.ReactNode | null }) {
 
   return (
     <>
@@ -33,6 +37,7 @@ export default function SidebarNavigation({ activeView }: { activeView: string }
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+        {visualProof}
       </SidebarContent>
     </>
   );

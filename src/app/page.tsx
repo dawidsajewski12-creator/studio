@@ -4,8 +4,10 @@ import LiveDemo from '@/components/journal/live-demo';
 import MethodologyAndResearch from '@/components/journal/methodology-research';
 import ContactCard from '@/components/journal/contact-card';
 import { Suspense } from 'react';
+import VisualProof from '@/components/sentinel-monitor/visual-proof';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// This is now a Server Component, so it can be async and read searchParams from props
+// This is a Server Component, so it can be async and read searchParams from props
 export default function Home({ searchParams }: { searchParams: { view?: string } }) {
   const view = searchParams?.view || 'live-demo';
 
@@ -25,11 +27,18 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
     }
   };
 
+  const visualProof = (
+      <div className="p-2 mt-4">
+          <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+              <VisualProof />
+          </Suspense>
+      </div>
+  );
+
   return (
       <SidebarProvider>
         <Sidebar>
-          {/* Pass the active view to the navigation component */}
-          <SidebarNavigation activeView={view} />
+          <SidebarNavigation activeView={view} visualProof={view === 'live-demo' ? visualProof : null} />
         </Sidebar>
         <SidebarInset>
           <main>

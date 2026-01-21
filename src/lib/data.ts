@@ -6,6 +6,25 @@ const CLIENT_ID = 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
 const CLIENT_SECRET = 'puq9Q6mEsKWRb8AFrZPEBesBE0Dq8uwE';
 const TOKEN_URL = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
 const STATS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/statistics';
+const PROCESS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/process';
+
+const TRUE_COLOR_EVALSCRIPT = `
+//VERSION=3
+function setup() {
+  return {
+    input: ["B04", "B03", "B02", "dataMask"],
+    output: {
+      bands: 3,
+      sampleType: "UINT8"
+    }
+  };
+}
+function evaluatePixel(sample) {
+  // Simple RGB with contrast enhancement
+  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02];
+}
+`;
+
 
 // --- Evalscripts for different indices ---
 const EVALSCRIPTS: Record<string, string> = {
@@ -268,4 +287,74 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     console.error("An error occurred in the main data pipeline:", error);
     return [];
   }
+}
+
+export async function getLatestVisual(station: Station): Promise<string | null> {
+    try {
+        const token = await getToken();
+        const today = new Date();
+        const sixtyDaysAgo = subDays(today, 60);
+
+        const requestBody = {
+            input: {
+                bounds: {
+                    bbox: getBoundingBox(station, 0.5)
+                },
+                data: [{
+                    type: "sentinel-2-l2a",
+                    dataFilter: {
+                        timeRange: {
+                            from: sixtyDaysAgo.toISOString(),
+                            to: today.toISOString()
+                        },
+                        maxCloudCoverage: 40, 
+                    }
+                }]
+            },
+            output: {
+                width: 512,
+                height: 512,
+                responses: [{
+                    identifier: "default",
+                    format: {
+                        type: "image/png"
+                    }
+                }]
+            },
+            evalscript: TRUE_COLOR_EVALSCRIPT
+        };
+        
+        const response = await fetch(PROCESS_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'image/png'
+            },
+            body: JSON.stringify(requestBody),
+            cache: 'no-store',
+        });
+
+        if (!response.ok || !response.body) {
+            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`);
+            return null;
+        }
+
+        const imageBlob = await response.blob();
+        if (imageBlob.type !== 'image/png') {
+             // The API might return a JSON error instead of an image
+            const errorText = await imageBlob.text();
+            console.error(`API returned an error instead of an image: ${errorText}`);
+            return null;
+        }
+        
+        const imageBuffer = await imageBlob.arrayBuffer();
+        const base64Image = Buffer.from(imageBuffer).toString('base64');
+
+        return `data:image/png;base64,${base64Image}`;
+
+    } catch (error) {
+        console.error(`Error fetching latest visual for station ${station.id}:`, error);
+        return null;
+    }
 }
