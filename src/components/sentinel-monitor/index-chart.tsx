@@ -29,10 +29,10 @@ const stationColors: string[] = [
 
 // Custom dot renderer
 const renderDot = (stationId: string) => (props: any) => {
-  const { cx, cy, payload, stroke } = props;
+  const { cx, cy, payload, stroke, index } = props;
   // Only render a dot if the data point is not interpolated
   if (payload && !payload[`${stationId}_isInterpolated`]) {
-    return <Dot cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
+    return <Dot key={index} cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
   }
   return null;
 };
