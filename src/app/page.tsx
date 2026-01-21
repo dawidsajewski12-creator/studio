@@ -3,6 +3,7 @@ import SidebarNavigation from '@/components/sentinel-monitor/sidebar-navigation'
 import LiveDemo from '@/components/journal/live-demo';
 import ResearchJournal from '@/components/journal/research-journal';
 import ContactCard from '@/components/journal/contact-card';
+import { Suspense } from 'react';
 
 export default async function Home({ searchParams }: { searchParams: { view?: string } }) {
   const view = searchParams.view || 'live-demo';
@@ -26,7 +27,9 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
       </Sidebar>
       <SidebarInset>
         <main>
-          {renderView()}
+          <Suspense fallback={<div className="w-full h-full flex items-center justify-center p-8">Loading...</div>}>
+            {renderView()}
+          </Suspense>
         </main>
       </SidebarInset>
     </SidebarProvider>
