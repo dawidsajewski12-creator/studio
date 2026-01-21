@@ -3,13 +3,17 @@
 import type { Station } from '@/lib/types';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import { Satellite } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { FeatureCollection } from 'geojson';
+import MapLegend from './map-legend';
 
-type StationWithBbox = Station & { bbox: [number, number, number, number] };
+type StationWithExtras = Station & { 
+  bbox: [number, number, number, number];
+  latestNdsi: number | null;
+};
 
 type MonitorMapProps = {
-  stations: StationWithBbox[];
+  stations: StationWithExtras[];
   center: { lat: number; lng: number };
   selectedStationId: Station['id'] | 'all';
   onMarkerClick: (stationId: Station['id']) => void;
@@ -17,21 +21,6 @@ type MonitorMapProps = {
 
 export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
-  const [accentColor, setAccentColor] = useState("hsl(19, 52%, 63%)"); // Default from dark theme
-  const [primaryColor, setPrimaryColor] = useState("hsl(188, 45%, 65%)"); // Default from dark theme
-
-  useEffect(() => {
-    // Reading CSS variables to pass to the map, which doesn't have direct access.
-    try {
-      const computedStyle = getComputedStyle(document.documentElement);
-      const accent = computedStyle.getPropertyValue('--accent').trim();
-      const primary = computedStyle.getPropertyValue('--primary').trim();
-      if (accent) setAccentColor(`hsl(${accent})`);
-      if (primary) setPrimaryColor(`hsl(${primary})`);
-    } catch (e) {
-      console.error("Could not read theme colors for map.", e);
-    }
-  }, []);
 
   const geojson: FeatureCollection = useMemo(() => ({
     type: 'FeatureCollection',
@@ -39,7 +28,10 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
       const [minLng, minLat, maxLng, maxLat] = station.bbox;
       return {
         type: 'Feature',
-        properties: { id: station.id },
+        properties: { 
+          id: station.id,
+          ndsiValue: station.latestNdsi,
+        },
         geometry: {
           type: 'Polygon',
           coordinates: [
@@ -87,12 +79,16 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
             source: 'station-bboxes',
             paint: {
               'fill-color': [
-                'case',
-                ['==', ['get', 'id'], selectedStationId],
-                accentColor,
-                primaryColor
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['get', 'ndsiValue'], -1], // Use -1 for null (no data)
+                -1, 'hsla(225, 13%, 40%, 0.2)', // No data color: transparent grey
+                -0.2, 'hsl(30, 20%, 60%)',    // No Snow: Brownish
+                0.2, 'hsl(180, 30%, 75%)',   // Patchy Snow: Light Cyan
+                0.4, 'hsl(195, 80%, 85%)',   // Snow: Light Blue
+                1.0, 'hsl(210, 100%, 98%)'   // Deep Snow: Almost White
               ],
-              'fill-opacity': 0.2
+              'fill-opacity': 0.65
             }
           },
           {
@@ -100,19 +96,26 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
             type: 'line',
             source: 'station-bboxes',
             paint: {
-              'line-color': [
+               'line-color': [
                 'case',
                 ['==', ['get', 'id'], selectedStationId],
-                accentColor,
-                primaryColor
+                'hsl(var(--accent))', // Selected station outline color
+                'hsl(var(--primary))' // Default outline color
               ],
-              'line-width': 1.5
+              'line-width': [
+                'case',
+                ['==', ['get', 'id'], selectedStationId],
+                2.5,
+                1
+              ],
+              'line-opacity': 0.9
             }
           }
         ]
       }}
       attributionControl={true}
     >
+      <MapLegend />
       {stations.map((station) => (
         <Marker
           key={station.id}
