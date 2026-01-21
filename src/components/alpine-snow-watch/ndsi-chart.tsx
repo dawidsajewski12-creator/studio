@@ -10,7 +10,7 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Line, LineChart, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
 type NdsiChartProps = {
@@ -60,7 +60,7 @@ export default function NdsiChart({ data, selectedStationId }: NdsiChartProps) {
         </CardDescription>
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ChartContainer config={chartConfig} className="w-full h-full aspect-auto">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
             <XAxis
@@ -101,7 +101,7 @@ export default function NdsiChart({ data, selectedStationId }: NdsiChartProps) {
             ))}
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       </div>
     </>
   );
