@@ -23,11 +23,9 @@ export default function SidebarNavigation({ projects, activeProjectId }: Sidebar
         <SidebarMenu>
           {projects.map((project) => (
             <SidebarMenuItem key={project.id}>
-              <Link href={`/?project=${project.id}`} legacyBehavior passHref>
-                <SidebarMenuButton asChild isActive={activeProjectId === project.id}>
-                  <a>{project.name}</a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton asChild isActive={activeProjectId === project.id}>
+                <Link href={`/?project=${project.id}`}>{project.name}</Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
