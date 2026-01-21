@@ -1,8 +1,7 @@
 "use client";
 
 import type { Station } from '@/lib/types';
-import Map, { Marker, Popup } from 'react-map-gl';
-import maplibregl from 'maplibre-gl';
+import Map, { Marker, Popup } from 'react-map-gl/maplibre';
 import { Mountain } from 'lucide-react';
 import { useState } from 'react';
 
@@ -18,7 +17,6 @@ export default function SnowMap({ stations, center, selectedStationId, onMarkerC
 
   return (
     <Map
-      mapLib={maplibregl}
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
