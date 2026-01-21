@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Alpine Snow Watch',
-  description: 'Monitoring snow conditions in the Alps using Copernicus data.',
+  title: 'Copernicus Sentinel Monitor',
+  description: 'A multi-project portfolio for Earth observation using Sentinel data.',
 };
 
 export default function RootLayout({

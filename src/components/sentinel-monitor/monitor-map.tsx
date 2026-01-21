@@ -2,25 +2,26 @@
 
 import type { Station } from '@/lib/types';
 import Map, { Marker, Popup } from 'react-map-gl/maplibre';
-import { Mountain } from 'lucide-react';
+import { Satellite } from 'lucide-react';
 import { useState } from 'react';
 
-type SnowMapProps = {
+type MonitorMapProps = {
   stations: Station[];
   center: { lat: number; lng: number };
   selectedStationId: Station['id'] | 'all';
   onMarkerClick: (stationId: Station['id']) => void;
 };
 
-export default function SnowMap({ stations, center, selectedStationId, onMarkerClick }: SnowMapProps) {
+export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
 
   return (
     <Map
+      key={`${center.lat}-${center.lng}`} // Force re-render on center change
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
-        zoom: 10
+        zoom: 7
       }}
       style={{width: '100%', height: '100%'}}
       mapStyle={{
@@ -60,7 +61,7 @@ export default function SnowMap({ stations, center, selectedStationId, onMarkerC
                 ? 'bg-accent text-accent-foreground ring-2 ring-accent'
                 : 'bg-card text-card-foreground shadow-md'
             }`}>
-                 <Mountain className="size-5" />
+                 <Satellite className="size-5" />
             </div>
         </Marker>
       ))}

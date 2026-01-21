@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from 'react';
-import type { NdsiDataPoint, Station } from '@/lib/types';
+import type { IndexDataPoint, Project, Station } from '@/lib/types';
 import {
   ChartContainer,
   ChartTooltip,
@@ -13,50 +13,62 @@ import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
-type NdsiChartProps = {
-  data: NdsiDataPoint[];
+type IndexChartProps = {
+  data: IndexDataPoint[];
   selectedStationId: Station['id'] | 'all';
+  project: Project;
 };
 
-const stationColors: Record<Station['id'], string> = {
-  valley: 'hsl(var(--chart-3))',
-  glacier: 'hsl(var(--chart-1))',
-  summit: 'hsl(var(--chart-2))',
-};
+const stationColors: string[] = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+];
 
-export default function NdsiChart({ data, selectedStationId }: NdsiChartProps) {
-  const chartData = useMemo(() => {
-    const filteredData = data.filter((d) => d.ndsi !== -1);
+export default function IndexChart({ data, selectedStationId, project }: IndexChartProps) {
+  const { chartData, chartConfig, visibleStations } = useMemo(() => {
+    const filteredData = data.filter((d) => d.indexValue !== -1);
+    
     const groupedByDate = filteredData.reduce((acc, curr) => {
       const dateStr = format(parseISO(curr.date), 'yyyy-MM-dd');
       if (!acc[dateStr]) {
         acc[dateStr] = { date: dateStr };
       }
-      acc[dateStr][curr.stationId] = curr.ndsi;
+      acc[dateStr][curr.stationId] = curr.indexValue;
       return acc;
     }, {} as Record<string, { date: string } & Partial<Record<Station['id'], number>>>);
 
-    return Object.values(groupedByDate).sort(
+    const sortedChartData = Object.values(groupedByDate).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  }, [data]);
-  
-  const chartConfig = {
-    valley: { label: "Valley", color: stationColors.valley },
-    glacier: { label: "Glacier", color: stationColors.glacier },
-    summit: { label: "Summit", color: stationColors.summit },
-  };
 
-  const visibleStations = (selectedStationId === 'all' 
-    ? ['valley', 'glacier', 'summit'] 
-    : [selectedStationId]) as Station['id'][];
+    const config: any = {};
+    project.stations.forEach((station, index) => {
+        config[station.id] = {
+            label: station.name,
+            color: stationColors[index % stationColors.length],
+        };
+    });
+
+    const stationsToShow = (selectedStationId === 'all' 
+        ? project.stations.map(s => s.id)
+        : [selectedStationId]) as Station['id'][];
+
+    return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow };
+  }, [data, project, selectedStationId]);
+  
+  const selectedStationName = selectedStationId === 'all' 
+    ? 'All stations' 
+    : project.stations.find(s => s.id === selectedStationId)?.name;
 
   return (
     <>
       <CardHeader>
-        <CardTitle>NDSI Trend (Last 90 Days)</CardTitle>
+        <CardTitle>{project.index.name} Trend (Last 90 Days)</CardTitle>
         <CardDescription>
-          Normalized Difference Snow Index. {selectedStationId === 'all' ? 'All stations' : chartConfig[selectedStationId].label}.
+          {`Normalized Difference ${project.index.name.replace('ND', '')} Index. ${selectedStationName}.`}
         </CardDescription>
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
@@ -92,7 +104,7 @@ export default function NdsiChart({ data, selectedStationId }: NdsiChartProps) {
                 key={stationId}
                 type="monotone"
                 dataKey={stationId}
-                stroke={stationColors[stationId]}
+                stroke={chartConfig[stationId].color}
                 strokeWidth={2}
                 dot={false}
                 name={chartConfig[stationId].label}

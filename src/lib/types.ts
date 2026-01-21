@@ -1,5 +1,5 @@
 export type Station = {
-  id: 'valley' | 'glacier' | 'summit';
+  id: string;
   name: string;
   location: {
     lat: number;
@@ -7,15 +7,31 @@ export type Station = {
   };
 };
 
-export type NdsiDataPoint = {
+export type IndexDataPoint = {
   date: string; // ISO string
   stationId: Station['id'];
-  ndsi: number;
+  indexValue: number;
 };
 
 export type KpiData = {
   stationId: Station['id'];
   name: string;
-  latestNdsi: number | null;
+  latestIndexValue: number | null;
   latestDate: string | null;
 };
+
+export type Project = {
+    id: string;
+    name: string;
+    description: string;
+    index: {
+        name: string;
+        unit: string;
+    };
+    stations: Station[];
+    dataConfig: {
+        base: number;
+        seasonalAmplitude: number;
+        noise: number;
+    }
+}
