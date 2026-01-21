@@ -6,10 +6,11 @@ import LiveDemo from '@/components/journal/live-demo';
 import MethodologyAndResearch from '@/components/journal/methodology-research';
 import ContactCard from '@/components/journal/contact-card';
 import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-// This is now a Server Component, so it can be async and read searchParams from props
-export default function Home({ searchParams }: { searchParams: { view?: string } }) {
-  const view = searchParams?.view || 'live-demo';
+export default function Home() {
+  const searchParams = useSearchParams();
+  const view = searchParams.get('view') || 'live-demo';
 
   const renderContent = () => {
     switch (view) {
@@ -19,7 +20,6 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
         return <ContactCard />;
       case 'live-demo':
       default:
-        // LiveDemo is an async Server Component, so its usage must be wrapped in Suspense.
         return (
           <Suspense fallback={<div className="w-full max-w-screen-2xl p-8 text-center">Loading live data...</div>}>
             <LiveDemo />
@@ -29,8 +29,6 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
   };
 
   return (
-    // This outer Suspense can catch client component suspension, like useSearchParams in SidebarNavigation
-    <Suspense fallback={<div className="w-full h-full flex items-center justify-center p-8">Loading...</div>}>
       <SidebarProvider>
         <Sidebar>
           <SidebarNavigation />
@@ -41,6 +39,5 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
           </main>
         </SidebarInset>
       </SidebarProvider>
-    </Suspense>
   );
 }
