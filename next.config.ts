@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  env: {
+    NEXT_PUBLIC_COPERNICUS_CLIENT_ID: process.env.COPERNICUS_CLIENT_ID,
+    NEXT_PUBLIC_COPERNICUS_CLIENT_SECRET: process.env.COPERNICUS_CLIENT_SECRET,
+  }
 };
 
 export default nextConfig;
