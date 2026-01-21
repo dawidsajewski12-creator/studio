@@ -20,6 +20,10 @@ export default function TechnicalNote() {
                         <strong>Filtrowanie Chmur za pomocą SCL (Scene Classification Layer)</strong><br/>
                         Dane z satelity Sentinel-2 zawierają warstwę klasyfikacji sceny (SCL), która identyfikuje każdy piksel jako np. roślinność, wodę, chmurę czy cień chmury. W naszej analizie aktywnie wykorzystujemy tę warstwę, aby maskować (usuwać) piksele oznaczone jako chmury. Gwarantuje to, że obliczenia wskaźnika NDSI są wykonywane tylko dla czystych, wolnych od chmur obserwacji, co znacząco podnosi jakość i wiarygodność danych.
                     </p>
+                    <p>
+                        <strong>Metodologia: Interpolacja Liniowa</strong><br />
+                        Stosujemy interpolację liniową dla luk w szeregach czasowych spowodowanych zachmurzeniem (po filtracji SCL), co pozwala na ciągły monitoring trendów i lepsze zrozumienie rocznych cykli, np. topnienia pokrywy śnieżnej. Punkty na wykresie oznaczają rzeczywiste, bezchmurne odczyty z satelity.
+                    </p>
                 </CardContent>
             </Card>
         </div>

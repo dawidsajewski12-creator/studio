@@ -1,5 +1,5 @@
 import type { Project, IndexDataPoint, Station } from './types';
-import { subDays, format, eachDayOfInterval, parseISO } from 'date-fns';
+import { subDays, format, eachDayOfInterval, parseISO, isSameDay } from 'date-fns';
 
 // --- Copernicus API Configuration ---
 const CLIENT_ID = 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
@@ -133,14 +133,12 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
   try {
     const token = await getToken();
     const today = new Date();
-    const thirtyDaysAgo = subDays(today, 30);
+    const thirtyDaysAgo = subDays(today, 365);
     const evalscript = EVALSCRIPTS[project.index.name];
 
     if (!evalscript) {
         throw new Error(`No evalscript found for index: ${project.index.name}`);
     }
-
-    const allStationsData: IndexDataPoint[] = [];
 
     const stationPromises = project.stations.map(async (station) => {
         const requestBody = {
@@ -151,7 +149,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             aggregation: {
                 evalscript,
                 timeRange: { from: thirtyDaysAgo.toISOString(), to: today.toISOString() },
-                aggregationInterval: { of: "P1D" },
+                aggregationInterval: { of: "P10D" },
                 width: 256,
                 height: 256,
             },
@@ -165,28 +163,89 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
         if (!response.ok) {
             console.error(`Failed to fetch data for station ${station.id}: ${response.statusText}`, await response.text());
-            return []; // Return empty for this station on failure
+            return [];
         }
         
         const apiResponse = await response.json();
-        const stationData: IndexDataPoint[] = [];
-        const intervalDays = eachDayOfInterval({ start: thirtyDaysAgo, end: today });
-        const resultsByDate = new Map(apiResponse.data.map((item: any) => [format(parseISO(item.interval.from), 'yyyy-MM-dd'), item.outputs.index.bands.B0.stats]));
+        
+        const sparseData: { date: Date; value: number }[] = apiResponse.data
+            .map((item: any) => {
+                const stats = item.outputs.index.bands.B0.stats;
+                if (stats && stats.sampleCount > 0 && stats.mean !== null) {
+                    return {
+                        date: parseISO(item.interval.from),
+                        value: Math.max(-1, Math.min(stats.mean, 1)),
+                    };
+                }
+                return null;
+            })
+            .filter(Boolean)
+            .sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 
-        for (const day of intervalDays) {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const stats = resultsByDate.get(dateStr);
+        if (sparseData.length === 0) {
+            return [];
+        }
 
-            if (stats && stats.sampleCount > 0) {
-                // Clamp index value between -1 and 1 for normalized indices
-                const indexValue = Math.max(-1, Math.min(stats.mean, 1));
-                stationData.push({ date: day.toISOString(), stationId: station.id, indexValue });
+        const allDays = eachDayOfInterval({ start: thirtyDaysAgo, end: today });
+        const dailySeries: (IndexDataPoint & { indexValue: number | null })[] = [];
+        let sparseIndex = 0;
+
+        for (const day of allDays) {
+            let pointToAdd: (IndexDataPoint & { indexValue: number | null });
+            if (sparseIndex < sparseData.length && isSameDay(day, sparseData[sparseIndex].date)) {
+                pointToAdd = {
+                    date: day.toISOString(),
+                    stationId: station.id,
+                    indexValue: sparseData[sparseIndex].value,
+                    isInterpolated: false,
+                };
+                sparseIndex++;
             } else {
-                // No data or all cloudy
-                stationData.push({ date: day.toISOString(), stationId: station.id, indexValue: -1 });
+                pointToAdd = {
+                    date: day.toISOString(),
+                    stationId: station.id,
+                    indexValue: null,
+                    isInterpolated: true,
+                };
+            }
+            dailySeries.push(pointToAdd);
+        }
+
+        for (let i = 0; i < dailySeries.length; i++) {
+            if (dailySeries[i].indexValue === null) {
+                let prevIndex = i - 1;
+                while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) {
+                    prevIndex--;
+                }
+
+                let nextIndex = i + 1;
+                while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) {
+                    nextIndex++;
+                }
+                
+                if (prevIndex >= 0 && nextIndex < dailySeries.length) {
+                    const prevPoint = dailySeries[prevIndex];
+                    const nextPoint = dailySeries[nextIndex];
+                    const prevValue = prevPoint.indexValue!;
+                    const nextValue = nextPoint.indexValue!;
+                    const prevTime = parseISO(prevPoint.date).getTime();
+                    const nextTime = parseISO(nextPoint.date).getTime();
+                    const currentTime = parseISO(dailySeries[i].date).getTime();
+
+                    const fraction = (currentTime - prevTime) / (nextTime - prevTime);
+                    dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
+                } else {
+                    if (prevIndex >= 0) {
+                        dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
+                    } else if (nextIndex < dailySeries.length) {
+                        dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
+                    } else {
+                        dailySeries[i].indexValue = 0;
+                    }
+                }
             }
         }
-        return stationData;
+        return dailySeries as IndexDataPoint[];
     });
 
     const results = await Promise.all(stationPromises);
@@ -194,6 +253,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
   } catch (error) {
     console.error("An error occurred while fetching Copernicus data:", error);
-    return []; // Return empty data on error
+    return [];
   }
 }

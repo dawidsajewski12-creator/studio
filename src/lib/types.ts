@@ -11,11 +11,12 @@ export type IndexDataPoint = {
   date: string; // ISO string
   stationId: Station['id'];
   indexValue: number;
+  isInterpolated: boolean;
 };
 
 export type KpiData = {
   stationId: Station['id'];
-  name: string;
+  name:string;
   latestIndexValue: number | null;
   latestDate: string | null;
 };

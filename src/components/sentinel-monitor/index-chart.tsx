@@ -28,17 +28,20 @@ const stationColors: string[] = [
 ];
 
 export default function IndexChart({ data, selectedStationId, project }: IndexChartProps) {
-  const { chartData, chartConfig, visibleStations } = useMemo(() => {
-    const filteredData = data.filter((d) => d.indexValue !== -1);
-    
-    const groupedByDate = filteredData.reduce((acc, curr) => {
+  const { chartData, chartConfig, visibleStations, cloudFreeDaysCount } = useMemo(() => {
+    const relevantData = selectedStationId === 'all'
+        ? data
+        : data.filter(d => d.stationId === selectedStationId);
+
+    const groupedByDate = relevantData.reduce((acc, curr) => {
       const dateStr = format(parseISO(curr.date), 'yyyy-MM-dd');
       if (!acc[dateStr]) {
         acc[dateStr] = { date: dateStr };
       }
       acc[dateStr][curr.stationId] = curr.indexValue;
+      acc[dateStr][`${curr.stationId}_isInterpolated`] = curr.isInterpolated;
       return acc;
-    }, {} as Record<string, { date: string } & Partial<Record<Station['id'], number>>>);
+    }, {} as Record<string, { date: string } & Partial<Record<Station['id'], number | boolean>>>);
 
     const sortedChartData = Object.values(groupedByDate).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -55,20 +58,32 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
     const stationsToShow = (selectedStationId === 'all' 
         ? project.stations.map(s => s.id)
         : [selectedStationId]) as Station['id'][];
+    
+    const observationCount = data.filter(p => selectedStationId === 'all' ? !p.isInterpolated : (p.stationId === selectedStationId && !p.isInterpolated)).length;
 
-    return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow };
+    return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow, cloudFreeDaysCount: observationCount };
   }, [data, project, selectedStationId]);
   
   const selectedStationName = selectedStationId === 'all' 
     ? 'All stations' 
     : project.stations.find(s => s.id === selectedStationId)?.name;
 
+  const renderDot = (stationId: string) => (props: any) => {
+    const { cx, cy, payload, stroke } = props;
+    if (!payload || payload[`${stationId}_isInterpolated`]) {
+      return null;
+    }
+    return <circle cx={cx} cy={cy} r={2.5} fill={stroke} strokeWidth={1} stroke="hsl(var(--background))" />;
+  };
+
   return (
     <>
       <CardHeader>
-        <CardTitle>{project.index.name} Trend (Last 30 Days)</CardTitle>
+        <CardTitle>{project.index.name} Trend (Last 365 Days)</CardTitle>
         <CardDescription>
           {`Normalized Difference ${project.index.name.replace('ND', '')} Index. ${selectedStationName}.`}
+          <br />
+          Suma dni bezchmurnych w roku (obserwacje): {cloudFreeDaysCount}
         </CardDescription>
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
@@ -80,8 +95,9 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => format(parseISO(value), 'MMM d')}
+              tickFormatter={(value) => format(parseISO(value), 'MMM')}
               style={{ fontSize: '0.75rem' }}
+              interval="preserveStartEnd"
             />
             <YAxis
               tickLine={false}
@@ -106,9 +122,9 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 dataKey={stationId}
                 stroke={chartConfig[stationId].color}
                 strokeWidth={2}
-                dot={false}
+                dot={renderDot(stationId)}
                 name={chartConfig[stationId].label}
-                connectNulls={false}
+                connectNulls={true}
               />
             ))}
             <ChartLegend content={<ChartLegendContent />} />
