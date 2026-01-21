@@ -5,14 +5,13 @@ import SidebarNavigation from '@/components/sentinel-monitor/sidebar-navigation'
 import LiveDemo from '@/components/journal/live-demo';
 import MethodologyAndResearch from '@/components/journal/methodology-research';
 import ContactCard from '@/components/journal/contact-card';
-import { Suspense, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-function RenderView() {
-  const searchParams = useSearchParams();
-  const view = searchParams.get('view') || 'live-demo';
+// This is now a Server Component, so it can be async and read searchParams from props
+export default function Home({ searchParams }: { searchParams: { view?: string } }) {
+  const view = searchParams?.view || 'live-demo';
 
-  return useMemo(() => {
+  const renderContent = () => {
     switch (view) {
       case 'research':
         return <MethodologyAndResearch />;
@@ -20,13 +19,17 @@ function RenderView() {
         return <ContactCard />;
       case 'live-demo':
       default:
-        return <LiveDemo />;
+        // LiveDemo is an async Server Component, so its usage must be wrapped in Suspense.
+        return (
+          <Suspense fallback={<div className="w-full max-w-screen-2xl p-8 text-center">Loading live data...</div>}>
+            <LiveDemo />
+          </Suspense>
+        );
     }
-  }, [view]);
-}
+  };
 
-export default function Home() {
   return (
+    // This outer Suspense can catch client component suspension, like useSearchParams in SidebarNavigation
     <Suspense fallback={<div className="w-full h-full flex items-center justify-center p-8">Loading...</div>}>
       <SidebarProvider>
         <Sidebar>
@@ -34,7 +37,7 @@ export default function Home() {
         </Sidebar>
         <SidebarInset>
           <main>
-            <RenderView />
+            {renderContent()}
           </main>
         </SidebarInset>
       </SidebarProvider>
