@@ -2,8 +2,8 @@ import type { Project, IndexDataPoint, Station } from './types';
 import { subDays, format, eachDayOfInterval, parseISO } from 'date-fns';
 
 // --- Copernicus API Configuration ---
-const CLIENT_ID = process.env.NEXT_PUBLIC_COPERNICUS_CLIENT_ID;
-const CLIENT_SECRET = process.env.NEXT_PUBLIC_COPERNICUS_CLIENT_SECRET;
+const CLIENT_ID = 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
+const CLIENT_SECRET = 'puq9Q6mEsKWRb8AFrZPEBesBE0Dq8uwE';
 const TOKEN_URL = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
 const STATS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/statistics';
 
