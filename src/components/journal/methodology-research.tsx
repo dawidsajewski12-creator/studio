@@ -3,6 +3,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Lightbulb, TestTube2 } from "lucide-react";
+import { Separator } from "../ui/separator";
 
 const researchPosts = [
   {
@@ -25,10 +27,31 @@ const researchPosts = [
   }
 ];
 
-export default function ResearchJournal() {
+export default function MethodologyAndResearch() {
   return (
     <div className="w-full max-w-screen-lg mx-auto p-4 sm:p-6 md:p-8 space-y-8">
-       <header className="mb-6 md:mb-8">
+       <Card className="bg-muted/20">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                    <TestTube2 className="text-primary" />
+                    Metodologia
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-muted-foreground">
+                <p>
+                    <strong>Monitoring Śniegu: NDSI vs. Obrazy RGB</strong><br/>
+                    Chociaż obrazy w naturalnych kolorach (RGB) są intuicyjne, mają ograniczenia w precyzyjnym mapowaniu pokrywy śnieżnej. Cień rzucany przez góry może być mylony ze śniegiem, a cienka warstwa śniegu bywa niewidoczna. Wskaźnik <strong>NDSI (Normalized Difference Snow Index)</strong> jest znacznie bardziej niezawodny, ponieważ wykorzystuje różnicę w odbiciu światła między pasmem światła widzialnego (zielonym) a krótkofalową podczerwienią (SWIR), gdzie śnieg silnie absorbuje promieniowanie.
+                </p>
+                <p>
+                    <strong>Filtrowanie Chmur za pomocą SCL (Scene Classification Layer)</strong><br/>
+                    Dane z satelity Sentinel-2 zawierają warstwę klasyfikacji sceny (SCL), która identyfikuje każdy piksel jako np. roślinność, wodę, chmurę czy cień chmury. W naszej analizie aktywnie wykorzystujemy tę warstwę, aby maskować (usuwać) piksele oznaczone jako chmury. Gwarantuje to, że obliczenia wskaźnika NDSI są wykonywane tylko dla czystych, wolnych od chmur obserwacji, co znacząco podnosi jakość i wiarygodność danych.
+                </p>
+            </CardContent>
+        </Card>
+
+      <Separator />
+
+       <header>
           <h1 className="text-3xl md:text-4xl font-bold text-primary font-headline">Badania i Artykuły</h1>
           <p className="text-muted-foreground mt-1">Zbiór analiz i publikacji na temat wykorzystania danych satelitarnych.</p>
         </header>

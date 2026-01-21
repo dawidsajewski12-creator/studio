@@ -10,7 +10,7 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Line, LineChart, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Dot } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
 type IndexChartProps = {
@@ -27,6 +27,17 @@ const stationColors: string[] = [
   'hsl(var(--chart-5))',
 ];
 
+// Custom dot renderer
+const renderDot = (stationId: string) => (props: any) => {
+  const { cx, cy, payload, stroke } = props;
+  // Only render a dot if the data point is not interpolated
+  if (payload && !payload[`${stationId}_isInterpolated`]) {
+    return <Dot cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
+  }
+  return null;
+};
+
+
 export default function IndexChart({ data, selectedStationId, project }: IndexChartProps) {
   const { chartData, chartConfig, visibleStations, cloudFreeDaysCount } = useMemo(() => {
     const relevantData = selectedStationId === 'all'
@@ -39,6 +50,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         acc[dateStr] = { date: dateStr };
       }
       acc[dateStr][curr.stationId] = curr.indexValue;
+      // Pass the interpolation flag to the chart data
       acc[dateStr][`${curr.stationId}_isInterpolated`] = curr.isInterpolated;
       return acc;
     }, {} as Record<string, { date: string } & Partial<Record<Station['id'], number | boolean>>>);
@@ -59,7 +71,14 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         ? project.stations.map(s => s.id)
         : [selectedStationId]) as Station['id'][];
     
-    const observationCount = data.filter(p => selectedStationId === 'all' ? !p.isInterpolated : (p.stationId === selectedStationId && !p.isInterpolated)).length;
+    // Calculate the number of non-interpolated (i.e., real) data points
+    const observationCount = data.filter(p => {
+      if (selectedStationId === 'all') {
+        return !p.isInterpolated;
+      }
+      return p.stationId === selectedStationId && !p.isInterpolated;
+    }).length;
+
 
     return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow, cloudFreeDaysCount: observationCount };
   }, [data, project, selectedStationId]);
@@ -68,20 +87,12 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
     ? 'All stations' 
     : project.stations.find(s => s.id === selectedStationId)?.name;
 
-  const renderDot = (stationId: string) => (props: any) => {
-    const { cx, cy, payload, stroke } = props;
-    if (!payload || payload[`${stationId}_isInterpolated`]) {
-      return null;
-    }
-    return <circle cx={cx} cy={cy} r={2.5} fill={stroke} strokeWidth={1} stroke="hsl(var(--background))" />;
-  };
-
   return (
     <>
       <CardHeader>
         <CardTitle>{project.index.name} Trend (Last 365 Days)</CardTitle>
         <CardDescription>
-          {`Normalized Difference ${project.index.name.replace('ND', '')} Index. ${selectedStationName}.`}
+          {`Normalized Difference ${project.index.name.replace('ND', '')} Index for ${selectedStationName}.`}
           <br />
           Suma dni bezchmurnych w roku (obserwacje): {cloudFreeDaysCount}
         </CardDescription>
@@ -122,9 +133,11 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 dataKey={stationId}
                 stroke={chartConfig[stationId].color}
                 strokeWidth={2}
+                // Use the custom dot renderer
                 dot={renderDot(stationId)}
+                activeDot={{ r: 4 }}
                 name={chartConfig[stationId].label}
-                connectNulls={true}
+                connectNulls={true} // This is crucial for drawing lines over null (interpolated) points
               />
             ))}
             <ChartLegend content={<ChartLegendContent />} />

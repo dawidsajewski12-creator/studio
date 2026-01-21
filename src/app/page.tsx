@@ -1,37 +1,43 @@
+'use client';
+
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import SidebarNavigation from '@/components/sentinel-monitor/sidebar-navigation';
 import LiveDemo from '@/components/journal/live-demo';
-import ResearchJournal from '@/components/journal/research-journal';
+import MethodologyAndResearch from '@/components/journal/methodology-research';
 import ContactCard from '@/components/journal/contact-card';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default async function Home({ searchParams }: { searchParams: { view?: string } }) {
-  const view = searchParams.view || 'live-demo';
+function RenderView() {
+  const searchParams = useSearchParams();
+  const view = searchParams.get('view') || 'live-demo';
 
-  const renderView = () => {
+  return useMemo(() => {
     switch (view) {
       case 'research':
-        return <ResearchJournal />;
+        return <MethodologyAndResearch />;
       case 'contact':
         return <ContactCard />;
       case 'live-demo':
       default:
         return <LiveDemo />;
     }
-  };
+  }, [view]);
+}
 
+export default function Home() {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarNavigation activeView={view} />
-      </Sidebar>
-      <SidebarInset>
-        <main>
-          <Suspense fallback={<div className="w-full h-full flex items-center justify-center p-8">Loading...</div>}>
-            {renderView()}
-          </Suspense>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <Suspense fallback={<div className="w-full h-full flex items-center justify-center p-8">Loading...</div>}>
+      <SidebarProvider>
+        <Sidebar>
+          <SidebarNavigation />
+        </Sidebar>
+        <SidebarInset>
+          <main>
+            <RenderView />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </Suspense>
   );
 }

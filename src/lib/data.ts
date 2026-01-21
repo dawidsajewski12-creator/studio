@@ -133,7 +133,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
   try {
     const token = await getToken();
     const today = new Date();
-    const thirtyDaysAgo = subDays(today, 365);
+    const yearAgo = subDays(today, 365);
     const evalscript = EVALSCRIPTS[project.index.name];
 
     if (!evalscript) {
@@ -144,11 +144,11 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const requestBody = {
             input: {
                 bounds: { bbox: getBoundingBox(station) },
-                data: [{ dataFilter: { timeRange: { from: thirtyDaysAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
+                data: [{ dataFilter: { timeRange: { from: yearAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
             },
             aggregation: {
                 evalscript,
-                timeRange: { from: thirtyDaysAgo.toISOString(), to: today.toISOString() },
+                timeRange: { from: yearAgo.toISOString(), to: today.toISOString() },
                 aggregationInterval: { of: "P10D" },
                 width: 256,
                 height: 256,
@@ -171,25 +171,28 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const sparseData: { date: Date; value: number }[] = apiResponse.data
             .map((item: any) => {
                 const stats = item.outputs.index.bands.B0.stats;
-                if (stats && stats.sampleCount > 0 && stats.mean !== null) {
+                // Ensure there is valid data to process
+                if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
                     return {
                         date: parseISO(item.interval.from),
+                        // Clamp values to the valid range for most indices
                         value: Math.max(-1, Math.min(stats.mean, 1)),
                     };
                 }
                 return null;
             })
-            .filter(Boolean)
+            .filter((item: any): item is { date: Date; value: number } => item !== null)
             .sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 
         if (sparseData.length === 0) {
             return [];
         }
 
-        const allDays = eachDayOfInterval({ start: thirtyDaysAgo, end: today });
+        const allDays = eachDayOfInterval({ start: yearAgo, end: today });
         const dailySeries: (IndexDataPoint & { indexValue: number | null })[] = [];
         let sparseIndex = 0;
 
+        // Create a full daily series, marking real data points
         for (const day of allDays) {
             let pointToAdd: (IndexDataPoint & { indexValue: number | null });
             if (sparseIndex < sparseData.length && isSameDay(day, sparseData[sparseIndex].date)) {
@@ -211,6 +214,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             dailySeries.push(pointToAdd);
         }
 
+        // Linear interpolation
         for (let i = 0; i < dailySeries.length; i++) {
             if (dailySeries[i].indexValue === null) {
                 let prevIndex = i - 1;
@@ -234,14 +238,12 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
                     const fraction = (currentTime - prevTime) / (nextTime - prevTime);
                     dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
-                } else {
-                    if (prevIndex >= 0) {
-                        dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
-                    } else if (nextIndex < dailySeries.length) {
-                        dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
-                    } else {
-                        dailySeries[i].indexValue = 0;
-                    }
+                } else if (prevIndex >= 0) { // Extrapolate start
+                    dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
+                } else if (nextIndex < dailySeries.length) { // Extrapolate end
+                    dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
+                } else { // No data at all
+                    dailySeries[i].indexValue = 0;
                 }
             }
         }

@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Satellite, FileText, Mail } from 'lucide-react';
-
-type SidebarNavigationProps = {
-  activeView: string;
-};
+import { useSearchParams } from 'next/navigation';
 
 const navigationItems = [
     { id: 'live-demo', name: '🏔️ Alpine Snow Watch (Live)', href: '/?view=live-demo', icon: <Satellite /> },
-    { id: 'research', name: '📄 Badania i Artykuły', href: '/?view=research', icon: <FileText /> },
+    { id: 'research', name: '📄 Methodology & Research', href: '/?view=research', icon: <FileText /> },
     { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
 ]
 
-export default function SidebarNavigation({ activeView }: SidebarNavigationProps) {
+export default function SidebarNavigation() {
+  const searchParams = useSearchParams();
+  const activeView = searchParams.get('view') || 'live-demo';
+
   return (
     <>
       <SidebarHeader>
