@@ -2,29 +2,36 @@
 
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { Satellite } from 'lucide-react';
-import type { Project } from '@/lib/types';
+import { Satellite, FileText, Mail } from 'lucide-react';
 
 type SidebarNavigationProps = {
-  projects: Project[];
-  activeProjectId: string;
+  activeView: string;
 };
 
-export default function SidebarNavigation({ projects, activeProjectId }: SidebarNavigationProps) {
+const navigationItems = [
+    { id: 'live-demo', name: '🏔️ Alpine Snow Watch (Live)', href: '/?view=live-demo', icon: <Satellite /> },
+    { id: 'research', name: '📄 Badania i Artykuły', href: '/?view=research', icon: <FileText /> },
+    { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
+]
+
+export default function SidebarNavigation({ activeView }: SidebarNavigationProps) {
   return (
     <>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-            <Satellite className="size-6 text-primary" />
-            <h2 className="text-lg font-semibold text-primary">Copernicus Monitor</h2>
+        <div className="flex flex-col items-start gap-2">
+            <div className='flex items-center gap-2'>
+                <Satellite className="size-6 text-primary" />
+                <h2 className="text-lg font-semibold text-primary">Satellite Insights</h2>
+            </div>
+            <p className="text-xs text-muted-foreground ml-1">by a GIS Specialist</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {projects.map((project) => (
-            <SidebarMenuItem key={project.id}>
-              <SidebarMenuButton asChild isActive={activeProjectId === project.id}>
-                <Link href={`/?project=${project.id}`}>{project.name}</Link>
+          {navigationItems.map((item) => (
+            <SidebarMenuItem key={item.id}>
+              <SidebarMenuButton asChild isActive={activeView === item.id}>
+                <Link href={item.href}>{item.icon}{item.name}</Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
