@@ -66,7 +66,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
   return (
     <>
       <CardHeader>
-        <CardTitle>{project.index.name} Trend (Last 90 Days)</CardTitle>
+        <CardTitle>{project.index.name} Trend (Last 30 Days)</CardTitle>
         <CardDescription>
           {`Normalized Difference ${project.index.name.replace('ND', '')} Index. ${selectedStationName}.`}
         </CardDescription>

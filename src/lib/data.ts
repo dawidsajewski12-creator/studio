@@ -133,7 +133,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
   try {
     const token = await getToken();
     const today = new Date();
-    const ninetyDaysAgo = subDays(today, 90);
+    const thirtyDaysAgo = subDays(today, 30);
     const evalscript = EVALSCRIPTS[project.index.name];
 
     if (!evalscript) {
@@ -146,11 +146,11 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const requestBody = {
             input: {
                 bounds: { bbox: getBoundingBox(station) },
-                data: [{ dataFilter: { timeRange: { from: ninetyDaysAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
+                data: [{ dataFilter: { timeRange: { from: thirtyDaysAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
             },
             aggregation: {
                 evalscript,
-                timeRange: { from: ninetyDaysAgo.toISOString(), to: today.toISOString() },
+                timeRange: { from: thirtyDaysAgo.toISOString(), to: today.toISOString() },
                 aggregationInterval: { of: "P1D" },
                 width: 256,
                 height: 256,
@@ -170,7 +170,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         
         const apiResponse = await response.json();
         const stationData: IndexDataPoint[] = [];
-        const intervalDays = eachDayOfInterval({ start: ninetyDaysAgo, end: today });
+        const intervalDays = eachDayOfInterval({ start: thirtyDaysAgo, end: today });
         const resultsByDate = new Map(apiResponse.data.map((item: any) => [format(parseISO(item.interval.from), 'yyyy-MM-dd'), item.outputs.index.bands.B0.stats]));
 
         for (const day of intervalDays) {
