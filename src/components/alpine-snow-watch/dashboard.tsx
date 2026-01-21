@@ -1,12 +1,17 @@
 "use client";
 
 import type { Station, NdsiDataPoint, KpiData } from '@/lib/types';
-import SnowMap from '@/components/alpine-snow-watch/snow-map';
 import NdsiChart from '@/components/alpine-snow-watch/ndsi-chart';
 import KpiCard from '@/components/alpine-snow-watch/kpi-card';
 import { Card } from '@/components/ui/card';
 import { Snowflake, Mountain, Trees } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const SnowMap = dynamic(() => import('@/components/alpine-snow-watch/snow-map'), { 
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full bg-muted"><p className="text-muted-foreground">Loading map...</p></div>
+});
 
 type DashboardProps = {
   stations: Station[];

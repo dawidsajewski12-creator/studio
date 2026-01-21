@@ -1,9 +1,10 @@
 "use client";
 
 import type { Station } from '@/lib/types';
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import Map, { Marker, Popup } from 'react-map-gl';
+import maplibregl from 'maplibre-gl';
 import { Mountain } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 type SnowMapProps = {
   stations: Station[];
@@ -13,53 +14,73 @@ type SnowMapProps = {
 };
 
 export default function SnowMap({ stations, center, selectedStationId, onMarkerClick }: SnowMapProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  if (!apiKey) {
-    return (
-      <div className="flex items-center justify-center h-full bg-muted">
-        <p className="text-muted-foreground">Google Maps API Key is missing.</p>
-      </div>
-    );
-  }
+  const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
 
   return (
-    <APIProvider apiKey={apiKey}>
-      <Map
-        defaultCenter={center}
-        defaultZoom={11}
-        gestureHandling={'greedy'}
-        disableDefaultUI={true}
-        mapId={'a2f5a34423a2c534'}
-        className="w-full h-full"
-      >
-        {stations.map((station) => (
-          <AdvancedMarker
-            key={station.id}
-            position={station.location}
-            onClick={() => onMarkerClick(station.id)}
-          >
-            <div className="relative group">
-              <div
-                className={cn(
-                  "p-2 rounded-full transition-all duration-300",
-                  selectedStationId === station.id ? 'bg-accent/80' : 'bg-background/80'
-                )}
-              >
-                <Mountain 
-                  className={cn(
-                    "size-5 transition-colors duration-300",
-                    selectedStationId === station.id ? 'text-accent-foreground' : 'text-primary'
-                  )}
-                />
-              </div>
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block bg-popover text-popover-foreground text-xs px-2 py-1 rounded-md shadow-lg whitespace-nowrap">
-                {station.name}
-              </div>
+    <Map
+      mapLib={maplibregl}
+      initialViewState={{
+        longitude: center.lng,
+        latitude: center.lat,
+        zoom: 10
+      }}
+      style={{width: '100%', height: '100%'}}
+      mapStyle={{
+        version: 8,
+        sources: {
+          'osm-tiles': {
+            type: 'raster',
+            tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }
+        },
+        layers: [
+          {
+            id: 'osm-tiles',
+            type: 'raster',
+            source: 'osm-tiles',
+          }
+        ]
+      }}
+      attributionControl={true}
+    >
+      {stations.map((station) => (
+        <Marker
+          key={station.id}
+          longitude={station.location.lng}
+          latitude={station.location.lat}
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            onMarkerClick(station.id);
+          }}
+          onMouseEnter={() => setHoveredStation(station)}
+          onMouseLeave={() => setHoveredStation(null)}
+        >
+            <div className={`p-2 rounded-full cursor-pointer flex items-center justify-center transition-colors duration-300 ${
+                selectedStationId === station.id
+                ? 'bg-accent text-accent-foreground ring-2 ring-accent'
+                : 'bg-card text-card-foreground shadow-md'
+            }`}>
+                 <Mountain className="size-5" />
             </div>
-          </AdvancedMarker>
-        ))}
-      </Map>
-    </APIProvider>
+        </Marker>
+      ))}
+
+      {hoveredStation && (
+        <Popup
+          anchor="top"
+          longitude={hoveredStation.location.lng}
+          latitude={hoveredStation.location.lat}
+          closeButton={false}
+          closeOnClick={false}
+          className="z-10"
+        >
+          <div className="bg-popover text-popover-foreground rounded-md px-2 py-1 text-sm shadow-md">
+              {hoveredStation.name}
+          </div>
+        </Popup>
+      )}
+    </Map>
   );
 }
