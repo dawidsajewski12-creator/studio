@@ -1,16 +1,13 @@
-'use client';
-
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import SidebarNavigation from '@/components/sentinel-monitor/sidebar-navigation';
 import LiveDemo from '@/components/journal/live-demo';
 import MethodologyAndResearch from '@/components/journal/methodology-research';
 import ContactCard from '@/components/journal/contact-card';
 import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
-  const searchParams = useSearchParams();
-  const view = searchParams.get('view') || 'live-demo';
+// This is now a Server Component, so it can be async and read searchParams from props
+export default function Home({ searchParams }: { searchParams: { view?: string } }) {
+  const view = searchParams?.view || 'live-demo';
 
   const renderContent = () => {
     switch (view) {
@@ -31,7 +28,8 @@ export default function Home() {
   return (
       <SidebarProvider>
         <Sidebar>
-          <SidebarNavigation />
+          {/* Pass the active view to the navigation component */}
+          <SidebarNavigation activeView={view} />
         </Sidebar>
         <SidebarInset>
           <main>

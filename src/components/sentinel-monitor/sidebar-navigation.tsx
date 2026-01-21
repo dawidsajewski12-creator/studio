@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Satellite, FileText, Mail } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
 
 const navigationItems = [
     { id: 'live-demo', name: '🏔️ Alpine Snow Watch (Live)', href: '/?view=live-demo', icon: <Satellite /> },
@@ -11,9 +10,7 @@ const navigationItems = [
     { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
 ]
 
-export default function SidebarNavigation() {
-  const searchParams = useSearchParams();
-  const activeView = searchParams.get('view') || 'live-demo';
+export default function SidebarNavigation({ activeView }: { activeView: string }) {
 
   return (
     <>
