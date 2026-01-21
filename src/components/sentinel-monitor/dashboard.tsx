@@ -1,16 +1,31 @@
 "use client";
 
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
-import IndexChart from '@/components/sentinel-monitor/index-chart';
 import KpiCard from '@/components/sentinel-monitor/kpi-card';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader } from '@/components/ui/card';
 import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-full bg-muted"><p className="text-muted-foreground">Loading map...</p></div>
+});
+
+const IndexChart = dynamic(() => import('@/components/sentinel-monitor/index-chart'), {
+    ssr: false,
+    loading: () => (
+        <>
+            <CardHeader>
+                <Skeleton className="h-8 w-3/4 mb-2" />
+                <Skeleton className="h-5 w-1/2" />
+            </CardHeader>
+            <div className="h-[300px] md:h-[400px] w-full px-2 pb-4">
+                 <Skeleton className="h-full w-full" />
+            </div>
+        </>
+    ),
 });
 
 type DashboardProps = {
