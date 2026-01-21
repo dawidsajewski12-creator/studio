@@ -3,7 +3,7 @@
 import type { Station } from '@/lib/types';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import { Satellite } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { FeatureCollection } from 'geojson';
 
 type StationWithBbox = Station & { bbox: [number, number, number, number] };
@@ -17,6 +17,21 @@ type MonitorMapProps = {
 
 export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
+  const [accentColor, setAccentColor] = useState("hsl(19, 52%, 63%)"); // Default from dark theme
+  const [primaryColor, setPrimaryColor] = useState("hsl(188, 45%, 65%)"); // Default from dark theme
+
+  useEffect(() => {
+    // Reading CSS variables to pass to the map, which doesn't have direct access.
+    try {
+      const computedStyle = getComputedStyle(document.documentElement);
+      const accent = computedStyle.getPropertyValue('--accent').trim();
+      const primary = computedStyle.getPropertyValue('--primary').trim();
+      if (accent) setAccentColor(`hsl(${accent})`);
+      if (primary) setPrimaryColor(`hsl(${primary})`);
+    } catch (e) {
+      console.error("Could not read theme colors for map.", e);
+    }
+  }, []);
 
   const geojson: FeatureCollection = useMemo(() => ({
     type: 'FeatureCollection',
@@ -74,8 +89,8 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
               'fill-color': [
                 'case',
                 ['==', ['get', 'id'], selectedStationId],
-                'hsl(var(--accent))', // Selected color
-                'hsl(var(--primary))'   // Default color
+                accentColor,
+                primaryColor
               ],
               'fill-opacity': 0.2
             }
@@ -88,8 +103,8 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
               'line-color': [
                 'case',
                 ['==', ['get', 'id'], selectedStationId],
-                'hsl(var(--accent))', // Selected color
-                'hsl(var(--primary))'   // Default color
+                accentColor,
+                primaryColor
               ],
               'line-width': 1.5
             }
