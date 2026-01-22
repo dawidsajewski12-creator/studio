@@ -4,7 +4,7 @@ import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
 import KpiCard from '@/components/sentinel-monitor/kpi-card';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Satellite, Leaf, Droplets, Waves } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -54,6 +54,11 @@ const getMapCenter = (stations: Station[]) => {
 
 export default function Dashboard({ project, chartData, kpiData }: DashboardProps) {
   const [selectedStation, setSelectedStation] = useState<Station['id'] | 'all'>('all');
+
+  useEffect(() => {
+    // Reset selected station when the project changes to avoid invalid state
+    setSelectedStation('all');
+  }, [project.id]);
 
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
