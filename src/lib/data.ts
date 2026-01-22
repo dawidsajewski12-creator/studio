@@ -1,3 +1,4 @@
+
 import type { Project, IndexDataPoint, Station } from './types';
 import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDays, addDays, isBefore } from 'date-fns';
 import { promises as fs } from 'fs';
@@ -17,7 +18,9 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: ["B04", "B03", "B02", "SCL"],
+    input: [
+      { bands: ["B04", "B03", "B02", "SCL"], units: "DN" }
+    ],
     output: {
       bands: 4, // R, G, B, A for transparency
       sampleType: "UINT8"
@@ -33,8 +36,8 @@ function evaluatePixel(sample) {
     return [0, 0, 0, 0]; // Return a transparent pixel
   }
 
-  // Scale reflectance values (0-10000 range) to 0-255 for UINT8 output
-  // A simple linear stretch for visualization purposes. 3000 is a reasonable upper value for bright surfaces.
+  // With units: "DN", input values are 0-10000.
+  // We apply gain and scale to 0-255. 3000 is a reasonable brightness clamp.
   let r = 255 * (gain * sample.B04 / 3000);
   let g = 255 * (gain * sample.B03 / 3000);
   let b = 255 * (gain * sample.B02 / 3000);
