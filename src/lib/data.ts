@@ -22,31 +22,25 @@ function setup() {
       { bands: ["B04", "B03", "B02", "SCL"], units: "DN" }
     ],
     output: {
-      bands: 4, // R, G, B, A for transparency
+      bands: 4,
       sampleType: "UINT8"
     }
   };
 }
 
-const gain = 2.5;
-
 function evaluatePixel(sample) {
-  // Mask clouds, shadows, and snow
   if ([1, 3, 8, 9, 10, 11].includes(sample.SCL)) {
-    return [0, 0, 0, 0]; // Return a transparent pixel for clouds/snow/shadows
+    return [0, 0, 0, 0];
   }
-
-  // With units: "DN", input values are 0-10000.
-  // We apply gain and scale to 0-255. 3000 is a reasonable brightness clamp.
+  const gain = 2.5;
   let r = 255 * (gain * sample.B04 / 3000);
   let g = 255 * (gain * sample.B03 / 3000);
   let b = 255 * (gain * sample.B02 / 3000);
-
   return [
       Math.max(0, Math.min(255, r)), 
       Math.max(0, Math.min(255, g)), 
       Math.max(0, Math.min(255, b)), 
-      255 // full opacity
+      255
   ];
 }
 `;
@@ -83,16 +77,11 @@ const EVALSCRIPTS: Record<string, string> = {
         };
     }
     function evaluatePixel(sample) {
-        // Use a 'soft mask' for water. SCL classes for Water (6), Vegetation (4), Bare Soil (5),
-        // Dark Areas (2) and Unclassified (7) are included for better detection during winter and algal blooms.
         const isWaterLike = [2, 4, 5, 6, 7].includes(sample.SCL);
-        
         if (isWaterLike) {
           let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
           return { index: [ndci], dataMask: [1] };
         }
-    
-        // For all other pixels (clouds, shadows, etc.), return a dataMask of 0.
         return { index: [0], dataMask: [0] };
     }`,
 };
@@ -378,17 +367,14 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
                 'Accept': 'image/png'
             },
             cache: 'no-store',
+            body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
-            // The response is not OK (e.g. 400, 401, 500). Read the body to get more info.
             const errorBodyText = await response.text();
-            
-            // Check if it's the specific "No data found" error, which is a common, non-critical case.
             if (errorBodyText.includes("No data found")) {
                 console.warn(`No cloud-free visual found for ${station.id} in the last 60 days.`);
             } else {
-                // For all other errors, log the full details for debugging.
                 console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`, errorBodyText);
             }
             return null; // Return null in any error case.
@@ -396,7 +382,6 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
 
         const imageBlob = await response.blob();
         
-        // This is a fallback check. If the response was OK but not a PNG, something is wrong.
         if (imageBlob.type !== 'image/png') {
             console.error(`API returned an unexpected content type: ${imageBlob.type}`);
             return null;
