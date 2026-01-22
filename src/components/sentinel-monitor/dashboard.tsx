@@ -70,7 +70,7 @@ export default function Dashboard({ project, rawIndexData, chartIndexData, kpiDa
 
   const featuresForMap = useMemo(() => {
     return project.stations.flatMap(station => {
-        const gridCells = getGridCellsForStation(station);
+        const gridCells = getGridCellsForStation(station, project);
         return gridCells.map(cell => {
           const cellData = rawIndexData.filter(d => d.cellId === cell.cellId && d.indexValue !== null && !d.isInterpolated);
           const latestReading = cellData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];

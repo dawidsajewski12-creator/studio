@@ -70,9 +70,9 @@ const EVALSCRIPTS: Record<string, string> = {
     function evaluatePixel(sample) {
         // Use a 'soft mask' for water. SCL classes for Water (6), Vegetation (4), Bare Soil (5),
         // Dark Areas (2) and Unclassified (7) are included for better detection during winter and algal blooms.
-        const isPotentiallyWater = [2, 4, 5, 6, 7].includes(sample.SCL);
+        const isWaterLike = [2, 4, 5, 6, 7].includes(sample.SCL);
         
-        if (isPotentiallyWater) {
+        if (isWaterLike) {
           let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
           return { index: [ndci], dataMask: [1] };
         }
@@ -164,7 +164,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     let isCacheUpdated = false;
 
     const stationPromises = project.stations.map(async (station) => {
-        let fetchTasks = getGridCellsForStation(station);
+        let fetchTasks = getGridCellsForStation(station, project);
         
         const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
 
@@ -316,8 +316,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
         
-        // Always use a consistent, smaller bounding box for visual proofs to avoid API errors.
-        const bufferKm = 1.4; // Creates a ~2.8km x 2.8km box
+        const bufferKm = 1.4; // Creates a ~2.8km x 2.8km box for a more reliable visual
         const { lat, lng } = station.location;
         const buffer = bufferKm / 111.32;
         const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];

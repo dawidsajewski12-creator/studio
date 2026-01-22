@@ -28,16 +28,12 @@ export const PROJECTS: Project[] = [
         { 
             id: 'maggiore', 
             name: 'Jezioro Maggiore (IT/CH)', 
-            location: { lat: 45.913, lng: 8.552 },
-            bbox: [8.45, 45.80, 8.80, 46.15],
-            gridShape: [5, 10]
+            location: { lat: 45.965, lng: 8.634 },
         },
         { 
             id: 'sniardwy', 
             name: 'Jezioro Śniardwy (PL)', 
             location: { lat: 53.760, lng: 21.730 },
-            bbox: [21.55, 53.68, 21.90, 53.84],
-            gridShape: [8, 6]
         }
     ],
     dataConfig: {
