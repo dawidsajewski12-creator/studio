@@ -21,20 +21,16 @@ function setup() {
     output: { bands: 4, sampleType: "UINT8" }
   };
 }
-
 function evaluatePixel(sample) {
-  if ([3, 8, 9, 10, 11].includes(sample.SCL) || sample.SCL === 1) { 
+  if ([3, 8, 9, 10, 11].includes(sample.SCL) || sample.SCL === 1 || sample.SCL === 6) { 
     return [0, 0, 0, 0];
   }
-  
   const gain = 2.5;
   const r = Math.max(0, Math.min(255, 255 * (gain * sample.B04 / 3000)));
   const g = Math.max(0, Math.min(255, 255 * (gain * sample.B03 / 3000)));
   const b = Math.max(0, Math.min(255, 255 * (gain * sample.B02 / 3000)));
-
   return [r, g, b, 255];
-}
-`;
+}`;
 
 // --- Caching Configuration ---
 const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
@@ -55,8 +51,8 @@ function setup(){return{input:[{bands:["B04","B05","SCL"],units:"DN"}],output:[{
 function evaluatePixel(e){if([2,4,5,6,7].includes(e.SCL)){let t=(e.B05-e.B04)/(e.B05+e.B04);return{index:[t],dataMask:[1]}}return{index:[0],dataMask:[0]}}`,
   "NDVI/NDMI": `
 //VERSION=3
-function setup(){return{input:[{bands:["B04","B08","B11","SCL"],units:"DN"}],output:[{id:"INDICES",bands:2,sampleType:"FLOAT32"}]}}
-function evaluatePixel(e){if(![4,5].includes(e.SCL))return{INDICES:[NaN,NaN]};let t=(e.B08-e.B04)/(e.B08+e.B04),a=(e.B08-e.B11)/(e.B08+e.B11);return{INDICES:[t,a]}}`,
+function setup(){return{input:[{bands:["B04","B08","B11","SCL"],units:"DN"}],output:[{id:"INDICES",bands:2,sampleType:"FLOAT32"},{id:"dataMask",bands:1,sampleType:"UINT8"}]}}
+function evaluatePixel(e){if(![4,5].includes(e.SCL))return{INDICES:[NaN,NaN],dataMask:[0]};let t=(e.B08-e.B04)/(e.B08+e.B04),a=(e.B08-e.B11)/(e.B08+e.B11);return{INDICES:[t,a],dataMask:[1]}}`,
 };
 
 // --- API Helper Functions ---
