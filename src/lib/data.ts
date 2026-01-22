@@ -12,7 +12,7 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: ["B04", "B03", "B02", "dataMask"],
+    input: ["B04", "B03", "B02"],
     output: {
       bands: 3,
       sampleType: "UINT8"
