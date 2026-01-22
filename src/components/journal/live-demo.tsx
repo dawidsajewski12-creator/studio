@@ -115,13 +115,26 @@ const processLakeAnalytics = (rawData: IndexDataPoint[], totalPoints: number): {
 const processVineyardAnalytics = (rawData: IndexDataPoint[]): IndexDataPoint[] => {
     return rawData.map(d => {
         let waterStress: number | null = null;
-        if (d.indexValue !== null && d.ndmiValue !== null && d.indexValue > 0.1) {
-            const stressRatio = 1 - (d.ndmiValue / d.indexValue);
-            waterStress = Math.max(0, Math.min(100, stressRatio * 200));
+        const ndvi = d.indexValue; // indexValue is NDVI for vineyards
+        const ndmi = d.ndmiValue;
+
+        if (ndvi !== null && ndmi !== null) {
+            // Dormancy Filter: If NDVI is below 0.5, the vine is likely dormant.
+            if (ndvi < 0.5) {
+                waterStress = 0;
+            } else {
+                // Active Season: Calculate stress based on NDMI.
+                // High Stress (Wilting Point) at NDMI <= -0.1 (100% risk)
+                // No Stress (Well Watered) at NDMI >= 0.2 (0% risk)
+                // Linear interpolation between these points.
+                const risk = (0.2 - ndmi) / 0.3 * 100; // (0.2 - (-0.1)) = 0.3
+                waterStress = Math.max(0, Math.min(100, risk));
+            }
         }
+        
         return {
             ...d,
-            waterStress: waterStress !== null ? Math.max(0, Math.min(100, waterStress)) : null,
+            waterStress: waterStress,
         };
     });
 };

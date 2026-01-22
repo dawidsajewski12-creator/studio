@@ -19,9 +19,9 @@ const waterLegendItems = [
 ];
 
 const vineyardLegendItems = [
-  { color: 'green', label: 'Healthy Vigor' },
-  { color: 'orange', label: 'Water Stress' },
-  { color: 'brown', label: 'Low Vigor' },
+  { color: 'green', label: 'Healthy (NDMI > 0.1)' },
+  { color: 'orange', label: 'Stress Warning (-0.05 to 0.1)' },
+  { color: 'brown', label: 'Critical / Low Vigor' },
   { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data' }
 ];
 

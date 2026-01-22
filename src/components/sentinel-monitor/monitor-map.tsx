@@ -66,9 +66,23 @@ const getMarkerColor = (feature: FeatureForMap, projectId: string) => {
     if (projectId.includes('vineyard')) {
         const ndvi = feature.latestIndexValue;
         const ndmi = feature.latestNdmiValue;
-        if (ndvi === null || ndvi === undefined) return 'rgba(128, 128, 128, 0.6)';
-        if (ndvi < 0.4) return 'brown'; // Low Vigor
-        if (ndmi !== null && ndmi !== undefined && ndmi < 0.1 && ndvi > 0.5) return 'orange'; // Water Stress
+
+        if (ndvi === null || ndvi === undefined) {
+            return 'rgba(128, 128, 128, 0.6)'; // No Data
+        }
+        
+        // Low Vigor based on NDVI
+        if (ndvi < 0.5) {
+            return 'brown';
+        }
+
+        if (ndmi === null || ndmi === undefined) {
+            return 'rgba(128, 128, 128, 0.6)'; // No moisture data
+        }
+
+        // Water Stress based on NDMI for healthy vines
+        if (ndmi < -0.05) return 'brown'; // Critical Stress
+        if (ndmi <= 0.1) return 'orange'; // Stress Warning
         return 'green'; // Healthy
     }
 
