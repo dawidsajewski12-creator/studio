@@ -15,6 +15,7 @@ import { format, parseISO } from 'date-fns';
 
 type IndexChartProps = {
   data: IndexDataPoint[];
+  aggregatedData?: IndexDataPoint[];
   selectedStationId: Station['id'] | 'all';
   project: Project;
 };
@@ -27,107 +28,99 @@ const stationColors: string[] = [
   'hsl(var(--chart-5))',
 ];
 const tempColor = 'hsl(var(--destructive))';
+const avgColor = 'hsl(var(--chart-3))';
+const selectedPointColor = 'hsl(var(--chart-1))';
 
 
 // Custom dot renderer for satellite observations
-const renderDot = (stationId: string) => (props: any) => {
-  const { cx, cy, payload, stroke, index } = props;
-  if (payload && !payload.isInterpolated && payload.stationId === stationId) {
-    return <Dot key={`dot-${index}`} cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
+const renderDot = (props: any) => {
+  const { cx, cy, payload, stroke } = props;
+  if (payload && !payload.isInterpolated) {
+    return <Dot cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
   }
   return null;
 };
 
-export default function IndexChart({ data, selectedStationId, project }: IndexChartProps) {
-  const isWaterProject = project.id === 'lake-quality';
+export default function IndexChart({ data, aggregatedData, selectedStationId, project }: IndexChartProps) {
+  const isLakeProject = project.id.includes('lake');
 
-  const { chartData, chartConfig, visibleStations, cloudFreeDaysCount } = useMemo(() => {
-    const relevantData = selectedStationId === 'all'
-      ? data
-      : data.filter(d => d.stationId === selectedStationId);
+  const { chartData, chartConfig, visibleLines } = useMemo(() => {
+    let finalChartData: any[] = [];
+    const config: any = {};
+    const lines: { dataKey: string, color: string, name: string, yAxis: 'left' | 'right' }[] = [];
 
-    const groupedByDate = relevantData.reduce((acc, curr) => {
-      const dateStr = format(parseISO(curr.date), 'yyyy-MM-dd');
-      if (!acc[dateStr]) {
-        acc[dateStr] = { date: dateStr };
-      }
-      
-      // For grid projects, data is pre-averaged. For point projects, we just assign.
-      acc[dateStr][curr.stationId] = curr.indexValue;
-      acc[dateStr].isInterpolated = curr.isInterpolated;
-      acc[dateStr].stationId = curr.stationId; // Used by dot renderer
-      
-      if (selectedStationId === 'all' && project.analysisType === 'point') {
-        if (!acc[dateStr].tempCount) {
-          acc[dateStr].temperature = 0;
-          acc[dateStr].tempCount = 0;
-        }
-        if (curr.temperature !== null) {
-          acc[dateStr].temperature += curr.temperature;
-          acc[dateStr].tempCount++;
-        }
-      } else {
-        acc[dateStr].temperature = curr.temperature;
-      }
+    if (isLakeProject && aggregatedData) {
+        // --- LAKE PROJECT LOGIC ---
+        const selectedPointData = selectedStationId !== 'all' 
+            ? data.filter(d => d.stationId === selectedStationId)
+            : [];
+        
+        const selectedPointMap = new Map(selectedPointData.map(d => [format(parseISO(d.date), 'yyyy-MM-dd'), d]));
 
-      return acc;
-    }, {} as any);
-    
-    if (selectedStationId === 'all' && project.analysisType === 'point') {
-        Object.values(groupedByDate).forEach((day: any) => {
-            if (day.tempCount > 0) {
-                day.temperature = day.temperature / day.tempCount;
-            } else {
-                day.temperature = null;
+        finalChartData = aggregatedData.map(aggPoint => {
+            const dateStr = format(parseISO(aggPoint.date), 'yyyy-MM-dd');
+            const pointData = selectedPointMap.get(dateStr);
+            return {
+                date: dateStr,
+                average: aggPoint.indexValue,
+                isAverageInterpolated: aggPoint.isInterpolated,
+                selectedPoint: pointData?.indexValue ?? null,
+                isPointInterpolated: pointData?.isInterpolated ?? true,
+                temperature: aggPoint.temperature
             }
         });
-    }
 
-    const sortedChartData = Object.values(groupedByDate).sort(
-      (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+        config.average = { label: 'Lake Average', color: avgColor };
+        lines.push({ dataKey: 'average', color: avgColor, name: 'Lake Average', yAxis: 'left' });
 
-    const config: any = {};
-    if (!isWaterProject) {
+        if (selectedStationId !== 'all') {
+            const stationName = project.stations.find(s => s.id === selectedStationId)?.name || 'Selected Point';
+            config.selectedPoint = { label: stationName, color: selectedPointColor };
+            lines.push({ dataKey: 'selectedPoint', color: selectedPointColor, name: stationName, yAxis: 'left' });
+        }
+    } else {
+        // --- SNOW PROJECT LOGIC ---
+        const groupedByDate = data.reduce((acc, curr) => {
+            const dateStr = format(parseISO(curr.date), 'yyyy-MM-dd');
+            if (!acc[dateStr]) acc[dateStr] = { date: dateStr };
+            acc[dateStr][curr.stationId] = curr.indexValue;
+            acc[dateStr][`${curr.stationId}_interpolated`] = curr.isInterpolated;
+            acc[dateStr].temperature = curr.temperature; // Temp is the same for all stations in snow watch
+            return acc;
+        }, {} as any);
+        
+        finalChartData = Object.values(groupedByDate).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        project.stations.forEach((station, index) => {
+            config[station.id] = { label: station.name, color: stationColors[index % stationColors.length] };
+        });
         config.temperature = { label: 'Temperature', color: tempColor };
+        
+        const stationsToShow = selectedStationId === 'all' ? project.stations.map(s => s.id) : [selectedStationId];
+        stationsToShow.forEach(id => lines.push({ dataKey: id, color: config[id].color, name: config[id].label, yAxis: 'left' }));
+        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'right' });
     }
-    project.stations.forEach((station, index) => {
-      config[station.id] = {
-        label: station.name,
-        color: stationColors[index % stationColors.length],
-      };
-    });
 
-    const stationsToShow = (selectedStationId === 'all' 
-        ? project.stations.map(s => s.id)
-        : [selectedStationId]) as Station['id'][];
-    
-    const observationCount = data.filter(p => !p.isInterpolated && p.indexValue !== null).length;
-
-    return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow, cloudFreeDaysCount: observationCount };
-  }, [data, project, selectedStationId, isWaterProject]);
+    return { chartData: finalChartData, chartConfig: config, visibleLines: lines };
+  }, [data, aggregatedData, selectedStationId, project, isLakeProject]);
   
   const selectedStationName = selectedStationId === 'all' 
-    ? 'All stations' 
-    : project.stations.find(s => s.id === selectedStationId)?.name;
+    ? 'All Stations' 
+    : project.stations.find(s => s.id === selectedStationId)?.name || 'Average';
 
-  const chartTitle = isWaterProject
-    ? `${project.index.name} Trend (Last 365 Days)`
-    : `${project.index.name} & Temp Trend (Last 365 Days)`;
+  const chartTitle = isLakeProject
+    ? `NDCI Trend for ${project.name}`
+    : `NDSI & Temp Trend (Last 365 Days)`;
 
-  const chartDescription = isWaterProject
-    ? `${project.index.name} for ${selectedStationName}.`
-    : `${project.index.name} and Mean Temperature for ${selectedStationName}.`;
+  const chartDescription = isLakeProject
+    ? `Lake-wide average vs. individual sensor data for ${selectedStationName}.`
+    : `Snow index and mean temperature for ${selectedStationName}.`;
 
   return (
     <>
       <CardHeader>
         <CardTitle>{chartTitle}</CardTitle>
-        <CardDescription>
-          {chartDescription}
-          <br />
-          Suma dni bezchmurnych w roku (obserwacje): {cloudFreeDaysCount}
-        </CardDescription>
+        <CardDescription>{chartDescription}</CardDescription>
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
         <ChartContainer config={chartConfig} className="w-full h-full aspect-auto">
@@ -147,10 +140,10 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              domain={isWaterProject ? [-0.2, 0.4] : [project.index.name === 'NDBI' ? -0.5 : 0, 1]}
+              domain={isLakeProject ? [-0.2, 0.4] : [project.index.name === 'NDBI' ? -0.5 : 0, 1]}
               style={{ fontSize: '0.75rem' }}
             />
-            {!isWaterProject && (
+            {!isLakeProject && (
               <YAxis
                 yAxisId="right"
                 orientation="right"
@@ -168,35 +161,22 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 return payload?.[0]?.payload?.date ? format(parseISO(payload[0].payload.date), 'PPP') : label;
               }} />}
             />
-            {visibleStations.map(stationId => (
+            {visibleLines.map(line => (
               <Line
-                key={stationId}
+                key={line.dataKey}
                 type="monotone"
-                dataKey={stationId}
-                stroke={chartConfig[stationId]?.color}
-                strokeWidth={2}
-                dot={project.analysisType === 'point' ? renderDot(stationId) : false}
+                dataKey={line.dataKey}
+                stroke={line.color}
+                strokeWidth={line.dataKey === 'average' ? 2.5 : 2}
+                strokeOpacity={line.dataKey === 'temperature' ? 0.8 : 1}
+                dot={line.dataKey === 'selectedPoint' ? renderDot : false}
                 activeDot={{ r: 4 }}
-                name={chartConfig[stationId]?.label}
+                name={line.name}
                 connectNulls={true}
-                yAxisId="left"
+                yAxisId={line.yAxis}
               />
             ))}
-             {!isWaterProject && (
-                <Line
-                    key="temperature"
-                    type="monotone"
-                    dataKey="temperature"
-                    stroke={tempColor}
-                    strokeWidth={1.5}
-                    dot={false}
-                    name="Avg. Temp"
-                    connectNulls={true}
-                    yAxisId="right"
-                    strokeOpacity={0.8}
-                />
-             )}
-            {isWaterProject ? (
+            {isLakeProject ? (
               <ReferenceLine y={0.1} yAxisId="left" label={{ value: 'Algal Bloom Risk', position: 'insideTopRight', fill: 'hsl(var(--accent))', fontSize: 12 }} stroke="hsl(var(--accent))" strokeDasharray="4 4" />
             ) : (
               <ReferenceLine y={0} yAxisId="right" stroke={tempColor} strokeDasharray="3 3" strokeOpacity={0.5} />

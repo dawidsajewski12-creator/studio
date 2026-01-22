@@ -1,52 +1,92 @@
 import { getProjectData } from '@/lib/data';
 import { PROJECTS } from '@/lib/projects';
-import type { IndexDataPoint, KpiData, Project, Station } from '@/lib/types';
+import type { IndexDataPoint, KpiData } from '@/lib/types';
 import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
-import { format, parseISO, isSameDay } from 'date-fns';
-import { getGridCellsForStation } from '@/lib/gis-utils';
+import { format, parseISO } from 'date-fns';
 
-// Helper function to find the latest valid reading from an aggregated data series
-const getLatestReading = (data: IndexDataPoint[]) => {
-  return data
-    .filter(d => d.indexValue !== null)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+// Helper to calculate the lake-wide average and spatial coverage for a given date
+const getDailyLakeAverage = (dataForDay: IndexDataPoint[], totalPoints: number) => {
+    const validPoints = dataForDay.filter(d => d.indexValue !== null && !d.isInterpolated);
+    if (validPoints.length === 0) {
+        return { avgIndex: null, coverage: 0 };
+    }
+    const sum = validPoints.reduce((acc, curr) => acc + curr.indexValue!, 0);
+    const coverage = (validPoints.length / totalPoints) * 100;
+    return {
+        avgIndex: sum / validPoints.length,
+        coverage: coverage,
+    };
 };
 
-// Helper to aggregate raw grid data into a single series for charts and KPIs
-const aggregateGridData = (data: IndexDataPoint[], stationId: string): IndexDataPoint[] => {
-    const dailyAggregates: { [date: string]: { sum: number; count: number; tempSum: number; tempCount: number } } = {};
-
-    // Filter for the specific station and aggregate cell data
-    data.filter(p => p.stationId === stationId).forEach(point => {
+// This function processes raw point data into an aggregated series for the whole lake
+const aggregateLakeData = (rawData: IndexDataPoint[], totalPoints: number): { aggregatedData: IndexDataPoint[], kpi: KpiData } => {
+    const groupedByDate: { [date: string]: IndexDataPoint[] } = {};
+    rawData.forEach(point => {
         const dateStr = format(parseISO(point.date), 'yyyy-MM-dd');
-        if (!dailyAggregates[dateStr]) {
-            dailyAggregates[dateStr] = { sum: 0, count: 0, tempSum: 0, tempCount: 0 };
+        if (!groupedByDate[dateStr]) {
+            groupedByDate[dateStr] = [];
         }
-        if (point.indexValue !== null) {
-            dailyAggregates[dateStr].sum += point.indexValue;
-            dailyAggregates[dateStr].count++;
-        }
-        if (point.temperature !== null) {
-            dailyAggregates[dateStr].tempSum += point.temperature;
-            dailyAggregates[dateStr].tempCount++;
-        }
+        groupedByDate[dateStr].push(point);
     });
 
-    // Create the aggregated time series
-    return Object.entries(dailyAggregates).map(([date, values]) => {
-        const avgIndex = values.count > 0 ? values.sum / values.count : null;
-        const avgTemp = values.tempCount > 0 ? values.tempSum / values.tempCount : null;
+    const aggregatedSeries: IndexDataPoint[] = Object.entries(groupedByDate).map(([date, points]) => {
+        const { avgIndex, coverage } = getDailyLakeAverage(points, totalPoints);
+        // We take the temperature from the first point as a representative sample for the day
+        const representativeTemp = points[0]?.temperature ?? null;
+
         return {
             date: parseISO(date).toISOString(),
-            stationId: stationId,
+            stationId: 'lake-average', // A special ID for the aggregated series
             indexValue: avgIndex,
-            isInterpolated: false, // Aggregated data is not "interpolated" in the same way. It's an average.
-            temperature: avgTemp,
+            isInterpolated: avgIndex === null, // Mark as 'interpolated' if no real data was found for that day
+            temperature: representativeTemp,
+            spatialCoverage: coverage,
         };
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    });
+
+    // Interpolate gaps in the aggregated series
+    for (let i = 0; i < aggregatedSeries.length; i++) {
+        if (aggregatedSeries[i].indexValue === null) {
+            let prevIndex = i - 1;
+            while (prevIndex >= 0 && aggregatedSeries[prevIndex].indexValue === null) prevIndex--;
+            
+            let nextIndex = i + 1;
+            while (nextIndex < aggregatedSeries.length && aggregatedSeries[nextIndex].indexValue === null) nextIndex++;
+            
+            if (prevIndex >= 0 && nextIndex < aggregatedSeries.length) {
+                const prevPoint = aggregatedSeries[prevIndex];
+                const nextPoint = aggregatedSeries[nextIndex];
+                if (prevPoint.indexValue !== null && nextPoint.indexValue !== null) {
+                    const prevValue = prevPoint.indexValue;
+                    const nextValue = nextPoint.indexValue;
+                    const prevTime = parseISO(prevPoint.date).getTime();
+                    const nextTime = parseISO(nextPoint.date).getTime();
+                    const currentTime = parseISO(aggregatedSeries[i].date).getTime();
+                    const fraction = (currentTime - prevTime) / (nextTime - prevTime);
+                    aggregatedSeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
+                    aggregatedSeries[i].isInterpolated = true; // Now it's truly interpolated
+                }
+            }
+        }
+    }
+
+    const latestValidReading = [...aggregatedSeries]
+        .filter(d => !d.isInterpolated && d.indexValue !== null)
+        .pop();
+
+    const kpi: KpiData = {
+      stationId: 'lake-average',
+      name: 'Lake-Wide Average',
+      latestIndexValue: latestValidReading?.indexValue ?? null,
+      latestDate: latestValidReading?.date ?? null,
+      spatialCoverage: latestValidReading?.spatialCoverage ?? 0,
+    };
+
+    return { aggregatedData: aggregatedSeries, kpi };
 };
+
 
 export default async function LiveDemo({ projectId }: { projectId: string }) {
   const project = PROJECTS.find(p => p.id === projectId);
@@ -55,56 +95,31 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
     notFound();
   }
 
-  // Fetch the raw satellite and weather data for all points/cells
   const rawIndexData = await getProjectData(project);
   
-  // KPI data and Chart data are derived differently depending on the project type
-  const kpiData: KpiData[] = [];
-  const chartData: { [stationId: string]: IndexDataPoint[] } = {};
+  let kpiData: KpiData[] = [];
+  let chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] } = { raw: [], aggregated: [] };
 
-  project.stations.forEach(station => {
-    let stationDataForKpiAndChart: IndexDataPoint[];
-    let spatialCoverage: number | null = null;
+  if (project.id.includes('lake')) {
+      const { aggregatedData, kpi } = aggregateLakeData(rawIndexData, project.stations.length);
+      kpiData.push(kpi);
+      chartData = { raw: rawIndexData, aggregated: aggregatedData };
+  } else { // For point-based projects like Snow Watch
+      kpiData = project.stations.map(station => {
+          const stationData = rawIndexData.filter(d => d.stationId === station.id);
+          const latestReading = [...stationData]
+            .filter(d => d.indexValue !== null && !d.isInterpolated)
+            .pop();
+          return {
+              stationId: station.id,
+              name: station.name,
+              latestIndexValue: latestReading?.indexValue ?? null,
+              latestDate: latestReading?.date ?? null,
+          }
+      });
+      chartData = { raw: rawIndexData, aggregated: [] }; // No separate aggregated view for simple points
+  }
 
-    if (project.analysisType === 'grid') {
-      stationDataForKpiAndChart = aggregateGridData(rawIndexData, station.id);
-      
-      const latestReading = getLatestReading(stationDataForKpiAndChart);
-      if (latestReading) {
-        const latestDate = latestReading.date;
-        const cellsForStation = getGridCellsForStation(station, project);
-        const totalCells = cellsForStation.length;
-        
-        const validCellsOnLatestDate = new Set(rawIndexData.filter(d => 
-          d.stationId === station.id &&
-          isSameDay(parseISO(d.date), parseISO(latestDate)) &&
-          d.indexValue !== null &&
-          !d.isInterpolated
-        ).map(d => d.cellId)).size;
-        
-        if (totalCells > 0) {
-          spatialCoverage = (validCellsOnLatestDate / totalCells) * 100;
-        }
-      }
-
-    } else { // 'point' analysis
-      stationDataForKpiAndChart = rawIndexData.filter(d => d.stationId === station.id);
-    }
-    
-    chartData[station.id] = stationDataForKpiAndChart;
-
-    const latestReading = getLatestReading(stationDataForKpiAndChart);
-    kpiData.push({
-      stationId: station.id,
-      name: station.name,
-      latestIndexValue: latestReading?.indexValue ?? null,
-      latestDate: latestReading?.date ?? null,
-      spatialCoverage: spatialCoverage,
-    });
-  });
-
-  // Flatten chart data for passing to the component
-  const flatChartData = Object.values(chartData).flat();
 
   return (
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8 bg-background">
@@ -115,8 +130,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
         </header>
         <Dashboard 
           project={project}
-          rawIndexData={rawIndexData}
-          chartIndexData={flatChartData}
+          chartData={chartData}
           kpiData={kpiData}
         />
         <TechnicalNote project={project} />

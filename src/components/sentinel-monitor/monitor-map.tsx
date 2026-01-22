@@ -1,10 +1,9 @@
 "use client";
 
-import type { Project } from '@/lib/types';
+import type { Project, Station } from '@/lib/types';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
-import { Satellite, Waves, Leaf, Building2, Droplets } from 'lucide-react';
+import { Satellite, Waves, Leaf, Droplets } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import type { FeatureCollection, Feature } from 'geojson';
 import MapLegend from './map-legend';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -28,22 +27,7 @@ const baseLayers = {
   }
 };
 
-const projectIcons: Record<string, React.ReactNode> = {
-  'snow-watch': <Satellite className="size-5" />,
-  'vineyard-vitality': <Leaf className="size-5" />,
-  'urban-greenery': <Building2 className="size-5" />,
-  'river-drought': <Droplets className="size-5" />,
-  'lake-quality': <Waves className="size-5" />,
-};
-
-type FeatureForMap = {
-    id: string;
-    stationId: string;
-    name: string;
-    bbox: [number, number, number, number];
-    latestIndexValue: number | null;
-    location: { lat: number; lng: number };
-};
+type FeatureForMap = Station & { latestIndexValue: number | null };
 
 type MonitorMapProps = {
   project: Project;
@@ -69,90 +53,32 @@ const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: strin
   </div>
 );
 
+const getMarkerColor = (value: number | null, projectId: string) => {
+    if (value === null) return 'rgba(128, 128, 128, 0.6)';
+
+    if (projectId.includes('lake')) { // NDCI for lakes
+        if (value < -0.1) return 'blue';
+        if (value <= 0.1) return 'cyan';
+        if (value <= 0.2) return 'lime';
+        return 'red';
+    } else { // NDSI for snow
+        if (value < 0.2) return '#8B4513';
+        if (value <= 0.5) return '#00FFFF';
+        return '#4169E1';
+    }
+};
+
 export default function MonitorMap({ project, features, center, zoom, selectedStationId, onFeatureClick }: MonitorMapProps) {
-  const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null);
   const [activeLayerKey, setActiveLayerKey] = useState('topo');
 
-  const geojson: FeatureCollection = useMemo(() => ({
-    type: 'FeatureCollection',
-    features: features.map(feature => {
-      const [minLng, minLat, maxLng, maxLat] = feature.bbox;
-      return {
-        type: 'Feature',
-        id: feature.id,
-        properties: { 
-          id: feature.id,
-          stationId: feature.stationId,
-          indexValue: feature.latestIndexValue,
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]
-          ]]
-        }
-      };
-    })
-  }), [features]);
-
-  const mapStyle = useMemo(() => {
-    let fillColorExpression: any[];
-
-    if (project.id === 'lake-quality') {
-        fillColorExpression = [
-            'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(128, 128, 128, 0.4)',
-            ['<', ['get', 'indexValue'], -0.1], 'blue',
-            ['<=', ['get', 'indexValue'], 0.1], 'cyan',
-            ['<=', ['get', 'indexValue'], 0.2], 'lime',
-            'red'
-        ];
-    } else { // snow-watch
-        fillColorExpression = [
-            'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(128, 128, 128, 0.4)',
-            ['<', ['get', 'indexValue'], 0.2], '#8B4513',
-            ['<=', ['get', 'indexValue'], 0.5], '#00FFFF',
-            '#4169E1'
-        ];
-    }
-
-    return {
-        version: 8,
-        sources: {
-            'base-tiles': { type: 'raster', tiles: [baseLayers[activeLayerKey as keyof typeof baseLayers].url.replace('{s}', 'a')], tileSize: 256, attribution: baseLayers[activeLayerKey as keyof typeof baseLayers].attribution },
-            'feature-polygons': { type: 'geojson', data: geojson }
-        },
-        layers: [
-            { id: 'base-tiles', type: 'raster', source: 'base-tiles' },
-            {
-                id: 'polygons-fill', type: 'fill', source: 'feature-polygons',
-                paint: {
-                    'fill-color': fillColorExpression,
-                    'fill-opacity': 0.5
-                }
-            },
-            {
-                id: 'polygons-outline', type: 'line', source: 'feature-polygons',
-                paint: {
-                    'line-color': '#000000',
-                    'line-width': 1,
-                    'line-opacity': 0.5
-                }
-            }
-        ]
-    };
-  }, [geojson, activeLayerKey, project.id]);
-
-  const markerIcon = projectIcons[project.id] || <Satellite className="size-5" />;
-
-  const handleMapClick = (e: maplibregl.MapLayerMouseEvent) => {
-    if (e.features && e.features.length > 0) {
-      const feature = e.features[0] as Feature & { properties: { stationId: string } };
-      if (feature.properties?.stationId) {
-        onFeatureClick(feature.properties.stationId);
-      }
-    }
+  const mapStyle = {
+    version: 8,
+    sources: {
+        'base-tiles': { type: 'raster', tiles: [baseLayers[activeLayerKey as keyof typeof baseLayers].url.replace('{s}', 'a')], tileSize: 256, attribution: baseLayers[activeLayerKey as keyof typeof baseLayers].attribution }
+    },
+    layers: [
+        { id: 'base-tiles', type: 'raster', source: 'base-tiles' }
+    ]
   };
 
   return (
@@ -162,52 +88,28 @@ export default function MonitorMap({ project, features, center, zoom, selectedSt
       style={{width: '100%', height: '100%'}}
       mapStyle={mapStyle}
       attributionControl={true}
-      interactiveLayerIds={['polygons-fill']}
-      onClick={handleMapClick}
-      onMouseMove={(e) => {
-        if (e.features && e.features.length > 0) {
-            const featureId = e.features[0].id;
-            if(featureId) setHoveredFeatureId(String(featureId));
-        } else {
-            setHoveredFeatureId(null);
-        }
-      }}
-      onMouseLeave={() => setHoveredFeatureId(null)}
     >
       <MapLegend projectId={project.id} />
       <LayerControl activeLayerKey={activeLayerKey} onLayerChange={setActiveLayerKey} />
       
-      {project.analysisType === 'point' && features.map((feature) => (
+      {features.map((feature) => (
         <Marker
           key={feature.id}
           longitude={feature.location.lng}
           latitude={feature.location.lat}
           onClick={(e) => { e.originalEvent.stopPropagation(); onFeatureClick(feature.id); }}
         >
-            <div className={`p-2 rounded-full cursor-pointer flex items-center justify-center transition-colors duration-300 ${
-                selectedStationId === feature.id
-                ? 'bg-accent text-accent-foreground ring-2 ring-accent'
-                : 'bg-card text-card-foreground shadow-md'
-            }`}>
-                 {markerIcon}
-            </div>
+            <div 
+              className="w-4 h-4 rounded-full cursor-pointer transition-transform duration-200"
+              style={{ 
+                  backgroundColor: getMarkerColor(feature.latestIndexValue, project.id),
+                  border: selectedStationId === feature.id ? '2px solid hsl(var(--accent))' : '1px solid rgba(255,255,255,0.8)',
+                  transform: selectedStationId === feature.id ? 'scale(1.5)' : 'scale(1)',
+                  boxShadow: '0 0 5px rgba(0,0,0,0.5)',
+              }}
+            />
         </Marker>
       ))}
-
-      {hoveredFeatureId && (
-        <Popup
-          anchor="top"
-          longitude={features.find(f => f.id === hoveredFeatureId)!.location.lng}
-          latitude={features.find(f => f.id === hoveredFeatureId)!.location.lat}
-          closeButton={false}
-          closeOnClick={false}
-          className="z-10"
-        >
-          <div className="bg-popover text-popover-foreground rounded-md px-2 py-1 text-sm shadow-md">
-              {features.find(f => f.id === hoveredFeatureId)!.name}
-          </div>
-        </Popup>
-      )}
     </Map>
   );
 }

@@ -3,15 +3,22 @@
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Satellite, FileText, Mail, Waves } from 'lucide-react';
+import { PROJECTS } from '@/lib/projects';
 
-const navigationItems = [
-    { id: 'snow-watch', name: '🏔️ Alpine Snow Watch', href: '/?view=snow-watch', icon: <Satellite /> },
-    { id: 'lake-quality', name: '💧 Lake Quality Monitor', href: '/?view=lake-quality', icon: <Waves /> },
+const staticItems = [
     { id: 'research', name: '📄 Methodology & Research', href: '/?view=research', icon: <FileText /> },
     { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
 ]
 
 export default function SidebarNavigation({ activeView, visualProof }: { activeView: string, visualProof: React.ReactNode | null }) {
+  const projectItems = PROJECTS.map(p => ({
+    id: p.id,
+    name: p.name,
+    href: `/?view=${p.id}`,
+    icon: p.id.includes('snow') ? <Satellite /> : <Waves />,
+  }));
+
+  const navigationItems = [...projectItems, ...staticItems];
 
   return (
     <>

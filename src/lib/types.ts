@@ -5,17 +5,16 @@ export type Station = {
     lat: number;
     lng: number;
   };
-  bbox?: [number, number, number, number];
-  gridShape?: [number, number]; // e.g., [width, height] in cells
 };
 
 export type IndexDataPoint = {
   date: string; // ISO string
   stationId: Station['id'];
-  cellId?: string; // Add this for grid cells
-  indexValue: number | null; // Allow null before interpolation
+  cellId?: string; // Used by point analysis as well
+  indexValue: number | null;
   isInterpolated: boolean;
   temperature: number | null;
+  spatialCoverage?: number;
 };
 
 export type KpiData = {
@@ -30,7 +29,7 @@ export type Project = {
     id: string;
     name: string;
     description: string;
-    analysisType: 'point' | 'grid';
+    analysisType: 'point'; // Grid analysis is now a special case of point analysis
     index: {
         name: string;
         unit: string;

@@ -3,11 +3,10 @@
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
 import KpiCard from '@/components/sentinel-monitor/kpi-card';
 import { Card, CardHeader } from '@/components/ui/card';
-import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
+import { Satellite, Leaf, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getGridCellsForStation } from '@/lib/gis-utils';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
@@ -31,17 +30,16 @@ const IndexChart = dynamic(() => import('@/components/sentinel-monitor/index-cha
 
 type DashboardProps = {
   project: Project;
-  rawIndexData: IndexDataPoint[];
-  chartIndexData: IndexDataPoint[];
+  chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] };
   kpiData: KpiData[];
 };
 
 const projectIcons: Record<string, React.ReactNode> = {
   'snow-watch': <Satellite className="size-6 text-primary" />,
   'vineyard-vitality': <Leaf className="size-6 text-primary" />,
-  'urban-greenery': <Building2 className="size-6 text-primary" />,
-  'river-drought': <Droplets className="size-6 text-primary" />,
-  'lake-quality': <Waves className="size-6 text-primary" />,
+  'urban-greenery': <Droplets className="size-6 text-primary" />,
+  'maggiore-lake': <Waves className="size-6 text-primary" />,
+  'sniardwy-lake': <Waves className="size-6 text-primary" />,
 };
 
 const getMapCenter = (stations: Station[]) => {
@@ -54,52 +52,53 @@ const getMapCenter = (stations: Station[]) => {
     };
 };
 
-export default function Dashboard({ project, rawIndexData, chartIndexData, kpiData }: DashboardProps) {
+export default function Dashboard({ project, chartData, kpiData }: DashboardProps) {
   const [selectedStation, setSelectedStation] = useState<Station['id'] | 'all'>('all');
 
-  const filteredChartData = useMemo(() => {
-    if (selectedStation === 'all') {
-      return chartIndexData;
-    }
-    return chartIndexData.filter(d => d.stationId === selectedStation);
-  }, [chartIndexData, selectedStation]);
-  
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
-  const initialZoom = useMemo(() => project.id === 'lake-quality' ? 8 : 9, [project.id]);
+  const initialZoom = useMemo(() => project.id.includes('lake') ? 10 : 9, [project.id]);
 
-  const featuresForMap = useMemo(() => {
-    return project.stations.flatMap(station => {
-        const gridCells = getGridCellsForStation(station, project);
-        return gridCells.map(cell => {
-          const cellData = rawIndexData.filter(d => d.cellId === cell.cellId && d.indexValue !== null && !d.isInterpolated);
-          const latestReading = cellData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-          return {
-            id: cell.cellId,
-            stationId: station.id,
-            name: `${station.name} Cell ${cell.cellId.split('_').pop()}`,
-            bbox: cell.bbox,
-            latestIndexValue: latestReading?.indexValue ?? null,
-            // For centering popups on grid cells, we need the cell's center
-            location: {
-              lat: (cell.bbox[1] + cell.bbox[3]) / 2,
-              lng: (cell.bbox[0] + cell.bbox[2]) / 2,
-            },
-          }
-        });
-    });
-  }, [project, rawIndexData]);
+  const mapFeatures = useMemo(() => {
+    return project.stations.map(station => {
+      const pointData = chartData.raw.filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated);
+      const latestReading = pointData.length > 0 ? pointData[pointData.length - 1] : null;
+      return {
+        ...station,
+        latestIndexValue: latestReading?.indexValue ?? null,
+      }
+    })
+  }, [project.stations, chartData.raw]);
+
+  const handleFeatureClick = (stationId: string) => {
+    // For lake projects, clicking a point on the map selects it for the chart
+    if (project.id.includes('lake')) {
+      setSelectedStation(prev => prev === stationId ? 'all' : stationId);
+    } else { // For snow project, it toggles between all and one station
+      setSelectedStation(prev => prev === stationId ? 'all' : stationId);
+    }
+  };
+
+  const handleKpiClick = (stationId: string) => {
+    // If it's a lake KPI (average), clicking it resets the view to 'all'
+    if (stationId === 'lake-average') {
+      setSelectedStation('all');
+    } else { // For snow KPIs, it toggles
+      setSelectedStation(prev => prev === stationId ? 'all' : stationId);
+    }
+  };
+
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
       <Card className="xl:col-span-3 w-full h-[400px] xl:h-auto min-h-[400px] p-0 overflow-hidden shadow-lg">
         <MonitorMap
           project={project}
-          features={featuresForMap}
+          features={mapFeatures}
           center={mapCenter}
           zoom={initialZoom}
           selectedStationId={selectedStation}
-          onFeatureClick={(stationId) => setSelectedStation(prev => prev === stationId ? 'all' : stationId)}
+          onFeatureClick={handleFeatureClick}
         />
       </Card>
       <div className="xl:col-span-2 flex flex-col gap-6">
@@ -111,13 +110,19 @@ export default function Dashboard({ project, rawIndexData, chartIndexData, kpiDa
               value={kpi.latestIndexValue !== null ? kpi.latestIndexValue.toFixed(3) : 'N/A'}
               date={kpi.latestDate}
               icon={stationIcon}
-              onClick={() => setSelectedStation(prev => prev === kpi.stationId ? 'all' : kpi.stationId)}
+              onClick={() => handleKpiClick(kpi.stationId)}
               isSelected={selectedStation === kpi.stationId}
+              coverage={kpi.spatialCoverage}
             />
           ))}
         </div>
         <Card className="flex-grow">
-          <IndexChart data={filteredChartData} selectedStationId={selectedStation} project={project} />
+          <IndexChart 
+            data={chartData.raw} 
+            aggregatedData={chartData.aggregated}
+            selectedStationId={selectedStation} 
+            project={project} 
+            />
         </Card>
       </div>
     </div>
