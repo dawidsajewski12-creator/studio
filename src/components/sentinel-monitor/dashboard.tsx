@@ -7,7 +7,7 @@ import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getBoundingBox } from '@/lib/data';
+import { getBoundingBox } from '@/lib/gis-utils';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,

@@ -1,5 +1,10 @@
+
 import type { Project, IndexDataPoint, Station } from './types';
-import { subDays, format, eachDayOfInterval, parseISO, isSameDay } from 'date-fns';
+import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDays, addDays, isBefore } from 'date-fns';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { getBoundingBox } from './gis-utils';
+
 
 // --- Copernicus API Configuration ---
 const CLIENT_ID = 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
@@ -12,7 +17,7 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: ["B04", "B03", "B02", "SCL"],
+    input: ["B04", "B03", "B02"],
     output: {
       bands: 3,
       sampleType: "UINT8"
@@ -24,6 +29,12 @@ function evaluatePixel(sample) {
   return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02];
 }
 `;
+
+// --- Caching Configuration ---
+const CACHE_FILE = path.join(process.cwd(), 'snow_cache.json');
+type CacheData = {
+    [stationId: string]: { date: string; value: number }[];
+};
 
 
 // --- Evalscripts for different indices ---
@@ -121,7 +132,7 @@ async function getToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
-    cache: 'no-store' // Do not use Next.js's fetch cache for the token
+    cache: 'no-store'
   });
 
   if (!response.ok) {
@@ -135,12 +146,6 @@ async function getToken(): Promise<string> {
     expires_at: Date.now() + (data.expires_in - 60) * 1000, // 60s buffer
   };
   return tokenCache.access_token;
-}
-
-export function getBoundingBox(station: Station, bufferKm = 0.5): [number, number, number, number] {
-    const { lat, lng } = station.location;
-    const buffer = bufferKm / 111.32; // Approx conversion of km to degrees
-    return [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
 }
 
 async function fetchWeatherHistory(station: Station, startDate: string, endDate: string): Promise<Map<string, number>> {
@@ -176,46 +181,93 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     if (!evalscript) {
         throw new Error(`No evalscript found for index: ${project.index.name}`);
     }
+    
+    // --- Caching Logic ---
+    let cache: CacheData = {};
+    try {
+        const cacheFileContent = await fs.readFile(CACHE_FILE, 'utf-8');
+        cache = JSON.parse(cacheFileContent);
+    } catch (error) {
+        console.log("Cache file not found or invalid. A new one will be created.");
+    }
+    let isCacheUpdated = false;
+
 
     const stationPromises = project.stations.map(async (station) => {
-        // --- 1. Fetch Satellite Data ---
-        const satelliteRequestBody = {
-            input: {
-                bounds: { bbox: getBoundingBox(station, 0.5) },
-                data: [{ dataFilter: { timeRange: { from: yearAgo.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
-            },
-            aggregation: {
-                evalscript,
-                timeRange: { from: yearAgo.toISOString(), to: today.toISOString() },
-                aggregationInterval: { of: "P10D" },
-                width: 256,
-                height: 256,
-            },
-        };
+        const stationCache = cache[station.id] || [];
+        let sparseDataFromCache: { date: Date; value: number }[] = [];
+        let fetchFromDate = yearAgo;
+        let needsApiCall = true;
 
-        const satelliteResponse = await fetch(STATS_URL, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(satelliteRequestBody),
-        });
+        if (stationCache.length > 0) {
+            const sortedStationCache = stationCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+            const lastRecordedDate = parseISO(sortedStationCache[sortedStationCache.length - 1].date);
+            const daysDiff = differenceInDays(today, lastRecordedDate);
+            
+            sparseDataFromCache = sortedStationCache.map(d => ({ date: parseISO(d.date), value: d.value }));
 
-        if (!satelliteResponse.ok) {
-            console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
-            return [];
+            if (daysDiff < 7) {
+                console.log(`[${station.id}] Using fresh cache (< 7 days old).`);
+                needsApiCall = false;
+            } else {
+                console.log(`[${station.id}] Stale cache (>= 7 days old). Will fetch new data from ${format(addDays(lastRecordedDate, 1), 'yyyy-MM-dd')}.`);
+                fetchFromDate = addDays(lastRecordedDate, 1);
+            }
+        } else {
+             console.log(`[${station.id}] No cache found. Will fetch full history.`);
+             fetchFromDate = yearAgo;
         }
-        
-        const apiResponse = await satelliteResponse.json();
-        const sparseData: { date: Date; value: number }[] = apiResponse.data
-            .map((item: any) => {
-                const stats = item.outputs.index.bands.B0.stats;
-                if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
-                    return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
-                }
-                return null;
-            })
-            .filter((item: any): item is { date: Date; value: number } => item !== null)
-            .sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 
+        let finalSparseData = sparseDataFromCache;
+
+        if (needsApiCall && isBefore(fetchFromDate, today)) {
+             const satelliteRequestBody = {
+                input: {
+                    bounds: { bbox: getBoundingBox(station, 0.5) },
+                    data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
+                },
+                aggregation: {
+                    evalscript,
+                    timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
+                    aggregationInterval: { of: "P1D" },
+                    width: 1,
+                    height: 1,
+                },
+            };
+
+            const satelliteResponse = await fetch(STATS_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(satelliteRequestBody),
+            });
+
+            if (!satelliteResponse.ok) {
+                console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
+                // Continue with cached data if available
+            } else {
+                const apiResponse = await satelliteResponse.json();
+                const newSparseDataFromApi: { date: Date; value: number }[] = apiResponse.data
+                    .map((item: any) => {
+                        const stats = item.outputs.index.bands.B0.stats;
+                        if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
+                            return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
+                        }
+                        return null;
+                    })
+                    .filter((item: any): item is { date: Date; value: number } => item !== null);
+
+                if (newSparseDataFromApi.length > 0) {
+                    isCacheUpdated = true;
+                    const combinedData = [...finalSparseData, ...newSparseDataFromApi];
+                    const dataMap = new Map<string, { date: Date; value: number }>();
+                    combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
+                    finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
+                    cache[station.id] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
+                }
+            }
+        }
+        const sparseData = finalSparseData.filter(d => isSameDay(d.date, yearAgo) || isBefore(yearAgo, d.date));
+        
         // --- 2. Fetch Weather Data ---
         const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
 
@@ -226,7 +278,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const dailySeries: IndexDataPoint[] = [];
         let sparseIndex = 0;
 
-        // Create a full daily series, marking real data points and adding weather
         for (const day of allDays) {
             const dateStr = format(day, 'yyyy-MM-dd');
             let pointToAdd: IndexDataPoint;
@@ -251,7 +302,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             dailySeries.push(pointToAdd);
         }
 
-        // Linear interpolation for indexValue
         for (let i = 0; i < dailySeries.length; i++) {
             if (dailySeries[i].indexValue === null) {
                 let prevIndex = i - 1;
@@ -280,6 +330,16 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     });
 
     const results = await Promise.all(stationPromises);
+    
+    if (isCacheUpdated) {
+        try {
+            await fs.writeFile(CACHE_FILE, JSON.stringify(cache, null, 2));
+            console.log("Cache file updated.");
+        } catch (error) {
+            console.error("Failed to write to cache file:", error);
+        }
+    }
+    
     return results.flat().filter(p => p.indexValue !== null) as IndexDataPoint[];
 
   } catch (error) {
@@ -341,7 +401,6 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
 
         const imageBlob = await response.blob();
         if (imageBlob.type !== 'image/png') {
-             // The API might return a JSON error instead of an image
             const errorText = await imageBlob.text();
             console.error(`API returned an error instead of an image: ${errorText}`);
             return null;
