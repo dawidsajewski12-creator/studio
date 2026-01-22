@@ -19380,5 +19380,4127 @@
       "date": "2026-01-20T12:03:53.398Z",
       "value": null
     }
+  ],
+  "bordeaux_2": [
+    {
+      "date": "2025-01-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:18:37.026Z",
+      "value": 0.057553958147764206,
+      "ndmiValue": -0.6100795865058899
+    },
+    {
+      "date": "2025-02-02T13:18:37.026Z",
+      "value": 0.30008673667907715,
+      "ndmiValue": -0.06662515550851822
+    },
+    {
+      "date": "2025-02-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-07T13:18:37.026Z",
+      "value": 0.3478064239025116,
+      "ndmiValue": -0.028366481885313988
+    },
+    {
+      "date": "2025-02-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:18:37.026Z",
+      "value": 0.2739667594432831,
+      "ndmiValue": -0.11433649063110352
+    },
+    {
+      "date": "2025-02-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-25T13:18:37.026Z",
+      "value": -0.06762028485536575,
+      "ndmiValue": -0.22861753404140472
+    },
+    {
+      "date": "2025-02-27T13:18:37.026Z",
+      "value": 0.31110239028930664,
+      "ndmiValue": -0.07628524303436279
+    },
+    {
+      "date": "2025-03-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-04T13:18:37.026Z",
+      "value": 0.3006364703178406,
+      "ndmiValue": -0.0886673629283905
+    },
+    {
+      "date": "2025-03-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-09T13:18:37.026Z",
+      "value": 0.2716049253940582,
+      "ndmiValue": -0.09672427177429199
+    },
+    {
+      "date": "2025-03-12T13:18:37.026Z",
+      "value": 0.2672613263130188,
+      "ndmiValue": -0.0630190521478653
+    },
+    {
+      "date": "2025-03-14T13:18:37.026Z",
+      "value": 0.3013513386249542,
+      "ndmiValue": -0.07426099479198456
+    },
+    {
+      "date": "2025-03-16T13:18:37.026Z",
+      "value": 0.30535781383514404,
+      "ndmiValue": -0.0917622521519661
+    },
+    {
+      "date": "2025-03-17T13:18:37.026Z",
+      "value": 0.31533268094062805,
+      "ndmiValue": -0.09187749773263931
+    },
+    {
+      "date": "2025-03-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-05T13:18:37.026Z",
+      "value": 0.30346232652664185,
+      "ndmiValue": -0.09198392182588577
+    },
+    {
+      "date": "2025-04-06T13:18:37.026Z",
+      "value": 0.30447542667388916,
+      "ndmiValue": -0.07275097817182541
+    },
+    {
+      "date": "2025-04-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-15T13:18:37.026Z",
+      "value": 0.2162902057170868,
+      "ndmiValue": -0.06325777620077133
+    },
+    {
+      "date": "2025-04-16T13:18:37.026Z",
+      "value": 0.2936197817325592,
+      "ndmiValue": -0.0675739124417305
+    },
+    {
+      "date": "2025-04-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-26T13:18:37.026Z",
+      "value": 0.06551630795001984,
+      "ndmiValue": -0.20370744168758392
+    },
+    {
+      "date": "2025-04-28T13:18:37.026Z",
+      "value": 0.2894550561904907,
+      "ndmiValue": -0.10135634988546371
+    },
+    {
+      "date": "2025-05-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-08T13:18:37.026Z",
+      "value": -0.4485638439655304,
+      "ndmiValue": -0.4423544406890869
+    },
+    {
+      "date": "2025-05-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-13T13:18:37.026Z",
+      "value": 0.35892006754875183,
+      "ndmiValue": -0.006194347515702248
+    },
+    {
+      "date": "2025-05-15T13:18:37.026Z",
+      "value": 0.24124066531658173,
+      "ndmiValue": -0.11416273564100266
+    },
+    {
+      "date": "2025-05-16T13:18:37.026Z",
+      "value": 0.2940050959587097,
+      "ndmiValue": -0.07457240670919418
+    },
+    {
+      "date": "2025-05-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-28T13:18:37.026Z",
+      "value": 0.27272728085517883,
+      "ndmiValue": -0.06499888002872467
+    },
+    {
+      "date": "2025-05-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-12T13:18:37.026Z",
+      "value": 0.24496732652187347,
+      "ndmiValue": -0.0845828503370285
+    },
+    {
+      "date": "2025-06-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-15T13:18:37.026Z",
+      "value": 0.18108032643795013,
+      "ndmiValue": -0.09169177711009979
+    },
+    {
+      "date": "2025-06-17T13:18:37.026Z",
+      "value": 0.18928262591362,
+      "ndmiValue": -0.09314586967229843
+    },
+    {
+      "date": "2025-06-20T13:18:37.026Z",
+      "value": 0.21705882251262665,
+      "ndmiValue": -0.11486630886793137
+    },
+    {
+      "date": "2025-06-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-24T13:18:37.026Z",
+      "value": 0.19534680247306824,
+      "ndmiValue": -0.0690598264336586
+    },
+    {
+      "date": "2025-06-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-27T13:18:37.026Z",
+      "value": 0.14193737506866455,
+      "ndmiValue": -0.1195848360657692
+    },
+    {
+      "date": "2025-06-30T13:18:37.026Z",
+      "value": 0.1418861448764801,
+      "ndmiValue": -0.11520737409591675
+    },
+    {
+      "date": "2025-07-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-04T13:18:37.026Z",
+      "value": 0.1628486067056656,
+      "ndmiValue": -0.10911865532398224
+    },
+    {
+      "date": "2025-07-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-10T13:18:37.026Z",
+      "value": 0.14848144352436066,
+      "ndmiValue": -0.10790738463401794
+    },
+    {
+      "date": "2025-07-12T13:18:37.026Z",
+      "value": -0.026957638561725616,
+      "ndmiValue": -0.16150441765785217
+    },
+    {
+      "date": "2025-07-14T13:18:37.026Z",
+      "value": 0.34141087532043457,
+      "ndmiValue": 0.11255024373531342
+    },
+    {
+      "date": "2025-07-15T13:18:37.026Z",
+      "value": 0.13186506927013397,
+      "ndmiValue": -0.10592380166053772
+    },
+    {
+      "date": "2025-07-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-20T13:18:37.026Z",
+      "value": -0.05425471067428589,
+      "ndmiValue": -0.23510392010211945
+    },
+    {
+      "date": "2025-07-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-30T13:18:37.026Z",
+      "value": 0.10670240968465805,
+      "ndmiValue": -0.11340206116437912
+    },
+    {
+      "date": "2025-08-01T13:18:37.026Z",
+      "value": 0.14146341383457184,
+      "ndmiValue": -0.10290557146072388
+    },
+    {
+      "date": "2025-08-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-06T13:18:37.026Z",
+      "value": 0.10892856866121292,
+      "ndmiValue": -0.140682652592659
+    },
+    {
+      "date": "2025-08-09T13:18:37.026Z",
+      "value": 0.0902167558670044,
+      "ndmiValue": -0.1496458798646927
+    },
+    {
+      "date": "2025-08-11T13:18:37.026Z",
+      "value": 0.12326695024967194,
+      "ndmiValue": -0.10915634036064148
+    },
+    {
+      "date": "2025-08-13T13:18:37.026Z",
+      "value": 0.11157456040382385,
+      "ndmiValue": -0.11681855469942093
+    },
+    {
+      "date": "2025-08-14T13:18:37.026Z",
+      "value": 0.10578034818172455,
+      "ndmiValue": -0.12668339908123016
+    },
+    {
+      "date": "2025-08-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:18:37.026Z",
+      "value": 0.10752925276756287,
+      "ndmiValue": -0.05714285746216774
+    },
+    {
+      "date": "2025-08-23T13:18:37.026Z",
+      "value": 0.13541384041309357,
+      "ndmiValue": -0.09924650192260742
+    },
+    {
+      "date": "2025-08-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:18:37.026Z",
+      "value": 0.2908550798892975,
+      "ndmiValue": 0.14360924065113068
+    },
+    {
+      "date": "2025-08-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-02T13:18:37.026Z",
+      "value": 0.1675126850605011,
+      "ndmiValue": -0.11797879636287689
+    },
+    {
+      "date": "2025-09-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-05T13:18:37.026Z",
+      "value": 0.10958005487918854,
+      "ndmiValue": -0.139659121632576
+    },
+    {
+      "date": "2025-09-08T13:18:37.026Z",
+      "value": 0.11863353848457336,
+      "ndmiValue": -0.11302635073661804
+    },
+    {
+      "date": "2025-09-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-15T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:18:37.026Z",
+      "value": 0.14541079103946686,
+      "ndmiValue": -0.13566796481609344
+    },
+    {
+      "date": "2025-09-20T13:18:37.026Z",
+      "value": 0.324621319770813,
+      "ndmiValue": 0.08913309127092361
+    },
+    {
+      "date": "2025-09-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-25T13:18:37.026Z",
+      "value": 0.3078517019748688,
+      "ndmiValue": 0.09525646269321442
+    },
+    {
+      "date": "2025-09-28T13:18:37.026Z",
+      "value": 0.09834403544664383,
+      "ndmiValue": -0.10836762934923172
+    },
+    {
+      "date": "2025-09-30T13:18:37.026Z",
+      "value": 0.16044457256793976,
+      "ndmiValue": -0.0651974305510521
+    },
+    {
+      "date": "2025-10-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-05T13:18:37.026Z",
+      "value": 0.16156890988349915,
+      "ndmiValue": -0.0957983210682869
+    },
+    {
+      "date": "2025-10-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:18:37.026Z",
+      "value": 0.12920135259628296,
+      "ndmiValue": -0.08289506286382675
+    },
+    {
+      "date": "2025-10-12T13:18:37.026Z",
+      "value": 0.13223408162593842,
+      "ndmiValue": -0.089206762611866
+    },
+    {
+      "date": "2025-10-13T13:18:37.026Z",
+      "value": 0.12571023404598236,
+      "ndmiValue": -0.11821974813938141
+    },
+    {
+      "date": "2025-10-15T13:18:37.026Z",
+      "value": 0.19223448634147644,
+      "ndmiValue": -0.10896158963441849
+    },
+    {
+      "date": "2025-10-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-22T13:18:37.026Z",
+      "value": 0.2492080181837082,
+      "ndmiValue": 0.03612874820828438
+    },
+    {
+      "date": "2025-10-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-25T13:18:37.026Z",
+      "value": 0.2332112342119217,
+      "ndmiValue": -0.06394810229539871
+    },
+    {
+      "date": "2025-10-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-14T13:18:37.026Z",
+      "value": 0.26781556010246277,
+      "ndmiValue": -0.1063690111041069
+    },
+    {
+      "date": "2025-11-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-21T13:18:37.026Z",
+      "value": 0.2847524881362915,
+      "ndmiValue": -0.03077382780611515
+    },
+    {
+      "date": "2025-11-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:18:37.026Z",
+      "value": 0.27916252613067627,
+      "ndmiValue": -0.0686025395989418
+    },
+    {
+      "date": "2025-12-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-12T13:18:37.026Z",
+      "value": 0.28444212675094604,
+      "ndmiValue": -0.09919176995754242
+    },
+    {
+      "date": "2025-12-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-27T13:18:37.026Z",
+      "value": 0.29802700877189636,
+      "ndmiValue": -0.12403643876314163
+    },
+    {
+      "date": "2025-12-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-03T13:18:37.026Z",
+      "value": 0.3105510473251343,
+      "ndmiValue": -0.01980830729007721
+    },
+    {
+      "date": "2026-01-06T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    }
+  ],
+  "bordeaux_1": [
+    {
+      "date": "2025-01-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-02T13:18:37.026Z",
+      "value": 0.5279831290245056,
+      "ndmiValue": 0.16482189297676086
+    },
+    {
+      "date": "2025-02-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-07T13:18:37.026Z",
+      "value": 0.529024064540863,
+      "ndmiValue": 0.2030315101146698
+    },
+    {
+      "date": "2025-02-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:18:37.026Z",
+      "value": 0.49897855520248413,
+      "ndmiValue": 0.10838368535041809
+    },
+    {
+      "date": "2025-02-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-25T13:18:37.026Z",
+      "value": 0.5496929883956909,
+      "ndmiValue": 0.2606845498085022
+    },
+    {
+      "date": "2025-02-27T13:18:37.026Z",
+      "value": 0.5388588905334473,
+      "ndmiValue": 0.15938439965248108
+    },
+    {
+      "date": "2025-03-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-04T13:18:37.026Z",
+      "value": 0.4694055914878845,
+      "ndmiValue": 0.07860121876001358
+    },
+    {
+      "date": "2025-03-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-09T13:18:37.026Z",
+      "value": 0.5679600834846497,
+      "ndmiValue": 0.2082531899213791
+    },
+    {
+      "date": "2025-03-12T13:18:37.026Z",
+      "value": 0.39203232526779175,
+      "ndmiValue": 0.009631490334868431
+    },
+    {
+      "date": "2025-03-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-16T13:18:37.026Z",
+      "value": 0.4730927050113678,
+      "ndmiValue": 0.07186664640903473
+    },
+    {
+      "date": "2025-03-17T13:18:37.026Z",
+      "value": 0.4257848262786865,
+      "ndmiValue": 0.040249053388834
+    },
+    {
+      "date": "2025-03-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-05T13:18:37.026Z",
+      "value": 0.37051793932914734,
+      "ndmiValue": 0.008304836228489876
+    },
+    {
+      "date": "2025-04-06T13:18:37.026Z",
+      "value": 0.4065985083580017,
+      "ndmiValue": 0.04163799062371254
+    },
+    {
+      "date": "2025-04-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:18:37.026Z",
+      "value": -0.030090456828475,
+      "ndmiValue": -0.17790642380714417
+    },
+    {
+      "date": "2025-04-15T13:18:37.026Z",
+      "value": 0.42661598324775696,
+      "ndmiValue": 0.05551387742161751
+    },
+    {
+      "date": "2025-04-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-26T13:18:37.026Z",
+      "value": 0.5198642015457153,
+      "ndmiValue": 0.17634691298007965
+    },
+    {
+      "date": "2025-04-28T13:18:37.026Z",
+      "value": 0.2671900987625122,
+      "ndmiValue": -0.07534722238779068
+    },
+    {
+      "date": "2025-05-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-03T13:18:37.026Z",
+      "value": 0.33186259865760803,
+      "ndmiValue": -0.0005912262131460011
+    },
+    {
+      "date": "2025-05-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:18:37.026Z",
+      "value": 0.3643985092639923,
+      "ndmiValue": 0.03337271139025688
+    },
+    {
+      "date": "2025-05-08T13:18:37.026Z",
+      "value": 0.3401981592178345,
+      "ndmiValue": 0.056840814650058746
+    },
+    {
+      "date": "2025-05-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-13T13:18:37.026Z",
+      "value": 0.3954554796218872,
+      "ndmiValue": 0.0362229086458683
+    },
+    {
+      "date": "2025-05-15T13:18:37.026Z",
+      "value": 0.31563761830329895,
+      "ndmiValue": -0.03932584449648857
+    },
+    {
+      "date": "2025-05-16T13:18:37.026Z",
+      "value": 0.3275824785232544,
+      "ndmiValue": -0.017868539318442345
+    },
+    {
+      "date": "2025-05-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-28T13:18:37.026Z",
+      "value": 0.33065056800842285,
+      "ndmiValue": -0.019116677343845367
+    },
+    {
+      "date": "2025-05-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-02T13:18:37.026Z",
+      "value": 0.4285714328289032,
+      "ndmiValue": 0.1291879266500473
+    },
+    {
+      "date": "2025-06-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-07T13:18:37.026Z",
+      "value": 0.40489479899406433,
+      "ndmiValue": 0.012376237660646439
+    },
+    {
+      "date": "2025-06-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-12T13:18:37.026Z",
+      "value": 0.35768646001815796,
+      "ndmiValue": -0.02008788473904133
+    },
+    {
+      "date": "2025-06-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-15T13:18:37.026Z",
+      "value": 0.3112133741378784,
+      "ndmiValue": -0.07547814399003983
+    },
+    {
+      "date": "2025-06-17T13:18:37.026Z",
+      "value": 0.27972373366355896,
+      "ndmiValue": -0.103507861495018
+    },
+    {
+      "date": "2025-06-20T13:18:37.026Z",
+      "value": 0.24237161874771118,
+      "ndmiValue": -0.1453924924135208
+    },
+    {
+      "date": "2025-06-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-27T13:18:37.026Z",
+      "value": 0.1924273818731308,
+      "ndmiValue": -0.18576234579086304
+    },
+    {
+      "date": "2025-06-30T13:18:37.026Z",
+      "value": 0.2094881385564804,
+      "ndmiValue": -0.16468356549739838
+    },
+    {
+      "date": "2025-07-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-04T13:18:37.026Z",
+      "value": 0.2603483498096466,
+      "ndmiValue": -0.08998856693506241
+    },
+    {
+      "date": "2025-07-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-07T13:18:37.026Z",
+      "value": 0.32151898741722107,
+      "ndmiValue": 0.022956326603889465
+    },
+    {
+      "date": "2025-07-10T13:18:37.026Z",
+      "value": 0.15993623435497284,
+      "ndmiValue": -0.21432428061962128
+    },
+    {
+      "date": "2025-07-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-14T13:18:37.026Z",
+      "value": 0.18913857638835907,
+      "ndmiValue": -0.17932148277759552
+    },
+    {
+      "date": "2025-07-15T13:18:37.026Z",
+      "value": 0.15056893229484558,
+      "ndmiValue": -0.2161528766155243
+    },
+    {
+      "date": "2025-07-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-20T13:18:37.026Z",
+      "value": 0.23822252452373505,
+      "ndmiValue": -0.09785784035921097
+    },
+    {
+      "date": "2025-07-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-25T13:18:37.026Z",
+      "value": 0.03108133189380169,
+      "ndmiValue": -0.23012785613536835
+    },
+    {
+      "date": "2025-07-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-30T13:18:37.026Z",
+      "value": 0.252636194229126,
+      "ndmiValue": -0.07525137811899185
+    },
+    {
+      "date": "2025-08-01T13:18:37.026Z",
+      "value": 0.21160247921943665,
+      "ndmiValue": -0.14868025481700897
+    },
+    {
+      "date": "2025-08-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-06T13:18:37.026Z",
+      "value": 0.1954459249973297,
+      "ndmiValue": -0.2062634974718094
+    },
+    {
+      "date": "2025-08-09T13:18:37.026Z",
+      "value": 0.19273892045021057,
+      "ndmiValue": -0.2065352499485016
+    },
+    {
+      "date": "2025-08-11T13:18:37.026Z",
+      "value": 0.24639736115932465,
+      "ndmiValue": -0.1390339434146881
+    },
+    {
+      "date": "2025-08-13T13:18:37.026Z",
+      "value": 0.24127310514450073,
+      "ndmiValue": -0.17063967883586884
+    },
+    {
+      "date": "2025-08-14T13:18:37.026Z",
+      "value": 0.20476706326007843,
+      "ndmiValue": -0.19317975640296936
+    },
+    {
+      "date": "2025-08-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-23T13:18:37.026Z",
+      "value": 0.2070600688457489,
+      "ndmiValue": -0.1781165897846222
+    },
+    {
+      "date": "2025-08-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-02T13:18:37.026Z",
+      "value": 0.3306501507759094,
+      "ndmiValue": -0.09951812028884888
+    },
+    {
+      "date": "2025-09-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-05T13:18:37.026Z",
+      "value": 0.29792147874832153,
+      "ndmiValue": -0.1348855048418045
+    },
+    {
+      "date": "2025-09-08T13:18:37.026Z",
+      "value": 0.3476056456565857,
+      "ndmiValue": -0.0939393937587738
+    },
+    {
+      "date": "2025-09-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-15T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:18:37.026Z",
+      "value": 0.5086081027984619,
+      "ndmiValue": 0.0264046061784029
+    },
+    {
+      "date": "2025-09-20T13:18:37.026Z",
+      "value": 0.6138092279434204,
+      "ndmiValue": 0.18828091025352478
+    },
+    {
+      "date": "2025-09-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-25T13:18:37.026Z",
+      "value": 0.5061194896697998,
+      "ndmiValue": 0.10687831044197083
+    },
+    {
+      "date": "2025-09-28T13:18:37.026Z",
+      "value": 0.6232339143753052,
+      "ndmiValue": 0.1628430038690567
+    },
+    {
+      "date": "2025-09-30T13:18:37.026Z",
+      "value": 0.5842992663383484,
+      "ndmiValue": 0.1648266464471817
+    },
+    {
+      "date": "2025-10-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-05T13:18:37.026Z",
+      "value": 0.5389589667320251,
+      "ndmiValue": 0.10466465353965759
+    },
+    {
+      "date": "2025-10-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:18:37.026Z",
+      "value": 0.5379644632339478,
+      "ndmiValue": 0.11497169733047485
+    },
+    {
+      "date": "2025-10-12T13:18:37.026Z",
+      "value": 0.5252440571784973,
+      "ndmiValue": 0.09623095393180847
+    },
+    {
+      "date": "2025-10-13T13:18:37.026Z",
+      "value": 0.5077102184295654,
+      "ndmiValue": 0.06275635957717896
+    },
+    {
+      "date": "2025-10-15T13:18:37.026Z",
+      "value": 0.504283607006073,
+      "ndmiValue": 0.07312960922718048
+    },
+    {
+      "date": "2025-10-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-25T13:18:37.026Z",
+      "value": 0.5565397143363953,
+      "ndmiValue": 0.1765231043100357
+    },
+    {
+      "date": "2025-10-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-14T13:18:37.026Z",
+      "value": 0.5282214879989624,
+      "ndmiValue": 0.1666666716337204
+    },
+    {
+      "date": "2025-11-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-21T13:18:37.026Z",
+      "value": 0.582552969455719,
+      "ndmiValue": 0.2577359974384308
+    },
+    {
+      "date": "2025-11-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:18:37.026Z",
+      "value": 0.5787211060523987,
+      "ndmiValue": 0.22723475098609924
+    },
+    {
+      "date": "2025-12-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-24T13:18:37.026Z",
+      "value": 0.5806763172149658,
+      "ndmiValue": 0.24600152671337128
+    },
+    {
+      "date": "2025-12-27T13:18:37.026Z",
+      "value": 0.5680590867996216,
+      "ndmiValue": 0.1422065794467926
+    },
+    {
+      "date": "2025-12-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-03T13:18:37.026Z",
+      "value": 0.5944609045982361,
+      "ndmiValue": 0.26729559898376465
+    },
+    {
+      "date": "2026-01-06T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    }
+  ],
+  "bordeaux_0": [
+    {
+      "date": "2025-01-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:18:37.026Z",
+      "value": 0.38868939876556396,
+      "ndmiValue": -0.07476076483726501
+    },
+    {
+      "date": "2025-02-02T13:18:37.026Z",
+      "value": 0.29864078760147095,
+      "ndmiValue": -0.1540602147579193
+    },
+    {
+      "date": "2025-02-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-07T13:18:37.026Z",
+      "value": 0.3202614486217499,
+      "ndmiValue": -0.1367521435022354
+    },
+    {
+      "date": "2025-02-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:18:37.026Z",
+      "value": 0.22169607877731323,
+      "ndmiValue": -0.2547268867492676
+    },
+    {
+      "date": "2025-02-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-25T13:18:37.026Z",
+      "value": 0.20849420130252838,
+      "ndmiValue": -0.22139303386211395
+    },
+    {
+      "date": "2025-02-27T13:18:37.026Z",
+      "value": 0.2507225573062897,
+      "ndmiValue": -0.1987965703010559
+    },
+    {
+      "date": "2025-03-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-04T13:18:37.026Z",
+      "value": 0.1882845163345337,
+      "ndmiValue": -0.26089784502983093
+    },
+    {
+      "date": "2025-03-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-14T13:18:37.026Z",
+      "value": 0.11626575142145157,
+      "ndmiValue": -0.24428072571754456
+    },
+    {
+      "date": "2025-03-16T13:18:37.026Z",
+      "value": 0.21616992354393005,
+      "ndmiValue": -0.23917701840400696
+    },
+    {
+      "date": "2025-03-17T13:18:37.026Z",
+      "value": 0.19457735121250153,
+      "ndmiValue": -0.2841099202632904
+    },
+    {
+      "date": "2025-03-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-05T13:18:37.026Z",
+      "value": 0.21643835306167603,
+      "ndmiValue": -0.20761451125144958
+    },
+    {
+      "date": "2025-04-06T13:18:37.026Z",
+      "value": 0.2196919023990631,
+      "ndmiValue": -0.23439142107963562
+    },
+    {
+      "date": "2025-04-08T13:18:37.026Z",
+      "value": 0.2303399294614792,
+      "ndmiValue": -0.08542334288358688
+    },
+    {
+      "date": "2025-04-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:18:37.026Z",
+      "value": 0.1032826229929924,
+      "ndmiValue": -0.24368825554847717
+    },
+    {
+      "date": "2025-04-15T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-26T13:18:37.026Z",
+      "value": 0.2761377692222595,
+      "ndmiValue": -0.16313773393630981
+    },
+    {
+      "date": "2025-04-28T13:18:37.026Z",
+      "value": 0.2578149139881134,
+      "ndmiValue": -0.18540789186954498
+    },
+    {
+      "date": "2025-05-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-03T13:18:37.026Z",
+      "value": 0.2794645130634308,
+      "ndmiValue": -0.1651848405599594
+    },
+    {
+      "date": "2025-05-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:18:37.026Z",
+      "value": 0.1310344785451889,
+      "ndmiValue": -0.3110691010951996
+    },
+    {
+      "date": "2025-05-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-11T13:18:37.026Z",
+      "value": 0.29239925742149353,
+      "ndmiValue": -0.1062476634979248
+    },
+    {
+      "date": "2025-05-13T13:18:37.026Z",
+      "value": 0.2708645761013031,
+      "ndmiValue": -0.15919986367225647
+    },
+    {
+      "date": "2025-05-15T13:18:37.026Z",
+      "value": 0.2584756016731262,
+      "ndmiValue": -0.15960179269313812
+    },
+    {
+      "date": "2025-05-16T13:18:37.026Z",
+      "value": 0.26829269528388977,
+      "ndmiValue": -0.164268359541893
+    },
+    {
+      "date": "2025-05-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-28T13:18:37.026Z",
+      "value": 0.311231791973114,
+      "ndmiValue": -0.13662025332450867
+    },
+    {
+      "date": "2025-05-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-02T13:18:37.026Z",
+      "value": 0.2211221158504486,
+      "ndmiValue": -0.07349442690610886
+    },
+    {
+      "date": "2025-06-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-12T13:18:37.026Z",
+      "value": 0.31774550676345825,
+      "ndmiValue": -0.13936665654182434
+    },
+    {
+      "date": "2025-06-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-15T13:18:37.026Z",
+      "value": 0.3283499479293823,
+      "ndmiValue": -0.11426988989114761
+    },
+    {
+      "date": "2025-06-17T13:18:37.026Z",
+      "value": 0.3258427083492279,
+      "ndmiValue": -0.12560208141803741
+    },
+    {
+      "date": "2025-06-20T13:18:37.026Z",
+      "value": 0.30235162377357483,
+      "ndmiValue": -0.1507849544286728
+    },
+    {
+      "date": "2025-06-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-27T13:18:37.026Z",
+      "value": 0.2799552083015442,
+      "ndmiValue": -0.1589404046535492
+    },
+    {
+      "date": "2025-06-30T13:18:37.026Z",
+      "value": 0.2737962007522583,
+      "ndmiValue": -0.16894976794719696
+    },
+    {
+      "date": "2025-07-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-04T13:18:37.026Z",
+      "value": 0.2713393568992615,
+      "ndmiValue": -0.12414342910051346
+    },
+    {
+      "date": "2025-07-05T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-07T13:18:37.026Z",
+      "value": 0.4536340832710266,
+      "ndmiValue": -0.11495421826839447
+    },
+    {
+      "date": "2025-07-10T13:18:37.026Z",
+      "value": 0.286410391330719,
+      "ndmiValue": -0.1530921459197998
+    },
+    {
+      "date": "2025-07-12T13:18:37.026Z",
+      "value": 0.1370084434747696,
+      "ndmiValue": -0.2084999978542328
+    },
+    {
+      "date": "2025-07-14T13:18:37.026Z",
+      "value": 0.2591894567012787,
+      "ndmiValue": -0.1648695170879364
+    },
+    {
+      "date": "2025-07-15T13:18:37.026Z",
+      "value": 0.2964878976345062,
+      "ndmiValue": -0.13965672254562378
+    },
+    {
+      "date": "2025-07-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-30T13:18:37.026Z",
+      "value": 0.29210659861564636,
+      "ndmiValue": -0.13960495591163635
+    },
+    {
+      "date": "2025-08-01T13:18:37.026Z",
+      "value": 0.2939237058162689,
+      "ndmiValue": -0.1287662535905838
+    },
+    {
+      "date": "2025-08-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-06T13:18:37.026Z",
+      "value": 0.2924474775791168,
+      "ndmiValue": -0.1456456482410431
+    },
+    {
+      "date": "2025-08-09T13:18:37.026Z",
+      "value": 0.26888567209243774,
+      "ndmiValue": -0.1757849156856537
+    },
+    {
+      "date": "2025-08-11T13:18:37.026Z",
+      "value": 0.2809097468852997,
+      "ndmiValue": -0.14169909060001373
+    },
+    {
+      "date": "2025-08-13T13:18:37.026Z",
+      "value": 0.29218950867652893,
+      "ndmiValue": -0.15998002886772156
+    },
+    {
+      "date": "2025-08-14T13:18:37.026Z",
+      "value": 0.2786516845226288,
+      "ndmiValue": -0.17145977914333344
+    },
+    {
+      "date": "2025-08-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:18:37.026Z",
+      "value": 0.29829663038253784,
+      "ndmiValue": -0.08465143293142319
+    },
+    {
+      "date": "2025-08-23T13:18:37.026Z",
+      "value": 0.29287734627723694,
+      "ndmiValue": -0.13756431639194489
+    },
+    {
+      "date": "2025-08-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-26T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:18:37.026Z",
+      "value": -0.012282204814255238,
+      "ndmiValue": -0.22708985209465027
+    },
+    {
+      "date": "2025-08-31T13:18:37.026Z",
+      "value": 0.38031160831451416,
+      "ndmiValue": 0.055796317756175995
+    },
+    {
+      "date": "2025-09-02T13:18:37.026Z",
+      "value": 0.30911093950271606,
+      "ndmiValue": -0.13179992139339447
+    },
+    {
+      "date": "2025-09-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-05T13:18:37.026Z",
+      "value": 0.30841708183288574,
+      "ndmiValue": -0.1406765729188919
+    },
+    {
+      "date": "2025-09-08T13:18:37.026Z",
+      "value": 0.3082893490791321,
+      "ndmiValue": -0.13558974862098694
+    },
+    {
+      "date": "2025-09-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-15T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:18:37.026Z",
+      "value": 0.31601446866989136,
+      "ndmiValue": -0.1457844227552414
+    },
+    {
+      "date": "2025-09-20T13:18:37.026Z",
+      "value": 0.38042473793029785,
+      "ndmiValue": 0.011159959249198437
+    },
+    {
+      "date": "2025-09-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-25T13:18:37.026Z",
+      "value": 0.30417880415916443,
+      "ndmiValue": -0.15224257111549377
+    },
+    {
+      "date": "2025-09-28T13:18:37.026Z",
+      "value": 0.31225576996803284,
+      "ndmiValue": -0.14688222110271454
+    },
+    {
+      "date": "2025-09-30T13:18:37.026Z",
+      "value": 0.29250457882881165,
+      "ndmiValue": -0.14716525375843048
+    },
+    {
+      "date": "2025-10-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-03T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-05T13:18:37.026Z",
+      "value": 0.32893773913383484,
+      "ndmiValue": -0.12282398343086243
+    },
+    {
+      "date": "2025-10-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:18:37.026Z",
+      "value": 0.28804701566696167,
+      "ndmiValue": -0.16245487332344055
+    },
+    {
+      "date": "2025-10-12T13:18:37.026Z",
+      "value": 0.2767379581928253,
+      "ndmiValue": -0.16974571347236633
+    },
+    {
+      "date": "2025-10-13T13:18:37.026Z",
+      "value": 0.2675207257270813,
+      "ndmiValue": -0.19309186935424805
+    },
+    {
+      "date": "2025-10-15T13:18:37.026Z",
+      "value": 0.2706708312034607,
+      "ndmiValue": -0.18140703439712524
+    },
+    {
+      "date": "2025-10-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-22T13:18:37.026Z",
+      "value": 0.323369562625885,
+      "ndmiValue": -0.08243051916360855
+    },
+    {
+      "date": "2025-10-23T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-25T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-28T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-02T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:18:37.026Z",
+      "value": 1,
+      "ndmiValue": -0.14468085765838623
+    },
+    {
+      "date": "2025-11-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-12T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-14T13:18:37.026Z",
+      "value": 0.25594672560691833,
+      "ndmiValue": -0.22739244997501373
+    },
+    {
+      "date": "2025-11-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-21T13:18:37.026Z",
+      "value": 0.27225130796432495,
+      "ndmiValue": -0.1323641985654831
+    },
+    {
+      "date": "2025-11-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-27T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:18:37.026Z",
+      "value": 0.2995735704898834,
+      "ndmiValue": -0.19855357706546783
+    },
+    {
+      "date": "2025-12-04T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-07T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-11T13:18:37.026Z",
+      "value": 0.286770761013031,
+      "ndmiValue": -0.041615668684244156
+    },
+    {
+      "date": "2025-12-12T13:18:37.026Z",
+      "value": 0.259579062461853,
+      "ndmiValue": -0.22791928052902222
+    },
+    {
+      "date": "2025-12-14T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-17T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-21T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-24T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-27T13:18:37.026Z",
+      "value": 0.2764397859573364,
+      "ndmiValue": -0.2621065378189087
+    },
+    {
+      "date": "2025-12-29T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-31T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-01T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-03T13:18:37.026Z",
+      "value": 0.33662551641464233,
+      "ndmiValue": -0.11062431335449219
+    },
+    {
+      "date": "2026-01-06T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-08T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-10T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-11T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-13T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-18T13:18:37.026Z",
+      "value": null,
+      "ndmiValue": null
+    }
+  ],
+  "tuscany_2": [
+    {
+      "date": "2025-01-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-05T13:20:28.741Z",
+      "value": 0.4143824577331543,
+      "ndmiValue": -0.03349493071436882
+    },
+    {
+      "date": "2025-02-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:20:28.741Z",
+      "value": 0.4159354269504547,
+      "ndmiValue": -0.0004955401527695358
+    },
+    {
+      "date": "2025-02-20T13:20:28.741Z",
+      "value": 0.40483975410461426,
+      "ndmiValue": -0.03871111944317818
+    },
+    {
+      "date": "2025-02-25T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-02T13:20:28.741Z",
+      "value": 0.3902735710144043,
+      "ndmiValue": -0.045293256640434265
+    },
+    {
+      "date": "2025-03-07T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-14T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-17T13:20:28.741Z",
+      "value": 0.4283190965652466,
+      "ndmiValue": 0.026443833485245705
+    },
+    {
+      "date": "2025-03-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:20:28.741Z",
+      "value": -0.09951690584421158,
+      "ndmiValue": -0.45369285345077515
+    },
+    {
+      "date": "2025-03-27T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:20:28.741Z",
+      "value": 0.3466366231441498,
+      "ndmiValue": -0.019910985603928566
+    },
+    {
+      "date": "2025-04-03T13:20:28.741Z",
+      "value": 0.36885470151901245,
+      "ndmiValue": -0.045393601059913635
+    },
+    {
+      "date": "2025-04-06T13:20:28.741Z",
+      "value": 0.35436275601387024,
+      "ndmiValue": -0.035332486033439636
+    },
+    {
+      "date": "2025-04-11T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:20:28.741Z",
+      "value": 0.399457186460495,
+      "ndmiValue": 0.01886114664375782
+    },
+    {
+      "date": "2025-04-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-01T13:20:28.741Z",
+      "value": 0.3854748606681824,
+      "ndmiValue": -0.031790293753147125
+    },
+    {
+      "date": "2025-05-03T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-11T13:20:28.741Z",
+      "value": 0.4219091534614563,
+      "ndmiValue": 0.08568248897790909
+    },
+    {
+      "date": "2025-05-13T13:20:28.741Z",
+      "value": 0.3821011781692505,
+      "ndmiValue": -0.01896519958972931
+    },
+    {
+      "date": "2025-05-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:20:28.741Z",
+      "value": 0.38687610626220703,
+      "ndmiValue": -0.014758819714188576
+    },
+    {
+      "date": "2025-05-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-31T13:20:28.741Z",
+      "value": 0.3418530225753784,
+      "ndmiValue": -0.05519986152648926
+    },
+    {
+      "date": "2025-06-02T13:20:28.741Z",
+      "value": 0.35172414779663086,
+      "ndmiValue": -0.042901989072561264
+    },
+    {
+      "date": "2025-06-10T13:20:28.741Z",
+      "value": 0.3511787950992584,
+      "ndmiValue": -0.048426151275634766
+    },
+    {
+      "date": "2025-06-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-15T13:20:28.741Z",
+      "value": 0.32698094844818115,
+      "ndmiValue": -0.0699472725391388
+    },
+    {
+      "date": "2025-06-20T13:20:28.741Z",
+      "value": 0.3061530888080597,
+      "ndmiValue": -0.09700847417116165
+    },
+    {
+      "date": "2025-06-22T13:20:28.741Z",
+      "value": 0.3744712471961975,
+      "ndmiValue": -0.032743826508522034
+    },
+    {
+      "date": "2025-06-25T13:20:28.741Z",
+      "value": 0.35347890853881836,
+      "ndmiValue": -0.07336578518152237
+    },
+    {
+      "date": "2025-06-30T13:20:28.741Z",
+      "value": 0.3192231059074402,
+      "ndmiValue": -0.09621289372444153
+    },
+    {
+      "date": "2025-07-02T13:20:28.741Z",
+      "value": 0.3824467957019806,
+      "ndmiValue": -0.049899470061063766
+    },
+    {
+      "date": "2025-07-05T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-10T13:20:28.741Z",
+      "value": 0.32245102524757385,
+      "ndmiValue": -0.09394356608390808
+    },
+    {
+      "date": "2025-07-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-15T13:20:28.741Z",
+      "value": 0.32183316349983215,
+      "ndmiValue": -0.09929824620485306
+    },
+    {
+      "date": "2025-07-20T13:20:28.741Z",
+      "value": 0.01791265793144703,
+      "ndmiValue": -0.1395319700241089
+    },
+    {
+      "date": "2025-07-22T13:20:28.741Z",
+      "value": 0.31251585483551025,
+      "ndmiValue": -0.09552134573459625
+    },
+    {
+      "date": "2025-07-25T13:20:28.741Z",
+      "value": 0.33590033650398254,
+      "ndmiValue": -0.07612781971693039
+    },
+    {
+      "date": "2025-07-30T13:20:28.741Z",
+      "value": 0.3433133661746979,
+      "ndmiValue": -0.0929919108748436
+    },
+    {
+      "date": "2025-08-01T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:20:28.741Z",
+      "value": 0.3365384638309479,
+      "ndmiValue": -0.10000000149011612
+    },
+    {
+      "date": "2025-08-11T13:20:28.741Z",
+      "value": 0.30187666416168213,
+      "ndmiValue": -0.12756018340587616
+    },
+    {
+      "date": "2025-08-14T13:20:28.741Z",
+      "value": 0.31481480598449707,
+      "ndmiValue": -0.11707230657339096
+    },
+    {
+      "date": "2025-08-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-24T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-31T13:20:28.741Z",
+      "value": 0.3814898431301117,
+      "ndmiValue": -0.06224860996007919
+    },
+    {
+      "date": "2025-09-03T13:20:28.741Z",
+      "value": 0.3976037800312042,
+      "ndmiValue": -0.054655108600854874
+    },
+    {
+      "date": "2025-09-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:20:28.741Z",
+      "value": 0.43544602394104004,
+      "ndmiValue": -0.04097235947847366
+    },
+    {
+      "date": "2025-09-20T13:20:28.741Z",
+      "value": 0.4207334816455841,
+      "ndmiValue": -0.031496062874794006
+    },
+    {
+      "date": "2025-09-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-28T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-03T13:20:28.741Z",
+      "value": 0.479086309671402,
+      "ndmiValue": -0.010321556590497494
+    },
+    {
+      "date": "2025-10-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:20:28.741Z",
+      "value": 0.44639497995376587,
+      "ndmiValue": -0.03794829174876213
+    },
+    {
+      "date": "2025-10-13T13:20:28.741Z",
+      "value": 0.42081981897354126,
+      "ndmiValue": -0.0668216124176979
+    },
+    {
+      "date": "2025-10-18T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-28T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:20:28.741Z",
+      "value": 0.4709944725036621,
+      "ndmiValue": -0.019788311794400215
+    },
+    {
+      "date": "2025-11-09T13:20:28.741Z",
+      "value": 0.4684339165687561,
+      "ndmiValue": -0.01910531148314476
+    },
+    {
+      "date": "2025-11-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-17T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-22T13:20:28.741Z",
+      "value": 0.5481410622596741,
+      "ndmiValue": 0.241590216755867
+    },
+    {
+      "date": "2025-11-27T13:20:28.741Z",
+      "value": 0.4836095869541168,
+      "ndmiValue": 0.02207561582326889
+    },
+    {
+      "date": "2025-11-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-07T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-12T13:20:28.741Z",
+      "value": 0.4490881562232971,
+      "ndmiValue": -0.015233669430017471
+    },
+    {
+      "date": "2025-12-17T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-27T13:20:28.741Z",
+      "value": 0.5007553100585938,
+      "ndmiValue": 0.026342974975705147
+    },
+    {
+      "date": "2025-12-29T13:20:28.741Z",
+      "value": 0.46145492792129517,
+      "ndmiValue": 0.014827846549451351
+    },
+    {
+      "date": "2026-01-01T13:20:28.741Z",
+      "value": 0.40924370288848877,
+      "ndmiValue": -0.045803699642419815
+    },
+    {
+      "date": "2026-01-06T13:20:28.741Z",
+      "value": 0.42388758063316345,
+      "ndmiValue": 0.043776825070381165
+    },
+    {
+      "date": "2026-01-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    }
+  ],
+  "tuscany_0": [
+    {
+      "date": "2025-01-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-05T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:20:28.741Z",
+      "value": 0.31646499037742615,
+      "ndmiValue": -0.09889557957649231
+    },
+    {
+      "date": "2025-02-20T13:20:28.741Z",
+      "value": 0.28410688042640686,
+      "ndmiValue": -0.12084737420082092
+    },
+    {
+      "date": "2025-02-25T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-02T13:20:28.741Z",
+      "value": 0.3060941696166992,
+      "ndmiValue": -0.10425077378749847
+    },
+    {
+      "date": "2025-03-07T13:20:28.741Z",
+      "value": 0.2881128191947937,
+      "ndmiValue": -0.12559835612773895
+    },
+    {
+      "date": "2025-03-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-14T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-17T13:20:28.741Z",
+      "value": 0.30478420853614807,
+      "ndmiValue": -0.0999307632446289
+    },
+    {
+      "date": "2025-03-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:20:28.741Z",
+      "value": 0.2808723747730255,
+      "ndmiValue": -0.10428689420223236
+    },
+    {
+      "date": "2025-03-27T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-03T13:20:28.741Z",
+      "value": 0.3046683073043823,
+      "ndmiValue": -0.10285110771656036
+    },
+    {
+      "date": "2025-04-06T13:20:28.741Z",
+      "value": 0.2787356376647949,
+      "ndmiValue": -0.08661740273237228
+    },
+    {
+      "date": "2025-04-11T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:20:28.741Z",
+      "value": 0.28325793147087097,
+      "ndmiValue": -0.11189979314804077
+    },
+    {
+      "date": "2025-04-23T13:20:28.741Z",
+      "value": -0.23924164474010468,
+      "ndmiValue": -0.33517423272132874
+    },
+    {
+      "date": "2025-04-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-01T13:20:28.741Z",
+      "value": 0.2949928343296051,
+      "ndmiValue": -0.11098016053438187
+    },
+    {
+      "date": "2025-05-03T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-11T13:20:28.741Z",
+      "value": 0.3029734790325165,
+      "ndmiValue": -0.09725315868854523
+    },
+    {
+      "date": "2025-05-13T13:20:28.741Z",
+      "value": 0.320817232131958,
+      "ndmiValue": -0.07999999821186066
+    },
+    {
+      "date": "2025-05-16T13:20:28.741Z",
+      "value": 0.3083149492740631,
+      "ndmiValue": -0.06731946021318436
+    },
+    {
+      "date": "2025-05-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:20:28.741Z",
+      "value": 0.34725990891456604,
+      "ndmiValue": -0.05911330133676529
+    },
+    {
+      "date": "2025-05-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-31T13:20:28.741Z",
+      "value": 0.33530518412590027,
+      "ndmiValue": -0.08002964407205582
+    },
+    {
+      "date": "2025-06-02T13:20:28.741Z",
+      "value": 0.3300839364528656,
+      "ndmiValue": -0.08460678160190582
+    },
+    {
+      "date": "2025-06-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-12T13:20:28.741Z",
+      "value": 0.3132365047931671,
+      "ndmiValue": -0.1153775155544281
+    },
+    {
+      "date": "2025-06-15T13:20:28.741Z",
+      "value": 0.30192720890045166,
+      "ndmiValue": -0.10341013967990875
+    },
+    {
+      "date": "2025-06-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-22T13:20:28.741Z",
+      "value": 0.30402737855911255,
+      "ndmiValue": -0.10738738626241684
+    },
+    {
+      "date": "2025-06-25T13:20:28.741Z",
+      "value": 0.30380773544311523,
+      "ndmiValue": -0.11331497132778168
+    },
+    {
+      "date": "2025-06-30T13:20:28.741Z",
+      "value": 0.28438907861709595,
+      "ndmiValue": -0.12684684991836548
+    },
+    {
+      "date": "2025-07-02T13:20:28.741Z",
+      "value": 0.2803916335105896,
+      "ndmiValue": -0.13232584297657013
+    },
+    {
+      "date": "2025-07-05T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-10T13:20:28.741Z",
+      "value": 0.3031817078590393,
+      "ndmiValue": -0.10493046790361404
+    },
+    {
+      "date": "2025-07-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-15T13:20:28.741Z",
+      "value": 0.29309892654418945,
+      "ndmiValue": -0.11937098205089569
+    },
+    {
+      "date": "2025-07-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-22T13:20:28.741Z",
+      "value": 0.30505794286727905,
+      "ndmiValue": -0.09976376593112946
+    },
+    {
+      "date": "2025-07-25T13:20:28.741Z",
+      "value": 0.16251760721206665,
+      "ndmiValue": -0.12882788479328156
+    },
+    {
+      "date": "2025-07-30T13:20:28.741Z",
+      "value": 0.30194202065467834,
+      "ndmiValue": -0.10888565331697464
+    },
+    {
+      "date": "2025-08-01T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:20:28.741Z",
+      "value": 0.28563380241394043,
+      "ndmiValue": -0.13182424008846283
+    },
+    {
+      "date": "2025-08-11T13:20:28.741Z",
+      "value": 0.2780294418334961,
+      "ndmiValue": -0.13739728927612305
+    },
+    {
+      "date": "2025-08-14T13:20:28.741Z",
+      "value": 0.29161882400512695,
+      "ndmiValue": -0.136607825756073
+    },
+    {
+      "date": "2025-08-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-24T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-31T13:20:28.741Z",
+      "value": 0.31602025032043457,
+      "ndmiValue": -0.027175268158316612
+    },
+    {
+      "date": "2025-09-03T13:20:28.741Z",
+      "value": 0.28854963183403015,
+      "ndmiValue": -0.11120472103357315
+    },
+    {
+      "date": "2025-09-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:20:28.741Z",
+      "value": 0.2999389171600342,
+      "ndmiValue": -0.11646252870559692
+    },
+    {
+      "date": "2025-09-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-23T13:20:28.741Z",
+      "value": 0.2989334166049957,
+      "ndmiValue": -0.09079903364181519
+    },
+    {
+      "date": "2025-09-28T13:20:28.741Z",
+      "value": 0.3128834366798401,
+      "ndmiValue": -0.09628378599882126
+    },
+    {
+      "date": "2025-09-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-03T13:20:28.741Z",
+      "value": 0.4101610779762268,
+      "ndmiValue": -0.025684932246804237
+    },
+    {
+      "date": "2025-10-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:20:28.741Z",
+      "value": 0.31406551599502563,
+      "ndmiValue": -0.10694020241498947
+    },
+    {
+      "date": "2025-10-13T13:20:28.741Z",
+      "value": 0.4825511574745178,
+      "ndmiValue": 0.15104329586029053
+    },
+    {
+      "date": "2025-10-18T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-23T13:20:28.741Z",
+      "value": 0.32519787549972534,
+      "ndmiValue": -0.07355314493179321
+    },
+    {
+      "date": "2025-10-28T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:20:28.741Z",
+      "value": 0.3391304314136505,
+      "ndmiValue": -0.0876777246594429
+    },
+    {
+      "date": "2025-11-09T13:20:28.741Z",
+      "value": 0.3354746699333191,
+      "ndmiValue": -0.09108573943376541
+    },
+    {
+      "date": "2025-11-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-17T13:20:28.741Z",
+      "value": -0.039182282984256744,
+      "ndmiValue": -0.25330978631973267
+    },
+    {
+      "date": "2025-11-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-27T13:20:28.741Z",
+      "value": 0.3309064507484436,
+      "ndmiValue": -0.08964143693447113
+    },
+    {
+      "date": "2025-11-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:20:28.741Z",
+      "value": 0.2842504680156708,
+      "ndmiValue": -0.02026635780930519
+    },
+    {
+      "date": "2025-12-07T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:20:28.741Z",
+      "value": 0.3211706578731537,
+      "ndmiValue": -0.0821230560541153
+    },
+    {
+      "date": "2025-12-12T13:20:28.741Z",
+      "value": 0.36188605427742004,
+      "ndmiValue": -0.06977992504835129
+    },
+    {
+      "date": "2025-12-17T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-27T13:20:28.741Z",
+      "value": 0.3928860127925873,
+      "ndmiValue": -0.030388295650482178
+    },
+    {
+      "date": "2025-12-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-01T13:20:28.741Z",
+      "value": 0.33666667342185974,
+      "ndmiValue": -0.07789594680070877
+    },
+    {
+      "date": "2026-01-06T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    }
+  ],
+  "tuscany_1": [
+    {
+      "date": "2025-01-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-01-31T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-05T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-15T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-02-25T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-02T13:20:28.741Z",
+      "value": 0.5273295044898987,
+      "ndmiValue": -0.09778597950935364
+    },
+    {
+      "date": "2025-03-07T13:20:28.741Z",
+      "value": 0.4956030249595642,
+      "ndmiValue": 0.050982121378183365
+    },
+    {
+      "date": "2025-03-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-14T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-17T13:20:28.741Z",
+      "value": 0.5631147623062134,
+      "ndmiValue": 0.01517167966812849
+    },
+    {
+      "date": "2025-03-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-24T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-03-27T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-01T13:20:28.741Z",
+      "value": 0.6592632532119751,
+      "ndmiValue": 0.07700421661138535
+    },
+    {
+      "date": "2025-04-03T13:20:28.741Z",
+      "value": 0.6215125918388367,
+      "ndmiValue": 0.05281536281108856
+    },
+    {
+      "date": "2025-04-06T13:20:28.741Z",
+      "value": 0.6398990154266357,
+      "ndmiValue": 0.15964286029338837
+    },
+    {
+      "date": "2025-04-11T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-21T13:20:28.741Z",
+      "value": 0.6903994083404541,
+      "ndmiValue": 0.18566209077835083
+    },
+    {
+      "date": "2025-04-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-04-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-01T13:20:28.741Z",
+      "value": 0.7723982930183411,
+      "ndmiValue": 0.2312760055065155
+    },
+    {
+      "date": "2025-05-03T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-06T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-11T13:20:28.741Z",
+      "value": 0.782934844493866,
+      "ndmiValue": 0.3138711452484131
+    },
+    {
+      "date": "2025-05-13T13:20:28.741Z",
+      "value": 0.8047969341278076,
+      "ndmiValue": 0.30248501896858215
+    },
+    {
+      "date": "2025-05-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-23T13:20:28.741Z",
+      "value": 0.6982648968696594,
+      "ndmiValue": 0.253866583108902
+    },
+    {
+      "date": "2025-05-26T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-05-31T13:20:28.741Z",
+      "value": 0.7894737124443054,
+      "ndmiValue": 0.2843594253063202
+    },
+    {
+      "date": "2025-06-02T13:20:28.741Z",
+      "value": 0.7795344591140747,
+      "ndmiValue": 0.29271015524864197
+    },
+    {
+      "date": "2025-06-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-06-12T13:20:28.741Z",
+      "value": 0.7493000030517578,
+      "ndmiValue": 0.28879719972610474
+    },
+    {
+      "date": "2025-06-15T13:20:28.741Z",
+      "value": 0.7665235996246338,
+      "ndmiValue": 0.29556185007095337
+    },
+    {
+      "date": "2025-06-20T13:20:28.741Z",
+      "value": 0.7694138288497925,
+      "ndmiValue": 0.28052598237991333
+    },
+    {
+      "date": "2025-06-22T13:20:28.741Z",
+      "value": 0.7863855361938477,
+      "ndmiValue": 0.3090359568595886
+    },
+    {
+      "date": "2025-06-25T13:20:28.741Z",
+      "value": 0.8021090626716614,
+      "ndmiValue": 0.2986257076263428
+    },
+    {
+      "date": "2025-06-30T13:20:28.741Z",
+      "value": 0.8138359189033508,
+      "ndmiValue": 0.2948318421840668
+    },
+    {
+      "date": "2025-07-02T13:20:28.741Z",
+      "value": 0.7792719602584839,
+      "ndmiValue": 0.2609267234802246
+    },
+    {
+      "date": "2025-07-05T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-10T13:20:28.741Z",
+      "value": 0.8132204413414001,
+      "ndmiValue": 0.30180713534355164
+    },
+    {
+      "date": "2025-07-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-15T13:20:28.741Z",
+      "value": 0.793021023273468,
+      "ndmiValue": 0.2881181240081787
+    },
+    {
+      "date": "2025-07-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-07-22T13:20:28.741Z",
+      "value": 0.8094775080680847,
+      "ndmiValue": 0.2990230321884155
+    },
+    {
+      "date": "2025-07-25T13:20:28.741Z",
+      "value": 0.8119211792945862,
+      "ndmiValue": 0.3094216585159302
+    },
+    {
+      "date": "2025-07-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-01T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-04T13:20:28.741Z",
+      "value": 0.7992258071899414,
+      "ndmiValue": 0.24611259996891022
+    },
+    {
+      "date": "2025-08-11T13:20:28.741Z",
+      "value": 0.7358782291412354,
+      "ndmiValue": 0.2216373234987259
+    },
+    {
+      "date": "2025-08-14T13:20:28.741Z",
+      "value": 0.7266401648521423,
+      "ndmiValue": 0.22864721715450287
+    },
+    {
+      "date": "2025-08-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-21T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-24T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-08-31T13:20:28.741Z",
+      "value": 0.7205216884613037,
+      "ndmiValue": 0.17505908012390137
+    },
+    {
+      "date": "2025-09-03T13:20:28.741Z",
+      "value": 0.75,
+      "ndmiValue": 0.22408801317214966
+    },
+    {
+      "date": "2025-09-10T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-13T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-18T13:20:28.741Z",
+      "value": 0.782216489315033,
+      "ndmiValue": 0.20208604633808136
+    },
+    {
+      "date": "2025-09-20T13:20:28.741Z",
+      "value": 0.7440476417541504,
+      "ndmiValue": 0.25824710726737976
+    },
+    {
+      "date": "2025-09-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-09-28T13:20:28.741Z",
+      "value": 0.7236739993095398,
+      "ndmiValue": 0.22216106951236725
+    },
+    {
+      "date": "2025-09-30T13:20:28.741Z",
+      "value": 0.9020904302597046,
+      "ndmiValue": 0.4228815734386444
+    },
+    {
+      "date": "2025-10-03T13:20:28.741Z",
+      "value": 0.779711127281189,
+      "ndmiValue": 0.4053311347961426
+    },
+    {
+      "date": "2025-10-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-10T13:20:28.741Z",
+      "value": 0.7578908205032349,
+      "ndmiValue": 0.167159765958786
+    },
+    {
+      "date": "2025-10-13T13:20:28.741Z",
+      "value": 0.7335684299468994,
+      "ndmiValue": 0.4088066816329956
+    },
+    {
+      "date": "2025-10-18T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-20T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-23T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-28T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-10-30T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-07T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-09T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-17T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-27T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-11-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-02T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-07T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-09T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-12T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-17T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-19T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-22T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-27T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2025-12-29T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-01T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-06T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-08T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    },
+    {
+      "date": "2026-01-16T13:20:28.741Z",
+      "value": null,
+      "ndmiValue": null
+    }
   ]
 }

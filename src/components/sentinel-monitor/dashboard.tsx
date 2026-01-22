@@ -3,7 +3,7 @@
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
 import KpiCard from '@/components/sentinel-monitor/kpi-card';
 import { Card } from '@/components/ui/card';
-import { Satellite, Leaf, Droplets, Waves } from 'lucide-react';
+import { Satellite, Leaf, Waves } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '../ui/skeleton';
@@ -23,12 +23,19 @@ const ChartLoader = () => (
 
 const EnvironmentalDriversChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
 const BloomProbabilityChart = dynamic(() => import('@/components/sentinel-monitor/BloomProbabilityChart'), { ssr: false, loading: ChartLoader });
+const WaterStressChart = dynamic(() => import('@/components/sentinel-monitor/WaterStressChart'), { ssr: false, loading: ChartLoader });
 
+type FeatureForMap = Station & { 
+  latestIndexValue: number | null; 
+  latestNdmiValue?: number | null;
+  bloomProbability?: number | null;
+};
 
 type DashboardProps = {
   project: Project;
   chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] };
   kpiData: KpiData[];
+  mapFeatures: FeatureForMap[];
 };
 
 const projectIcons: Record<string, React.ReactNode> = {
@@ -49,7 +56,7 @@ const getMapCenter = (stations: Station[]) => {
     };
 };
 
-export default function Dashboard({ project, chartData, kpiData }: DashboardProps) {
+export default function Dashboard({ project, chartData, kpiData, mapFeatures }: DashboardProps) {
   const [selectedStation, setSelectedStation] = useState<Station['id'] | 'all'>('all');
 
   useEffect(() => {
@@ -61,18 +68,6 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
   const initialZoom = useMemo(() => project.id.includes('lake') ? 10 : project.id.includes('vineyard') ? 12 : 9, [project.id]);
   const isLakeProject = project.id.includes('lake');
   const isVineyardProject = project.id.includes('vineyard');
-
-
-  const mapFeatures = useMemo(() => {
-    return project.stations.map(station => {
-      const pointData = chartData.raw.filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated);
-      const latestReading = pointData.length > 0 ? pointData[pointData.length - 1] : null;
-      return {
-        ...station,
-        latestIndexValue: latestReading?.indexValue ?? null,
-      }
-    })
-  }, [project.stations, chartData.raw]);
 
   const handleFeatureClick = (stationId: string) => {
       setSelectedStation(prev => prev === stationId ? 'all' : stationId);
@@ -112,6 +107,8 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
               onClick={() => handleKpiClick(kpi.stationId)}
               isSelected={selectedStation === kpi.stationId}
               coverage={kpi.spatialCoverage}
+              riskValue={kpi.riskValue}
+              riskLabel={kpi.riskLabel}
             />
           ))}
         </div>
@@ -124,6 +121,15 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
                 <BloomProbabilityChart data={chartData.aggregated} />
             </Card>
           </>
+        ) : isVineyardProject ? (
+            <>
+                <Card className="flex-grow">
+                    <EnvironmentalDriversChart data={chartData.raw} selectedStationId={selectedStation} project={project} />
+                </Card>
+                <Card>
+                    <WaterStressChart data={chartData.raw} />
+                </Card>
+            </>
         ) : (
           <Card className="flex-grow">
               <EnvironmentalDriversChart data={chartData.raw} selectedStationId={selectedStation} project={project} />

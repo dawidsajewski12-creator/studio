@@ -22,7 +22,10 @@ const sniardwyStations = [
 }));
 
 const tuscanyStations = [
-    { lat: 43.585, lng: 11.317 }, { lat: 43.488, lng: 11.377 }, { lat: 43.466, lng: 11.434 }
+    { lat: 43.535, lng: 11.310 }, { lat: 43.538, lng: 11.315 }, { lat: 43.532, lng: 11.308 },
+    { lat: 43.540, lng: 11.320 }, { lat: 43.530, lng: 11.305 }, { lat: 43.542, lng: 11.312 },
+    { lat: 43.536, lng: 11.302 }, { lat: 43.545, lng: 11.318 }, { lat: 43.528, lng: 11.300 },
+    { lat: 43.533, lng: 11.322 }
 ].map((loc, i) => ({
   id: `tuscany_${i}`,
   name: `Chianti Pt. ${i + 1}`,
@@ -30,7 +33,10 @@ const tuscanyStations = [
 }));
 
 const bordeauxStations = [
-    { lat: 44.893, lng: -0.155 }, { lat: 44.929, lng: -0.205 }, { lat: 44.915, lng: -0.243 }
+    { lat: 44.915, lng: -0.135 }, { lat: 44.918, lng: -0.130 }, { lat: 44.912, lng: -0.138 },
+    { lat: 44.920, lng: -0.125 }, { lat: 44.910, lng: -0.140 }, { lat: 44.922, lng: -0.132 },
+    { lat: 44.908, lng: -0.128 }, { lat: 44.925, lng: -0.136 }, { lat: 44.905, lng: -0.142 },
+    { lat: 44.916, lng: -0.122 }
 ].map((loc, i) => ({
   id: `bordeaux_${i}`,
   name: `St-Émilion Pt. ${i + 1}`,

@@ -17,6 +17,7 @@ export type IndexDataPoint = {
   temperature: number | null;
   spatialCoverage?: number;
   bloomProbability?: number;
+  waterStress?: number | null;
 };
 
 export type KpiData = {
@@ -26,6 +27,8 @@ export type KpiData = {
   latestNdmiValue?: number | null; // Secondary index for vineyards
   latestDate: string | null;
   spatialCoverage?: number | null;
+  riskValue?: number | null;
+  riskLabel?: string;
 };
 
 export type Project = {

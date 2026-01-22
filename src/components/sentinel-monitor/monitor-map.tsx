@@ -1,14 +1,12 @@
 "use client";
 
 import type { Project, Station } from '@/lib/types';
-import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
-import { Satellite, Waves, Leaf, Droplets } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import Map, { Marker } from 'react-map-gl/maplibre';
+import { useState } from 'react';
 import MapLegend from './map-legend';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
-// --- Base Layer Definitions ---
 const baseLayers = {
   topo: {
     name: 'Mapa Topograficzna',
@@ -27,7 +25,11 @@ const baseLayers = {
   }
 };
 
-type FeatureForMap = Station & { latestIndexValue: number | null };
+type FeatureForMap = Station & { 
+  latestIndexValue: number | null; 
+  latestNdmiValue?: number | null;
+  bloomProbability?: number | null;
+};
 
 type MonitorMapProps = {
   project: Project;
@@ -38,7 +40,6 @@ type MonitorMapProps = {
   onFeatureClick: (stationId: string) => void;
 };
 
-// --- Layer Control Component ---
 const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: string, onLayerChange: (key: string) => void }) => (
   <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg z-10 border border-border text-card-foreground w-52">
     <h4 className="font-semibold text-sm mb-2 text-foreground">Base Map</h4>
@@ -53,19 +54,30 @@ const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: strin
   </div>
 );
 
-const getMarkerColor = (value: number | null, projectId: string) => {
-    if (value === null) return 'rgba(128, 128, 128, 0.6)';
-
-    if (projectId.includes('lake')) { // NDCI for lakes
-        if (value < -0.1) return 'blue';
-        if (value < 0.1) return 'cyan';
-        if (value < 0.3) return 'lime';
-        return 'red';
-    } else { // NDSI for snow
-        if (value < 0.2) return '#8B4513';
-        if (value <= 0.5) return '#00FFFF';
-        return '#4169E1';
+const getMarkerColor = (feature: FeatureForMap, projectId: string) => {
+    if (projectId.includes('lake')) {
+        const prob = feature.bloomProbability;
+        if (prob === null || prob === undefined) return 'rgba(128, 128, 128, 0.6)';
+        if (prob > 60) return 'red';
+        if (prob > 30) return 'orange';
+        return 'green';
     }
+    
+    if (projectId.includes('vineyard')) {
+        const ndvi = feature.latestIndexValue;
+        const ndmi = feature.latestNdmiValue;
+        if (ndvi === null || ndvi === undefined) return 'rgba(128, 128, 128, 0.6)';
+        if (ndvi < 0.4) return 'brown'; // Low Vigor
+        if (ndmi !== null && ndmi !== undefined && ndmi < 0.1 && ndvi > 0.5) return 'orange'; // Water Stress
+        return 'green'; // Healthy
+    }
+
+    // Default snow logic
+    const value = feature.latestIndexValue;
+    if (value === null) return 'rgba(128, 128, 128, 0.6)';
+    if (value < 0.2) return '#8B4513';
+    if (value <= 0.5) return '#00FFFF';
+    return '#4169E1';
 };
 
 export default function MonitorMap({ project, features, center, zoom, selectedStationId, onFeatureClick }: MonitorMapProps) {
@@ -102,7 +114,7 @@ export default function MonitorMap({ project, features, center, zoom, selectedSt
             <div 
               className="w-4 h-4 rounded-full cursor-pointer transition-transform duration-200"
               style={{ 
-                  backgroundColor: getMarkerColor(feature.latestIndexValue, project.id),
+                  backgroundColor: getMarkerColor(feature, project.id),
                   border: selectedStationId === feature.id ? '2px solid hsl(var(--accent))' : '1px solid rgba(255,255,255,0.8)',
                   transform: selectedStationId === feature.id ? 'scale(1.5)' : 'scale(1)',
                   boxShadow: '0 0 5px rgba(0,0,0,0.5)',

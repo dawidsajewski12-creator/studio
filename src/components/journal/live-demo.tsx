@@ -1,6 +1,6 @@
 import { getProjectData } from '@/lib/data';
 import { PROJECTS } from '@/lib/projects';
-import type { IndexDataPoint, KpiData } from '@/lib/types';
+import type { IndexDataPoint, KpiData, Project, Station } from '@/lib/types';
 import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
@@ -105,9 +105,25 @@ const processLakeAnalytics = (rawData: IndexDataPoint[], totalPoints: number): {
       latestIndexValue: latestValidReading?.indexValue ?? null,
       latestDate: latestValidReading?.date ?? null,
       spatialCoverage: latestValidReading?.spatialCoverage ?? 0,
+      riskValue: latestValidReading?.bloomProbability ?? null,
+      riskLabel: 'Bloom Risk',
     };
 
     return { aggregatedData: aggregatedSeries, kpi };
+};
+
+const processVineyardAnalytics = (rawData: IndexDataPoint[]): IndexDataPoint[] => {
+    return rawData.map(d => {
+        let waterStress: number | null = null;
+        if (d.indexValue !== null && d.ndmiValue !== null && d.indexValue > 0.1) {
+            const stressRatio = 1 - (d.ndmiValue / d.indexValue);
+            waterStress = Math.max(0, Math.min(100, stressRatio * 200));
+        }
+        return {
+            ...d,
+            waterStress: waterStress !== null ? Math.max(0, Math.min(100, waterStress)) : null,
+        };
+    });
 };
 
 
@@ -122,14 +138,31 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
   
   let kpiData: KpiData[] = [];
   let chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] } = { raw: [], aggregated: [] };
+  let mapFeatures: (Station & { latestIndexValue: number | null, latestNdmiValue?: number | null, bloomProbability?: number | null })[] = [];
 
   if (project.id.includes('lake')) {
       const { aggregatedData, kpi } = processLakeAnalytics(rawIndexData, project.stations.length);
       kpiData.push(kpi);
       chartData = { raw: rawIndexData, aggregated: aggregatedData.filter(d => d.temperature !== null && d.indexValue !== null) };
+
+      const latestAggregatedTemp = aggregatedData.filter(d => d.temperature !== null).pop()?.temperature ?? null;
+
+      mapFeatures = project.stations.map(station => {
+        const latestReading = [...rawIndexData]
+            .filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated)
+            .pop();
+        const probability = calculateBloomProbability(latestReading?.indexValue ?? null, latestAggregatedTemp);
+        return {
+            ...station,
+            latestIndexValue: latestReading?.indexValue ?? null,
+            bloomProbability: probability,
+        };
+      });
+
   } else if (project.id.includes('vineyard')) {
+    const processedData = processVineyardAnalytics(rawIndexData);
     kpiData = project.stations.map(station => {
-        const stationData = rawIndexData.filter(d => d.stationId === station.id);
+        const stationData = processedData.filter(d => d.stationId === station.id);
         const latestReading = [...stationData]
           .filter(d => d.indexValue !== null && !d.isInterpolated)
           .pop();
@@ -141,7 +174,19 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
             latestDate: latestReading?.date ?? null,
         }
     });
-    chartData = { raw: rawIndexData, aggregated: [] };
+    chartData = { raw: processedData, aggregated: [] };
+    
+    mapFeatures = project.stations.map(station => {
+        const latestReading = [...processedData]
+          .filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated)
+          .pop();
+        return {
+            ...station,
+            latestIndexValue: latestReading?.indexValue ?? null,
+            latestNdmiValue: latestReading?.ndmiValue ?? null,
+        }
+    });
+
   } else { 
       kpiData = project.stations.map(station => {
           const stationData = rawIndexData.filter(d => d.stationId === station.id);
@@ -156,6 +201,16 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
           }
       });
       chartData = { raw: rawIndexData, aggregated: [] };
+
+      mapFeatures = project.stations.map(station => {
+        const latestReading = [...rawIndexData]
+            .filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated)
+            .pop();
+        return {
+            ...station,
+            latestIndexValue: latestReading?.indexValue ?? null,
+        };
+      });
   }
 
 
@@ -171,6 +226,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
           project={project}
           chartData={chartData}
           kpiData={kpiData}
+          mapFeatures={mapFeatures}
         />
         <TechnicalNote project={project} />
       </div>

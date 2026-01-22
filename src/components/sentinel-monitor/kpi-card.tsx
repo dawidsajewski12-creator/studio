@@ -13,9 +13,11 @@ type KpiCardProps = {
   onClick: () => void;
   isSelected: boolean;
   coverage?: number | null;
+  riskValue?: number | null;
+  riskLabel?: string;
 };
 
-export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, isSelected, coverage }: KpiCardProps) {
+export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, isSelected, coverage, riskValue, riskLabel }: KpiCardProps) {
     const coverageText = coverage !== null && coverage !== undefined
     ? `Pokrycie: ${coverage.toFixed(0)}%`
     : null;
@@ -40,6 +42,9 @@ export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, 
             </>
         ) : (
             <div className="text-2xl font-bold text-primary">{value}</div>
+        )}
+        {riskValue !== null && riskValue !== undefined && riskLabel && (
+            <div className="text-lg font-bold text-primary/80">{`${riskLabel}: ${riskValue.toFixed(0)}%`}</div>
         )}
         <p className="text-xs text-muted-foreground mt-1">
           {date ? `📅 Dane z dnia: ${format(parseISO(date), 'yyyy-MM-dd')}` : 'Brak aktualnych danych'}

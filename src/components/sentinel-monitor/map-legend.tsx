@@ -12,17 +12,25 @@ const snowLegendItems = [
 ];
 
 const waterLegendItems = [
-  { color: 'blue', label: 'Clean Water (< -0.1)' },
-  { color: 'cyan', label: 'Turbid Water (-0.1 to 0.1)' },
-  { color: 'lime', label: 'Low Algae (0.1 to 0.3)' },
-  { color: 'red', label: 'Bloom Risk (> 0.3)' },
-  { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data / Land' }
+  { color: 'red', label: 'High Risk (> 60%)' },
+  { color: 'orange', label: 'Warning (30-60%)' },
+  { color: 'green', label: 'Safe (< 30%)' },
+  { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data' }
+];
+
+const vineyardLegendItems = [
+  { color: 'green', label: 'Healthy Vigor' },
+  { color: 'orange', label: 'Water Stress' },
+  { color: 'brown', label: 'Low Vigor' },
+  { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data' }
 ];
 
 export default function MapLegend({ projectId }: MapLegendProps) {
   const isWaterProject = projectId.includes('lake');
-  const legendItems = isWaterProject ? waterLegendItems : snowLegendItems;
-  const title = isWaterProject ? 'NDCI - Algal Bloom Index' : 'NDSI (Snow Index)';
+  const isVineyardProject = projectId.includes('vineyard');
+  
+  const legendItems = isWaterProject ? waterLegendItems : isVineyardProject ? vineyardLegendItems : snowLegendItems;
+  const title = isWaterProject ? 'Algal Bloom Risk' : isVineyardProject ? 'Vine Health Status' : 'NDSI (Snow Index)';
 
   return (
     <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg w-52 text-card-foreground z-10 border border-border">
