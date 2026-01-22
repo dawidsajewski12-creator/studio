@@ -29,7 +29,7 @@ export default function KpiCard({ title, value, date, icon, onClick, isSelected 
       <CardContent>
         <div className="text-2xl font-bold text-primary">{value}</div>
         <p className="text-xs text-muted-foreground">
-          {date ? `Data from: ${format(parseISO(date), 'MMM d, yyyy')}` : 'No recent data'}
+          {date ? `📅 Dane z dnia: ${format(parseISO(date), 'yyyy-MM-dd')}` : 'Brak aktualnych danych'}
         </p>
       </CardContent>
     </Card>

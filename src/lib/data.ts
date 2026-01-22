@@ -340,7 +340,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         }
     }
     
-    return results.flat().filter(p => p.indexValue !== null) as IndexDataPoint[];
+    return results.flat();
 
   } catch (error) {
     console.error("An error occurred in the main data pipeline:", error);
@@ -399,7 +399,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         });
 
         if (!response.ok || !response.body) {
-            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`, await response.text());
+            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`);
             return null;
         }
 

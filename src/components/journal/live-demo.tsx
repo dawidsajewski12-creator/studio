@@ -5,10 +5,10 @@ import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
 
-// Helper function to find the latest valid reading
+// Helper function to find the latest valid reading (not interpolated and has a value)
 const getLatestReading = (data: IndexDataPoint[], stationId: Station['id']) => {
   return data
-    .filter(d => d.stationId === stationId && !d.isInterpolated) // Only consider real observations
+    .filter(d => d.stationId === stationId && !d.isInterpolated && d.indexValue !== null)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 };
 
