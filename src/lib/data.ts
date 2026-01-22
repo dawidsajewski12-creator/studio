@@ -69,20 +69,15 @@ const EVALSCRIPTS: Record<string, string> = {
     }
     function evaluatePixel(sample) {
         // Use a 'soft mask' for water. SCL classes for Water (6), Vegetation (4), Bare Soil (5),
-        // and Dark Areas (2) are included. This is crucial for capturing thick algal blooms
-        // misclassified as 'vegetation' and for getting readings during winter when low sun angles
-        // can make water appear as 'dark areas'.
-        const isPotentiallyWater = [2, 4, 5, 6].includes(sample.SCL);
+        // Dark Areas (2) and Unclassified (7) are included for better detection during winter and algal blooms.
+        const isPotentiallyWater = [2, 4, 5, 6, 7].includes(sample.SCL);
         
         if (isPotentiallyWater) {
           let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-          // Return the calculated index with a dataMask of 1 to include it in statistics.
           return { index: [ndci], dataMask: [1] };
         }
     
-        // For all other pixels (clouds, shadows, etc.), return a dataMask of 0
-        // so the pixel is excluded from the statistical analysis (mean, etc.).
-        // We still return a value for 'index' to maintain the object structure.
+        // For all other pixels (clouds, shadows, etc.), return a dataMask of 0.
         return { index: [0], dataMask: [0] };
     }`,
 };
@@ -321,16 +316,11 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
         
-        let bbox: [number, number, number, number];
-        if (project.analysisType === 'grid' && station.bbox) {
-            bbox = station.bbox;
-        } else {
-            const bufferKm = 2.5;
-            const { lat, lng } = station.location;
-            const buffer = bufferKm / 111.32;
-            bbox = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
-        }
-
+        // Always use a consistent, smaller bounding box for visual proofs to avoid API errors.
+        const bufferKm = 2.5; // Creates a ~5km x 5km box
+        const { lat, lng } = station.location;
+        const buffer = bufferKm / 111.32;
+        const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
 
         const requestBody = {
             input: {
