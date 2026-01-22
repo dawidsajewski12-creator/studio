@@ -7,9 +7,9 @@ export const PROJECTS: Project[] = [
     description: 'Monitoring snow cover in high-altitude regions. (CH/IT)',
     index: { name: 'NDSI', unit: '' },
     stations: [
-        { id: 'zermatt', name: 'Valley (Zermatt)', location: { lat: 46.02, lng: 7.748 } },
-        { id: 'theodul', name: 'Glacier (Theodul)', location: { lat: 45.95, lng: 7.71 } },
-        { id: 'matterhorn', name: 'Summit (Matterhorn)', location: { lat: 45.976, lng: 7.658 } },
+        { id: 'zermatt', name: 'Valley (Zermatt)', location: { lat: 46.0207, lng: 7.7491 } },
+        { id: 'theodul', name: 'Glacier (Theodul)', location: { lat: 45.9500, lng: 7.7100 } },
+        { id: 'matterhorn', name: 'Summit (Matterhorn)', location: { lat: 45.9766, lng: 7.6585 } },
     ],
     dataConfig: {
         base: 0.25,
@@ -25,8 +25,6 @@ export const PROJECTS: Project[] = [
     stations: [
         { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
         { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.760, lng: 21.730 } },
-        { id: 'mar-menor', name: 'Mar Menor (ES) [Hotspot]', location: { lat: 37.730, lng: -0.780 } },
-        { id: 'balaton', name: 'Jezioro Balaton (HU)', location: { lat: 46.900, lng: 17.800 } },
     ],
     dataConfig: {
         base: 0.0,
