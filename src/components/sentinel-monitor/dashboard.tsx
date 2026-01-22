@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
@@ -69,7 +70,7 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
 
   // Augment stations with BBox and latest Index value for the map
   const stationsForMap = useMemo(() => {
-    const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
+    const bufferKm = project.id === 'lake-quality' ? 0.7 : 0.5;
     return project.stations.map(station => {
       const kpi = kpiData.find(k => k.stationId === station.id);
       return {

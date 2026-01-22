@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Project, Station } from '@/lib/types';
@@ -8,6 +9,7 @@ import type { FeatureCollection } from 'geojson';
 import MapLegend from './map-legend';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { getBoundingBox } from '@/lib/gis-utils';
 
 // --- Base Layer Definitions ---
 const baseLayers = {

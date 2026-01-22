@@ -111,11 +111,13 @@ const EVALSCRIPTS: Record<string, string> = {
       };
     }
     function evaluatePixel(sample) {
-      let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
       // Allow Water(6), Vegetation(4), and Not Vegetated(5) to capture thick algal blooms.
-      // Exclude clouds, shadows, snow etc.
       const isValid = [4, 5, 6].includes(sample.SCL);
-      return { index: [ndci], dataMask: [isValid ? 1 : 0] };
+      if (!isValid) {
+        return { dataMask: [0] };
+      }
+      let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
+      return { index: [ndci], dataMask: [1] };
     }`,
 };
 
@@ -228,20 +230,20 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         let finalSparseData = sparseDataFromCache;
 
         if (needsApiCall && isBefore(fetchFromDate, today)) {
-             const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
-             const satelliteRequestBody = {
-                input: {
-                    bounds: { bbox: getBoundingBox(station, bufferKm) },
-                    data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
-                },
-                aggregation: {
-                    evalscript,
-                    timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
-                    aggregationInterval: { of: "P1D" },
-                    width: 1,
-                    height: 1,
-                },
-            };
+            const bufferKm = project.id === 'lake-quality' ? 0.7 : 0.5;
+            const satelliteRequestBody = {
+               input: {
+                   bounds: { bbox: getBoundingBox(station, bufferKm) },
+                   data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
+               },
+               aggregation: {
+                   evalscript,
+                   timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
+                   aggregationInterval: { of: "P1D" },
+                   width: 1,
+                   height: 1,
+               },
+           };
 
             const satelliteResponse = await fetch(STATS_URL, {
                 method: 'POST',
@@ -259,7 +261,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                         if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
                             return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
                         }
-                        // Return a record with null value if there was no valid data (e.g. all masked out)
                         return { date: parseISO(item.interval.from), value: null };
                     });
 
