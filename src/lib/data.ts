@@ -68,17 +68,21 @@ const EVALSCRIPTS: Record<string, string> = {
         };
     }
     function evaluatePixel(sample) {
-        // Relaxed water mask to include potential algal blooms misclassified as vegetation/soil
-        // and dark water areas common in winter.
-        // SCL Classes: 2(Dark Area), 4(Vegetation), 5(Bare Soil), 6(Water)
-        const isWaterOrAlgae = [2, 4, 5, 6].includes(sample.SCL);
+        // Use a 'soft mask' for water. SCL classes for Water (6), Vegetation (4), Bare Soil (5),
+        // and Dark Areas (2) are included. This is crucial for capturing thick algal blooms
+        // misclassified as 'vegetation' and for getting readings during winter when low sun angles
+        // can make water appear as 'dark areas'.
+        const isPotentiallyWater = [2, 4, 5, 6].includes(sample.SCL);
         
-        if (isWaterOrAlgae) {
+        if (isPotentiallyWater) {
           let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
+          // Return the calculated index with a dataMask of 1 to include it in statistics.
           return { index: [ndci], dataMask: [1] };
         }
     
-        // For all other pixels (clouds, shadow, etc.), return a masked value.
+        // For all other pixels (clouds, shadows, etc.), return a dataMask of 0
+        // so the pixel is excluded from the statistical analysis (mean, etc.).
+        // We still return a value for 'index' to maintain the object structure.
         return { index: [0], dataMask: [0] };
     }`,
 };
