@@ -4,6 +4,7 @@ export const PROJECTS: Project[] = [
   {
     id: 'snow-watch',
     name: 'Alpine Snow Watch',
+    analysisType: 'point',
     description: 'Monitoring snow cover in high-altitude regions. (CH/IT)',
     index: { name: 'NDSI', unit: '' },
     stations: [
@@ -20,6 +21,7 @@ export const PROJECTS: Project[] = [
   {
     id: 'lake-quality',
     name: 'Lake Quality Monitor',
+    analysisType: 'grid',
     description: 'Monitoring chlorophyll concentration and algal blooms in lakes.',
     index: { name: 'NDCI', unit: '' },
     stations: [

@@ -52,13 +52,12 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         acc[dateStr] = { date: dateStr };
       }
       
-      if (!acc[dateStr][curr.stationId]) {
-         acc[dateStr][curr.stationId] = curr.indexValue;
-         acc[dateStr].isInterpolated = curr.isInterpolated;
-         acc[dateStr].stationId = curr.stationId;
-      }
+      // For grid projects, data is pre-averaged. For point projects, we just assign.
+      acc[dateStr][curr.stationId] = curr.indexValue;
+      acc[dateStr].isInterpolated = curr.isInterpolated;
+      acc[dateStr].stationId = curr.stationId; // Used by dot renderer
       
-      if (selectedStationId === 'all' && !isWaterProject) {
+      if (selectedStationId === 'all' && project.analysisType === 'point') {
         if (!acc[dateStr].tempCount) {
           acc[dateStr].temperature = 0;
           acc[dateStr].tempCount = 0;
@@ -74,7 +73,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
       return acc;
     }, {} as any);
     
-    if (selectedStationId === 'all' && !isWaterProject) {
+    if (selectedStationId === 'all' && project.analysisType === 'point') {
         Object.values(groupedByDate).forEach((day: any) => {
             if (day.tempCount > 0) {
                 day.temperature = day.temperature / day.tempCount;
@@ -176,7 +175,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 dataKey={stationId}
                 stroke={chartConfig[stationId]?.color}
                 strokeWidth={2}
-                dot={renderDot(stationId)}
+                dot={project.analysisType === 'point' ? renderDot(stationId) : false}
                 activeDot={{ r: 4 }}
                 name={chartConfig[stationId]?.label}
                 connectNulls={true}

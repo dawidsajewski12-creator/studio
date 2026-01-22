@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
@@ -8,7 +7,7 @@ import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getBoundingBox } from '@/lib/gis-utils';
+import { getGridCells } from '@/lib/gis-utils';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
@@ -32,7 +31,8 @@ const IndexChart = dynamic(() => import('@/components/sentinel-monitor/index-cha
 
 type DashboardProps = {
   project: Project;
-  indexData: IndexDataPoint[];
+  rawIndexData: IndexDataPoint[];
+  chartIndexData: IndexDataPoint[];
   kpiData: KpiData[];
 };
 
@@ -54,44 +54,68 @@ const getMapCenter = (stations: Station[]) => {
     };
 };
 
-export default function Dashboard({ project, indexData, kpiData }: DashboardProps) {
+export default function Dashboard({ project, rawIndexData, chartIndexData, kpiData }: DashboardProps) {
   const [selectedStation, setSelectedStation] = useState<Station['id'] | 'all'>('all');
 
-  const filteredIndexData = useMemo(() => {
+  const filteredChartData = useMemo(() => {
     if (selectedStation === 'all') {
-      return indexData;
+      return chartIndexData;
     }
-    return indexData.filter(d => d.stationId === selectedStation);
-  }, [indexData, selectedStation]);
+    return chartIndexData.filter(d => d.stationId === selectedStation);
+  }, [chartIndexData, selectedStation]);
   
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
-  const initialZoom = useMemo(() => project.id === 'lake-quality' ? 6 : 9, [project.id]);
+  const initialZoom = useMemo(() => project.id === 'lake-quality' ? 8 : 9, [project.id]);
 
   // Augment stations with BBox and latest Index value for the map
-  const stationsForMap = useMemo(() => {
-    const bufferKm = project.id === 'lake-quality' ? 0.7 : 0.5;
-    return project.stations.map(station => {
-      const kpi = kpiData.find(k => k.stationId === station.id);
-      return {
-        ...station,
-        bbox: getBoundingBox(station, bufferKm),
-        latestIndexValue: kpi?.latestIndexValue ?? null,
-      };
+  const featuresForMap = useMemo(() => {
+    return project.stations.flatMap(station => {
+      if (project.analysisType === 'grid') {
+        const gridCells = getGridCells(station, 3, 1);
+        return gridCells.map(cell => {
+          const cellData = rawIndexData.filter(d => d.cellId === cell.cellId && d.indexValue !== null && !d.isInterpolated);
+          const latestReading = cellData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+          return {
+            id: cell.cellId,
+            stationId: station.id,
+            name: `${station.name} Cell`,
+            bbox: cell.bbox,
+            latestIndexValue: latestReading?.indexValue ?? null,
+            location: station.location,
+          }
+        });
+      } else { // 'point'
+        const kpi = kpiData.find(k => k.stationId === station.id);
+        const bufferKm = 0.5;
+        // The getBoundingBox function expects a Station object. Let's provide a compatible one.
+        const pointStation = {
+          id: station.id,
+          name: station.name,
+          location: station.location
+        };
+        return [{
+          id: station.id,
+          stationId: station.id,
+          name: station.name,
+          bbox: getBoundingBox(pointStation, bufferKm),
+          latestIndexValue: kpi?.latestIndexValue ?? null,
+          location: station.location,
+        }];
+      }
     });
-  }, [project.stations, kpiData, project.id]);
-
+  }, [project, rawIndexData, kpiData]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
       <Card className="xl:col-span-3 w-full h-[400px] xl:h-auto min-h-[400px] p-0 overflow-hidden shadow-lg">
         <MonitorMap
           project={project}
-          stations={stationsForMap}
+          features={featuresForMap}
           center={mapCenter}
           zoom={initialZoom}
           selectedStationId={selectedStation}
-          onMarkerClick={(stationId) => setSelectedStation(prev => prev === stationId ? 'all' : stationId)}
+          onFeatureClick={(stationId) => setSelectedStation(prev => prev === stationId ? 'all' : stationId)}
         />
       </Card>
       <div className="xl:col-span-2 flex flex-col gap-6">
@@ -109,7 +133,7 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
           ))}
         </div>
         <Card className="flex-grow">
-          <IndexChart data={filteredIndexData} selectedStationId={selectedStation} project={project} />
+          <IndexChart data={filteredChartData} selectedStationId={selectedStation} project={project} />
         </Card>
       </div>
     </div>

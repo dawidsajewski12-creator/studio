@@ -1,9 +1,8 @@
-
 import type { Project, IndexDataPoint, Station } from './types';
 import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDays, addDays, isBefore } from 'date-fns';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { getBoundingBox } from './gis-utils';
+import { getBoundingBox, getGridCells } from './gis-utils';
 import { PROJECTS } from './projects';
 
 
@@ -40,7 +39,7 @@ function evaluatePixel(sample) {
 // --- Caching Configuration ---
 const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
 type CacheData = {
-    [stationId: string]: { date: string; value: number | null }[];
+    [id: string]: { date: string; value: number | null }[]; // id can be stationId or cellId
 };
 
 
@@ -60,48 +59,6 @@ const EVALSCRIPTS: Record<string, string> = {
       const isNoData = [0, 1, 2, 7].includes(sample.SCL);
       return { index: [ndsi], dataMask: [isCloud || isNoData ? 0 : 1] };
     }`,
-  NDVI: `
-    //VERSION=3
-    function setup() {
-      return {
-        input: [{ bands: ["B04", "B08", "SCL"], units: "DN" }],
-        output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-      };
-    }
-    function evaluatePixel(sample) {
-      let ndvi = (sample.B08 - sample.B04) / (sample.B08 + sample.B04);
-      const isCloud = [3, 8, 9, 10].includes(sample.SCL);
-      const isNoData = [0, 1, 2, 7].includes(sample.SCL);
-      return { index: [ndvi], dataMask: [isCloud || isNoData ? 0 : 1] };
-    }`,
-  NDBI: `
-    //VERSION=3
-    function setup() {
-      return {
-        input: [{ bands: ["B08", "B11", "SCL"], units: "DN" }],
-        output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-      };
-    }
-    function evaluatePixel(sample) {
-      let ndbi = (sample.B11 - sample.B08) / (sample.B11 + sample.B08);
-      const isCloud = [3, 8, 9, 10].includes(sample.SCL);
-      const isNoData = [0, 1, 2, 7].includes(sample.SCL);
-      return { index: [ndbi], dataMask: [isCloud || isNoData ? 0 : 1] };
-    }`,
-  NDWI: `
-    //VERSION=3
-    function setup() {
-      return {
-        input: [{ bands: ["B03", "B08", "SCL"], units: "DN" }],
-        output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-      };
-    }
-    function evaluatePixel(sample) {
-      let ndwi = (sample.B03 - sample.B08) / (sample.B03 + sample.B08);
-      const isCloud = [3, 8, 9, 10].includes(sample.SCL);
-      const isNoData = [0, 1, 2, 7].includes(sample.SCL);
-      return { index: [ndwi], dataMask: [isCloud || isNoData ? 0 : 1] };
-    }`,
   NDCI: `
     //VERSION=3
     function setup() {
@@ -111,10 +68,8 @@ const EVALSCRIPTS: Record<string, string> = {
       };
     }
     function evaluatePixel(sample) {
-      // Allow Water(6), Vegetation(4), Bare Soil(5), Dark Area(2), and Unclassified(7) to capture thick algal blooms and winter conditions.
       const isValid = [2, 4, 5, 6, 7].includes(sample.SCL);
       if (!isValid) {
-        // If pixel is not valid (e.g., cloud, land), mask it out and return all output bands.
         return { index: [0], dataMask: [0] };
       }
       let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
@@ -204,131 +159,136 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     let isCacheUpdated = false;
 
     const stationPromises = project.stations.map(async (station) => {
-        const stationCache = cache[station.id] || [];
-        let sparseDataFromCache: { date: Date; value: number | null }[] = [];
-        let fetchFromDate = yearAgo;
-        let needsApiCall = true;
+        let fetchTasks: { id: string; bbox: [number, number, number, number] }[] = [];
 
-        if (stationCache.length > 0) {
-            const sortedStationCache = stationCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-            const lastRecordedDate = parseISO(sortedStationCache[sortedStationCache.length - 1].date);
-            const daysDiff = differenceInDays(today, lastRecordedDate);
-            
-            sparseDataFromCache = sortedStationCache.map(d => ({ date: parseISO(d.date), value: d.value }));
-
-            if (daysDiff < 7) {
-                console.log(`[${station.id}] Using fresh cache (< 7 days old).`);
-                needsApiCall = false;
-            } else {
-                console.log(`[${station.id}] Stale cache (>= 7 days old). Will fetch new data from ${format(addDays(lastRecordedDate, 1), 'yyyy-MM-dd')}.`);
-                fetchFromDate = addDays(lastRecordedDate, 1);
-            }
+        if (project.analysisType === 'grid') {
+            const gridCells = getGridCells(station, 3, 1);
+            fetchTasks = gridCells.map(cell => ({ id: cell.cellId, bbox: cell.bbox }));
         } else {
-             console.log(`[${station.id}] No cache found. Will fetch full history.`);
-             fetchFromDate = yearAgo;
+            const bufferKm = 0.5;
+            fetchTasks.push({ id: station.id, bbox: getBoundingBox(station, bufferKm) });
         }
+        
+        const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
 
-        let finalSparseData = sparseDataFromCache;
+        const allTaskDataPromises = fetchTasks.map(async (task) => {
+            const taskCache = cache[task.id] || [];
+            let sparseDataFromCache: { date: Date; value: number | null }[] = [];
+            let fetchFromDate = yearAgo;
+            let needsApiCall = true;
 
-        if (needsApiCall && isBefore(fetchFromDate, today)) {
-            const bufferKm = project.id === 'lake-quality' ? 0.7 : 0.5;
-            const satelliteRequestBody = {
-               input: {
-                   bounds: { bbox: getBoundingBox(station, bufferKm) },
-                   data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
-               },
-               aggregation: {
-                   evalscript,
-                   timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
-                   aggregationInterval: { of: "P1D" },
-                   width: 1,
-                   height: 1,
-               },
-           };
+            if (taskCache.length > 0) {
+                const sortedTaskCache = taskCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+                const lastRecordedDate = parseISO(sortedTaskCache[sortedTaskCache.length - 1].date);
+                const daysDiff = differenceInDays(today, lastRecordedDate);
+                
+                sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value }));
 
-            const satelliteResponse = await fetch(STATS_URL, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(satelliteRequestBody),
-            });
-
-            if (!satelliteResponse.ok) {
-                console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
-            } else {
-                const apiResponse = await satelliteResponse.json();
-                const newSparseDataFromApi: { date: Date; value: number | null }[] = apiResponse.data
-                    .map((item: any) => {
-                        const stats = item.outputs.index.bands.B0.stats;
-                        if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
-                            return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
-                        }
-                        return { date: parseISO(item.interval.from), value: null };
-                    });
-
-                if (newSparseDataFromApi.length > 0) {
-                    isCacheUpdated = true;
-                    const combinedData = [...finalSparseData, ...newSparseDataFromApi];
-                    const dataMap = new Map<string, { date: Date; value: number | null }>();
-                    combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
-                    finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
-                    cache[station.id] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
+                if (daysDiff < 7) {
+                    needsApiCall = false;
+                } else {
+                    fetchFromDate = addDays(lastRecordedDate, 1);
                 }
             }
-        }
-        const sparseData = finalSparseData.filter(d => isSameDay(d.date, yearAgo) || isBefore(yearAgo, d.date));
-        
-        const weatherStartDate = project.id === 'lake-quality' ? subDays(today, 365) : yearAgo;
-        const weatherDataMap = await fetchWeatherHistory(station, format(weatherStartDate, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
-        
-        if (sparseData.length === 0) return [];
+            
+            let finalSparseData = sparseDataFromCache;
 
-        const allDays = eachDayOfInterval({ start: yearAgo, end: today });
-        const dailySeries: IndexDataPoint[] = [];
-        
-        const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), d.value]));
+            if (needsApiCall && isBefore(fetchFromDate, today)) {
+                const satelliteRequestBody = {
+                   input: {
+                       bounds: { bbox: task.bbox },
+                       data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
+                   },
+                   aggregation: {
+                       evalscript,
+                       timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
+                       aggregationInterval: { of: "P1D" },
+                       width: 1,
+                       height: 1,
+                   },
+               };
 
-        for (const day of allDays) {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const hasRealValue = sparseDataMap.has(dateStr);
-            const indexValue = sparseDataMap.get(dateStr) ?? null;
+                const satelliteResponse = await fetch(STATS_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(satelliteRequestBody),
+                });
 
-            dailySeries.push({
-                date: day.toISOString(),
-                stationId: station.id,
-                indexValue: indexValue,
-                isInterpolated: !hasRealValue,
-                temperature: weatherDataMap.get(dateStr) ?? null,
-            });
-        }
+                if (!satelliteResponse.ok) {
+                    console.error(`Failed to fetch satellite data for task ${task.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
+                } else {
+                    const apiResponse = await satelliteResponse.json();
+                    const newSparseDataFromApi: { date: Date; value: number | null }[] = apiResponse.data
+                        .map((item: any) => {
+                            const stats = item.outputs.index.bands.B0.stats;
+                            if (stats && stats.sampleCount > 0 && stats.mean !== null && !isNaN(stats.mean) && stats.mean !== -Infinity && stats.mean !== Infinity) {
+                                return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
+                            }
+                            return { date: parseISO(item.interval.from), value: null };
+                        });
 
-        // Interpolation step
-        for (let i = 0; i < dailySeries.length; i++) {
-            if (dailySeries[i].indexValue === null) {
-                let prevIndex = i - 1;
-                while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) prevIndex--;
-                
-                let nextIndex = i + 1;
-                while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) nextIndex++;
-                
-                if (prevIndex >= 0 && nextIndex < dailySeries.length) {
-                    const prevPoint = dailySeries[prevIndex];
-                    const nextPoint = dailySeries[nextIndex];
-                    const prevValue = prevPoint.indexValue!;
-                    const nextValue = nextPoint.indexValue!;
-                    const prevTime = parseISO(prevPoint.date).getTime();
-                    const nextTime = parseISO(nextPoint.date).getTime();
-                    const currentTime = parseISO(dailySeries[i].date).getTime();
+                    if (newSparseDataFromApi.length > 0) {
+                        isCacheUpdated = true;
+                        const combinedData = [...finalSparseData, ...newSparseDataFromApi];
+                        const dataMap = new Map<string, { date: Date; value: number | null }>();
+                        combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
+                        finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
+                        cache[task.id] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
+                    }
+                }
+            }
+
+            const sparseData = finalSparseData.filter(d => isSameDay(d.date, yearAgo) || isBefore(yearAgo, d.date));
+            if (sparseData.length === 0) return [];
+            
+            const allDays = eachDayOfInterval({ start: yearAgo, end: today });
+            const dailySeries: IndexDataPoint[] = [];
+            const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), d.value]));
+
+            for (const day of allDays) {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const hasRealValue = sparseDataMap.has(dateStr);
+                const indexValue = sparseDataMap.get(dateStr) ?? null;
+
+                dailySeries.push({
+                    date: day.toISOString(),
+                    stationId: station.id,
+                    cellId: project.analysisType === 'grid' ? task.id : undefined,
+                    indexValue: indexValue,
+                    isInterpolated: !hasRealValue,
+                    temperature: weatherDataMap.get(dateStr) ?? null,
+                });
+            }
+
+            // Interpolation step
+            for (let i = 0; i < dailySeries.length; i++) {
+                if (dailySeries[i].indexValue === null) {
+                    let prevIndex = i - 1;
+                    while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) prevIndex--;
                     
-                    const fraction = (currentTime - prevTime) / (nextTime - prevTime);
-                    dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
-                } else if (prevIndex >= 0) { // Extrapolate backward
-                    dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
-                } else if (nextIndex < dailySeries.length) { // Extrapolate forward
-                    dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
+                    let nextIndex = i + 1;
+                    while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) nextIndex++;
+                    
+                    if (prevIndex >= 0 && nextIndex < dailySeries.length) {
+                        const prevPoint = dailySeries[prevIndex];
+                        const nextPoint = dailySeries[nextIndex];
+                        if (prevPoint.indexValue !== null && nextPoint.indexValue !== null) {
+                            const prevValue = prevPoint.indexValue;
+                            const nextValue = nextPoint.indexValue;
+                            const prevTime = parseISO(prevPoint.date).getTime();
+                            const nextTime = parseISO(nextPoint.date).getTime();
+                            const currentTime = parseISO(dailySeries[i].date).getTime();
+                            const fraction = (currentTime - prevTime) / (nextTime - prevTime);
+                            dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
+                        }
+                    }
                 }
             }
-        }
-        return dailySeries;
+            return dailySeries;
+        });
+
+        const allTaskData = await Promise.all(allTaskDataPromises);
+        return allTaskData.flat();
     });
 
     const results = await Promise.all(stationPromises);
@@ -358,7 +318,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
-        const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
+        const bufferKm = 2.5;
 
         const requestBody = {
             input: {
