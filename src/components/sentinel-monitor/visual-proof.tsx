@@ -5,27 +5,28 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CloudOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
-export default async function VisualProof() {
-    // For simplicity, let's always get proof for the "Glacier" station
-    const project = PROJECTS.find(p => p.id === 'snow-watch');
-    const glacierStation = project?.stations.find(s => s.id === 'theodul');
+export default async function VisualProof({ projectId }: { projectId: string }) {
+    const project = PROJECTS.find(p => p.id === projectId);
 
-    if (!glacierStation) {
+    if (!project || project.stations.length === 0) {
         return null;
     }
 
-    const imageUrl = await getLatestVisual(glacierStation);
+    // Use the first station of the project for the visual proof.
+    const stationForVisual = project.stations[0]; 
+
+    const imageUrl = await getLatestVisual(stationForVisual);
 
     return (
         <Card className="bg-transparent border-0 shadow-none">
             <CardHeader className="p-0 mb-2">
-                <CardTitle className="text-sm font-semibold text-sidebar-foreground">Live Visual (Glacier)</CardTitle>
+                <CardTitle className="text-sm font-semibold text-sidebar-foreground">Live Visual ({stationForVisual.name})</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 {imageUrl ? (
                     <Image
                         src={imageUrl}
-                        alt="Latest satellite image of Theodul Glacier"
+                        alt={`Latest satellite image of ${stationForVisual.name}`}
                         width={512}
                         height={512}
                         className="rounded-md w-full h-auto"

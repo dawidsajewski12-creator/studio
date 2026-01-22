@@ -7,8 +7,8 @@ import { getBoundingBox } from './gis-utils';
 
 
 // --- Copernicus API Configuration ---
-const CLIENT_ID = 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
-const CLIENT_SECRET = 'puq9Q6mEsKWRb8AFrZPEBesBE0Dq8uwE';
+const CLIENT_ID = process.env.COPERNICUS_CLIENT_ID || 'sh-216e2f62-9d93-4534-9840-e2fba090196f';
+const CLIENT_SECRET = process.env.COPERNICUS_CLIENT_SECRET || 'puq9Q6mEsKWRb8AFrZPEBesBE0Dq8uwE';
 const TOKEN_URL = 'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
 const STATS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/statistics';
 const PROCESS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/process';
@@ -17,21 +17,27 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: ["B04", "B03", "B02"],
+    input: ["B04", "B03", "B02", "SCL"],
     output: {
       bands: 3,
       sampleType: "UINT8"
     }
   };
 }
+
 function evaluatePixel(sample) {
+  // Mask clouds and shadows
+  if ([3, 8, 9, 10].includes(sample.SCL)) {
+    // Return a transparent pixel for clouds/shadows
+    return [0,0,0,0];
+  }
   // Simple RGB with contrast enhancement
   return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02];
 }
 `;
 
 // --- Caching Configuration ---
-const CACHE_FILE = path.join(process.cwd(), 'snow_cache.json');
+const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
 type CacheData = {
     [stationId: string]: { date: string; value: number }[];
 };
@@ -105,9 +111,11 @@ const EVALSCRIPTS: Record<string, string> = {
     }
     function evaluatePixel(sample) {
       let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-      const isCloud = [3, 8, 9, 10].includes(sample.SCL);
-      const isNoData = [0, 1, 2, 7].includes(sample.SCL);
-      return { index: [ndci], dataMask: [isCloud || isNoData ? 0 : 1] };
+      // We want stats for pixels that are water (6) and not cloudy/no-data
+      const isWater = sample.SCL == 6;
+      const isCloudOrNodata = [0, 1, 2, 3, 7, 8, 9, 10].includes(sample.SCL);
+      const dataMask = isWater && !isCloudOrNodata ? 1 : 0;
+      return { index: [ndci], dataMask: [dataMask] };
     }`,
 };
 
@@ -243,7 +251,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
             if (!satelliteResponse.ok) {
                 console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
-                // Continue with cached data if available
             } else {
                 const apiResponse = await satelliteResponse.json();
                 const newSparseDataFromApi: { date: Date; value: number }[] = apiResponse.data
@@ -268,10 +275,9 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         }
         const sparseData = finalSparseData.filter(d => isSameDay(d.date, yearAgo) || isBefore(yearAgo, d.date));
         
-        // --- 2. Fetch Weather Data ---
-        const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
-
-        // --- 3. Fuse and Interpolate Data ---
+        const weatherStartDate = project.id === 'lake-quality' ? subDays(today, 365) : yearAgo;
+        const weatherDataMap = await fetchWeatherHistory(station, format(weatherStartDate, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
+        
         if (sparseData.length === 0) return [];
 
         const allDays = eachDayOfInterval({ start: yearAgo, end: today });
@@ -395,14 +401,18 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         });
 
         if (!response.ok || !response.body) {
-            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`);
+            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`, await response.text());
             return null;
         }
 
         const imageBlob = await response.blob();
         if (imageBlob.type !== 'image/png') {
             const errorText = await imageBlob.text();
-            console.error(`API returned an error instead of an image: ${errorText}`);
+            if (errorText.includes("No data found")) {
+                console.warn(`No cloud-free visual found for ${station.id} in the last 60 days.`);
+            } else {
+                console.error(`API returned an error instead of an image: ${errorText}`);
+            }
             return null;
         }
         

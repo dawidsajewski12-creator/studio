@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lightbulb, TestTube2 } from "lucide-react";
+import { TestTube2 } from "lucide-react";
 import { Separator } from "../ui/separator";
 
 const researchPosts = [
@@ -39,12 +39,16 @@ export default function MethodologyAndResearch() {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
                 <p>
-                    <strong>Monitoring Śniegu: NDSI vs. Obrazy RGB</strong><br/>
-                    Chociaż obrazy w naturalnych kolorach (RGB) są intuicyjne, mają ograniczenia w precyzyjnym mapowaniu pokrywy śnieżnej. Cień rzucany przez góry może być mylony ze śniegiem, a cienka warstwa śniegu bywa niewidoczna. Wskaźnik <strong>NDSI (Normalized Difference Snow Index)</strong> jest znacznie bardziej niezawodny, ponieważ wykorzystuje różnicę w odbiciu światła między pasmem światła widzialnego (zielonym) a krótkofalową podczerwienią (SWIR), gdzie śnieg silnie absorbuje promieniowanie.
+                    <strong>Monitoring Śniegu: NDSI (Normalized Difference Snow Index)</strong><br/>
+                    Chociaż obrazy w naturalnych kolorach (RGB) są intuicyjne, mają ograniczenia w precyzyjnym mapowaniu pokrywy śnieżnej. Cień rzucany przez góry może być mylony ze śniegiem, a cienka warstwa śniegu bywa niewidoczna. Wskaźnik NDSI jest znacznie bardziej niezawodny, ponieważ wykorzystuje różnicę w odbiciu światła między pasmem światła widzialnego (zielonym) a krótkofalową podczerwienią (SWIR), gdzie śnieg silnie absorbuje promieniowanie.
+                </p>
+                 <p>
+                    <strong>Monitoring Wody: NDCI (Normalized Difference Chlorophyll Index)</strong><br/>
+                    Wskaźnik NDCI jest używany do oceny stężenia chlorofilu-a w wodzie, co jest kluczowym wskaźnikiem obecności fitoplanktonu i potencjalnych zakwitów alg. Oblicza się go na podstawie różnicy w odbiciu światła między pasmem "red-edge" (B05) a pasmem czerwonym (B04). Wysokie wartości NDCI wskazują na dużą ilość chlorofilu i mogą sygnalizować ryzyko eutrofizacji (przeżyźnienia) zbiornika wodnego.
                 </p>
                 <p>
-                    <strong>Filtrowanie Chmur za pomocą SCL (Scene Classification Layer)</strong><br/>
-                    Dane z satelity Sentinel-2 zawierają warstwę klasyfikacji sceny (SCL), która identyfikuje każdy piksel jako np. roślinność, wodę, chmurę czy cień chmury. W naszej analizie aktywnie wykorzystujemy tę warstwę, aby maskować (usuwać) piksele oznaczone jako chmury. Gwarantuje to, że obliczenia wskaźnika NDSI są wykonywane tylko dla czystych, wolnych od chmur obserwacji, co znacząco podnosi jakość i wiarygodność danych.
+                    <strong>Filtrowanie Danych za pomocą SCL (Scene Classification Layer)</strong><br/>
+                    Dane z satelity Sentinel-2 zawierają warstwę klasyfikacji sceny (SCL), która identyfikuje każdy piksel jako np. roślinność, wodę, chmurę czy cień chmury. W naszej analizie aktywnie wykorzystujemy tę warstwę, aby maskować (usuwać) piksele niepożądane — np. chmury w przypadku analizy śniegu, czy ląd i chmury w przypadku analizy wody. Gwarantuje to, że obliczenia wskaźników są wykonywane tylko dla czystych, odpowiednich obserwacji, co znacząco podnosi jakość i wiarygodność danych.
                 </p>
             </CardContent>
         </Card>

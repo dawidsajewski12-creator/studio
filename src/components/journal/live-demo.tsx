@@ -4,7 +4,6 @@ import type { IndexDataPoint, KpiData, Project, Station } from '@/lib/types';
 import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
-import { parseISO } from 'date-fns';
 
 // Helper function to find the latest valid reading
 const getLatestReading = (data: IndexDataPoint[], stationId: Station['id']) => {
@@ -13,8 +12,8 @@ const getLatestReading = (data: IndexDataPoint[], stationId: Station['id']) => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 };
 
-export default async function LiveDemo() {
-  const project = PROJECTS.find(p => p.id === 'snow-watch');
+export default async function LiveDemo({ projectId }: { projectId: string }) {
+  const project = PROJECTS.find(p => p.id === projectId);
 
   if (!project) {
     notFound();
@@ -38,7 +37,7 @@ export default async function LiveDemo() {
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-6 md:p-8 bg-background">
       <div className="w-full max-w-screen-2xl">
         <header className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary font-headline">{project.name} (Live Demo)</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary font-headline">{project.name}</h1>
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </header>
         <Dashboard 
@@ -46,7 +45,7 @@ export default async function LiveDemo() {
           indexData={indexData}
           kpiData={kpiData}
         />
-        <TechnicalNote />
+        <TechnicalNote project={project} />
       </div>
     </div>
   );

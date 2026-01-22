@@ -66,14 +66,14 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
 
-  // Augment stations with BBox and latest NDSI for the map
+  // Augment stations with BBox and latest Index value for the map
   const stationsForMap = useMemo(() => {
     return project.stations.map(station => {
       const kpi = kpiData.find(k => k.stationId === station.id);
       return {
         ...station,
         bbox: getBoundingBox(station, 0.5),
-        latestNdsi: kpi?.latestIndexValue ?? null,
+        latestIndexValue: kpi?.latestIndexValue ?? null,
       };
     });
   }, [project.stations, kpiData]);
@@ -83,6 +83,7 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
       <Card className="xl:col-span-3 w-full h-[400px] xl:h-auto min-h-[400px] p-0 overflow-hidden shadow-lg">
         <MonitorMap
+          project={project}
           stations={stationsForMap}
           center={mapCenter}
           selectedStationId={selectedStation}

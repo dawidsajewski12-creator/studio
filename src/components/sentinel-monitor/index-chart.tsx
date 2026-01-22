@@ -33,12 +33,14 @@ const tempColor = 'hsl(var(--destructive))';
 const renderDot = (stationId: string) => (props: any) => {
   const { cx, cy, payload, stroke, index } = props;
   if (payload && !payload.isInterpolated && payload.stationId === stationId) {
-    return <Dot key={index} cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
+    return <Dot key={`dot-${index}`} cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
   }
   return null;
 };
 
 export default function IndexChart({ data, selectedStationId, project }: IndexChartProps) {
+  const isWaterProject = project.id === 'lake-quality';
+
   const { chartData, chartConfig, visibleStations, cloudFreeDaysCount } = useMemo(() => {
     const relevantData = selectedStationId === 'all'
       ? data
@@ -50,15 +52,13 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         acc[dateStr] = { date: dateStr };
       }
       
-      // Store index value for the station
       if (!acc[dateStr][curr.stationId]) {
          acc[dateStr][curr.stationId] = curr.indexValue;
-         // Pass the interpolation flag to the chart data
-         acc[dateStr][`${curr.stationId}_isInterpolated`] = curr.isInterpolated;
+         acc[dateStr].isInterpolated = curr.isInterpolated;
+         acc[dateStr].stationId = curr.stationId;
       }
       
-      // Average temperature if multiple stations are selected
-      if (selectedStationId === 'all') {
+      if (selectedStationId === 'all' && !isWaterProject) {
         if (!acc[dateStr].tempCount) {
           acc[dateStr].temperature = 0;
           acc[dateStr].tempCount = 0;
@@ -74,8 +74,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
       return acc;
     }, {} as any);
     
-    // Finalize temperature averaging
-    if (selectedStationId === 'all') {
+    if (selectedStationId === 'all' && !isWaterProject) {
         Object.values(groupedByDate).forEach((day: any) => {
             if (day.tempCount > 0) {
                 day.temperature = day.temperature / day.tempCount;
@@ -85,17 +84,14 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         });
     }
 
-
     const sortedChartData = Object.values(groupedByDate).sort(
       (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    const config: any = {
-      temperature: {
-        label: 'Temperature',
-        color: tempColor,
-      }
-    };
+    const config: any = {};
+    if (!isWaterProject) {
+        config.temperature = { label: 'Temperature', color: tempColor };
+    }
     project.stations.forEach((station, index) => {
       config[station.id] = {
         label: station.name,
@@ -110,18 +106,26 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
     const observationCount = data.filter(p => !p.isInterpolated).length;
 
     return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow, cloudFreeDaysCount: observationCount };
-  }, [data, project, selectedStationId]);
+  }, [data, project, selectedStationId, isWaterProject]);
   
   const selectedStationName = selectedStationId === 'all' 
     ? 'All stations' 
     : project.stations.find(s => s.id === selectedStationId)?.name;
 
+  const chartTitle = isWaterProject
+    ? `${project.index.name} Trend (Last 365 Days)`
+    : `${project.index.name} & Temp Trend (Last 365 Days)`;
+
+  const chartDescription = isWaterProject
+    ? `${project.index.name} for ${selectedStationName}.`
+    : `${project.index.name} and Mean Temperature for ${selectedStationName}.`;
+
   return (
     <>
       <CardHeader>
-        <CardTitle>{project.index.name} & Temp Trend (Last 365 Days)</CardTitle>
+        <CardTitle>{chartTitle}</CardTitle>
         <CardDescription>
-          {`${project.index.name} and Mean Temperature for ${selectedStationName}.`}
+          {chartDescription}
           <br />
           Suma dni bezchmurnych w roku (obserwacje): {cloudFreeDaysCount}
         </CardDescription>
@@ -144,19 +148,21 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              domain={[project.index.name === 'NDBI' ? -0.5 : 0, 1]}
+              domain={isWaterProject ? [-0.2, 0.4] : [project.index.name === 'NDBI' ? -0.5 : 0, 1]}
               style={{ fontSize: '0.75rem' }}
             />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              domain={[-20, 30]}
-              tickFormatter={(value) => `${value}°C`}
-              style={{ fontSize: '0.75rem' }}
-            />
+            {!isWaterProject && (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                domain={[-20, 30]}
+                tickFormatter={(value) => `${value}°C`}
+                style={{ fontSize: '0.75rem' }}
+              />
+            )}
             <ChartTooltip
               cursor={true}
               content={<ChartTooltipContent indicator="line" labelFormatter={(label, payload) => {
@@ -177,19 +183,25 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 yAxisId="left"
               />
             ))}
-             <Line
-                key="temperature"
-                type="monotone"
-                dataKey="temperature"
-                stroke={tempColor}
-                strokeWidth={1.5}
-                dot={false}
-                name="Avg. Temp"
-                connectNulls={true}
-                yAxisId="right"
-                strokeOpacity={0.8}
-            />
-            <ReferenceLine y={0} yAxisId="right" stroke={tempColor} strokeDasharray="3 3" strokeOpacity={0.5} />
+             {!isWaterProject && (
+                <Line
+                    key="temperature"
+                    type="monotone"
+                    dataKey="temperature"
+                    stroke={tempColor}
+                    strokeWidth={1.5}
+                    dot={false}
+                    name="Avg. Temp"
+                    connectNulls={true}
+                    yAxisId="right"
+                    strokeOpacity={0.8}
+                />
+             )}
+            {isWaterProject ? (
+              <ReferenceLine y={0.1} yAxisId="left" label={{ value: 'Algal Bloom Risk', position: 'insideTopRight', fill: 'hsl(var(--destructive))', fontSize: 12 }} stroke="hsl(var(--destructive))" strokeDasharray="4 4" />
+            ) : (
+              <ReferenceLine y={0} yAxisId="right" stroke={tempColor} strokeDasharray="3 3" strokeOpacity={0.5} />
+            )}
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>

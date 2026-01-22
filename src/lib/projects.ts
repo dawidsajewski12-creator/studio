@@ -3,7 +3,7 @@ import type { Project } from './types';
 export const PROJECTS: Project[] = [
   {
     id: 'snow-watch',
-    name: 'Snow Watch',
+    name: 'Alpine Snow Watch',
     description: 'Monitoring snow cover in high-altitude regions. (CH/IT)',
     index: { name: 'NDSI', unit: '' },
     stations: [
@@ -18,67 +18,20 @@ export const PROJECTS: Project[] = [
     }
   },
   {
-    id: 'vineyard-vitality',
-    name: 'Vineyard Vitality',
-    description: 'Assessing grapevine health and vigor. (FR/IT)',
-    index: { name: 'NDVI', unit: '' },
-    stations: [
-        { id: 'barolo', name: 'Barolo', location: { lat: 44.61, lng: 7.94 } },
-        { id: 'burgundy', name: 'Burgundy', location: { lat: 47.0, lng: 4.8 } },
-        { id: 'bordeaux', name: 'Bordeaux', location: { lat: 44.83, lng: -0.57 } },
-    ],
-    dataConfig: {
-        base: 0.4,
-        seasonalAmplitude: 0.3,
-        noise: 0.15
-    }
-  },
-  {
-    id: 'urban-greenery',
-    name: 'Urban Greenery',
-    description: 'Mapping green spaces in urban environments. (PL/FR)',
-    index: { name: 'NDBI', unit: '' },
-    stations: [
-        { id: 'warsaw', name: 'Warsaw', location: { lat: 52.23, lng: 21.01 } },
-        { id: 'paris', name: 'Paris', location: { lat: 48.85, lng: 2.35 } },
-        { id: 'krakow', name: 'Krakow', location: { lat: 50.06, lng: 19.94 } },
-    ],
-     dataConfig: {
-        base: 0.1,
-        seasonalAmplitude: 0.1,
-        noise: 0.05
-    }
-  },
-  {
-    id: 'river-drought',
-    name: 'River Drought',
-    description: 'Monitoring water levels in major rivers. (IT/PL)',
-    index: { name: 'NDWI', unit: '' },
-    stations: [
-        { id: 'po', name: 'Po River', location: { lat: 45.0, lng: 9.0 } },
-        { id: 'vistula', name: 'Vistula River', location: { lat: 54.3, lng: 18.9 } },
-        { id: 'tiber', name: 'Tiber River', location: { lat: 41.9, lng: 12.5 } },
-    ],
-    dataConfig: {
-        base: 0.2,
-        seasonalAmplitude: 0.25,
-        noise: 0.1
-    }
-  },
-  {
     id: 'lake-quality',
-    name: 'Lake Quality',
-    description: 'Assessing water quality in large lakes. (PL/CH)',
+    name: 'Lake Quality Monitor',
+    description: 'Monitoring chlorophyll concentration and algal blooms in lakes.',
     index: { name: 'NDCI', unit: '' },
     stations: [
-        { id: 'geneva', name: 'Lake Geneva', location: { lat: 46.45, lng: 6.5 } },
-        { id: 'sniardwy', name: 'Śniardwy Lake', location: { lat: 53.75, lng: 21.72 } },
-        { id: 'mamry', name: 'Mamry Lake', location: { lat: 54.1, lng: 21.8 } },
+        { id: 'geneva', name: 'Jezioro Genewskie (CH/FR)', location: { lat: 46.452, lng: 6.665 } },
+        { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
+        { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.755, lng: 21.725 } },
+        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL)', location: { lat: 54.316, lng: 19.554 } },
     ],
     dataConfig: {
-        base: 0.15,
-        seasonalAmplitude: 0.1,
-        noise: 0.08
+        base: 0.0,
+        seasonalAmplitude: 0.15,
+        noise: 0.05
     }
   },
 ];

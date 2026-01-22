@@ -2,14 +2,11 @@
 
 import Link from 'next/link';
 import { SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { Satellite, FileText, Mail } from 'lucide-react';
-import VisualProof from "./visual-proof";
-import { Suspense } from "react";
-import { Skeleton } from "../ui/skeleton";
-
+import { Satellite, FileText, Mail, Waves } from 'lucide-react';
 
 const navigationItems = [
-    { id: 'live-demo', name: '🏔️ Alpine Snow Watch (Live)', href: '/?view=live-demo', icon: <Satellite /> },
+    { id: 'snow-watch', name: '🏔️ Alpine Snow Watch', href: '/?view=snow-watch', icon: <Satellite /> },
+    { id: 'lake-quality', name: '💧 Lake Quality Monitor', href: '/?view=lake-quality', icon: <Waves /> },
     { id: 'research', name: '📄 Methodology & Research', href: '/?view=research', icon: <FileText /> },
     { id: 'contact', name: '📧 Kontakt', href: '/?view=contact', icon: <Mail /> },
 ]

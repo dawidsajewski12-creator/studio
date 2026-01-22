@@ -1,8 +1,8 @@
 "use client";
 
-import type { Station } from '@/lib/types';
+import type { Project, Station } from '@/lib/types';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
-import { Satellite } from 'lucide-react';
+import { Satellite, Waves, Leaf, Building2, Droplets } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import type { FeatureCollection } from 'geojson';
 import MapLegend from './map-legend';
@@ -28,12 +28,21 @@ const baseLayers = {
   }
 };
 
+const projectIcons: Record<string, React.ReactNode> = {
+  'snow-watch': <Satellite className="size-5" />,
+  'vineyard-vitality': <Leaf className="size-5" />,
+  'urban-greenery': <Building2 className="size-5" />,
+  'river-drought': <Droplets className="size-5" />,
+  'lake-quality': <Waves className="size-5" />,
+};
+
 type StationWithExtras = Station & { 
   bbox: [number, number, number, number];
-  latestNdsi: number | null;
+  latestIndexValue: number | null;
 };
 
 type MonitorMapProps = {
+  project: Project;
   stations: StationWithExtras[];
   center: { lat: number; lng: number };
   selectedStationId: Station['id'] | 'all';
@@ -55,7 +64,7 @@ const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: strin
   </div>
 );
 
-export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
+export default function MonitorMap({ project, stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
   const [activeLayerKey, setActiveLayerKey] = useState('topo');
 
@@ -67,7 +76,7 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
         type: 'Feature',
         properties: { 
           id: station.id,
-          ndsiValue: station.latestNdsi,
+          indexValue: station.latestIndexValue,
         },
         geometry: {
           type: 'Polygon',
@@ -85,57 +94,76 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
     })
   }), [stations]);
 
-  const mapStyle = useMemo(() => ({
-    version: 8,
-    sources: {
-      'base-tiles': {
-        type: 'raster',
-        tiles: [baseLayers[activeLayerKey as keyof typeof baseLayers].url.replace('{s}', 'a')],
-        tileSize: 256,
-        attribution: baseLayers[activeLayerKey as keyof typeof baseLayers].attribution
-      },
-      'station-bboxes': {
-        type: 'geojson',
-        data: geojson
-      }
-    },
-    layers: [
-      { id: 'base-tiles', type: 'raster', source: 'base-tiles' },
-      {
-        id: 'bboxes-fill',
-        type: 'fill',
-        source: 'station-bboxes',
-        paint: {
-          'fill-color': [
+  const mapStyle = useMemo(() => {
+    let fillColorExpression: any[];
+
+    if (project.id === 'lake-quality') {
+        fillColorExpression = [
             'case',
-            ['==', ['coalesce', ['get', 'ndsiValue'], -999], -999], '#FF0000',
-            ['<', ['get', 'ndsiValue'], 0.2], '#8B4513',
-            ['<=', ['get', 'ndsiValue'], 0.5], '#00FFFF',
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000', // Missing data -> Red
+            ['<', ['get', 'indexValue'], 0.0], '#0000FF',  // < 0.0: Blue (Clean water)
+            ['<=', ['get', 'indexValue'], 0.1], '#00FFFF', // 0.0-0.1: Turquoise (Turbid)
+            ['<=', ['get', 'indexValue'], 0.2], '#00FF00', // 0.1-0.2: Green (Bloom risk)
+            '#A52A2A' // > 0.2: Red/Brown (Strong bloom)
+        ];
+    } else { // Default to snow-watch
+        fillColorExpression = [
+            'case',
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000',
+            ['<', ['get', 'indexValue'], 0.2], '#8B4513',
+            ['<=', ['get', 'indexValue'], 0.5], '#00FFFF',
             '#4169E1'
-          ],
-          'fill-opacity': [
-            'case',
-            ['==', ['coalesce', ['get', 'ndsiValue'], -999], -999], 0.5,
-            0.7
-          ]
-        }
-      },
-      {
-        id: 'bboxes-outline',
-        type: 'line',
-        source: 'station-bboxes',
-        paint: {
-          'line-color': '#000000',
-          'line-width': 3,
-          'line-opacity': 0.8
-        }
-      }
-    ]
-  }), [geojson, activeLayerKey]);
+        ];
+    }
+
+    return {
+        version: 8,
+        sources: {
+            'base-tiles': {
+                type: 'raster',
+                tiles: [baseLayers[activeLayerKey as keyof typeof baseLayers].url.replace('{s}', 'a')],
+                tileSize: 256,
+                attribution: baseLayers[activeLayerKey as keyof typeof baseLayers].attribution
+            },
+            'station-bboxes': {
+                type: 'geojson',
+                data: geojson
+            }
+        },
+        layers: [
+            { id: 'base-tiles', type: 'raster', source: 'base-tiles' },
+            {
+                id: 'bboxes-fill',
+                type: 'fill',
+                source: 'station-bboxes',
+                paint: {
+                    'fill-color': fillColorExpression,
+                    'fill-opacity': [
+                        'case',
+                        ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 0.5,
+                        0.7
+                    ]
+                }
+            },
+            {
+                id: 'bboxes-outline',
+                type: 'line',
+                source: 'station-bboxes',
+                paint: {
+                    'line-color': '#000000',
+                    'line-width': 3,
+                    'line-opacity': 0.8
+                }
+            }
+        ]
+    };
+  }, [geojson, activeLayerKey, project.id]);
+
+  const markerIcon = projectIcons[project.id] || <Satellite className="size-5" />;
 
   return (
     <Map
-      key={`${center.lat}-${center.lng}-${activeLayerKey}`}
+      key={`${center.lat}-${center.lng}-${activeLayerKey}-${project.id}`}
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
@@ -145,7 +173,7 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
       mapStyle={mapStyle}
       attributionControl={true}
     >
-      <MapLegend />
+      <MapLegend projectId={project.id} />
       <LayerControl activeLayerKey={activeLayerKey} onLayerChange={setActiveLayerKey} />
       
       {stations.map((station) => (
@@ -165,7 +193,7 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
                 ? 'bg-accent text-accent-foreground ring-2 ring-accent'
                 : 'bg-card text-card-foreground shadow-md'
             }`}>
-                 <Satellite className="size-5" />
+                 {markerIcon}
             </div>
         </Marker>
       ))}
