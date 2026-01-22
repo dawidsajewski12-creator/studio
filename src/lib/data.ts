@@ -111,8 +111,8 @@ const EVALSCRIPTS: Record<string, string> = {
       };
     }
     function evaluatePixel(sample) {
-      // Allow Water(6), Vegetation(4), and Not Vegetated(5) to capture thick algal blooms.
-      const isValid = [4, 5, 6].includes(sample.SCL);
+      // Allow Water(6), Vegetation(4), Bare Soil(5), Dark Area(2), and Unclassified(7) to capture thick algal blooms and winter conditions.
+      const isValid = [2, 4, 5, 6, 7].includes(sample.SCL);
       if (!isValid) {
         return { dataMask: [0] };
       }
