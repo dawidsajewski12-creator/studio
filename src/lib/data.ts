@@ -317,7 +317,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         if (!project) return null;
         
         // Always use a consistent, smaller bounding box for visual proofs to avoid API errors.
-        const bufferKm = 2.5; // Creates a ~5km x 5km box
+        const bufferKm = 1.4; // Creates a ~2.8km x 2.8km box
         const { lat, lng } = station.location;
         const buffer = bufferKm / 111.32;
         const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
