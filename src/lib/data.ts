@@ -19,20 +19,32 @@ function setup() {
   return {
     input: ["B04", "B03", "B02", "SCL"],
     output: {
-      bands: 3,
+      bands: 4, // R, G, B, A for transparency
       sampleType: "UINT8"
     }
   };
 }
 
+const gain = 2.5;
+
 function evaluatePixel(sample) {
-  // Mask clouds and shadows
-  if ([3, 8, 9, 10].includes(sample.SCL)) {
-    // Return a transparent pixel for clouds/shadows
-    return [0,0,0,0];
+  // Mask clouds, shadows, and snow
+  if ([3, 8, 9, 10, 11].includes(sample.SCL)) {
+    return [0, 0, 0, 0]; // Return a transparent pixel
   }
-  // Simple RGB with contrast enhancement
-  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02];
+
+  // Scale reflectance values (0-10000 range) to 0-255 for UINT8 output
+  // A simple linear stretch for visualization purposes. 3000 is a reasonable upper value for bright surfaces.
+  let r = 255 * (gain * sample.B04 / 3000);
+  let g = 255 * (gain * sample.B03 / 3000);
+  let b = 255 * (gain * sample.B02 / 3000);
+
+  return [
+      Math.max(0, Math.min(255, r)), 
+      Math.max(0, Math.min(255, g)), 
+      Math.max(0, Math.min(255, b)), 
+      255 // full opacity
+  ];
 }
 `;
 
