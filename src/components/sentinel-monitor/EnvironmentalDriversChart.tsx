@@ -41,13 +41,33 @@ const renderDot = (props: any) => {
 
 export default function EnvironmentalDriversChart({ data, aggregatedData, selectedStationId, project }: ChartProps) {
   const isLakeProject = project.id.includes('lake');
+  const isVineyardProject = project.id.includes('vineyard');
 
   const { chartData, chartConfig, visibleLines } = useMemo(() => {
     let finalChartData: any[] = [];
     const config: any = {};
     const lines: { dataKey: string, color: string, name: string, yAxis: 'left' | 'right' }[] = [];
 
-    if (isLakeProject && aggregatedData) {
+    if (isVineyardProject) {
+        const stationData = selectedStationId === 'all'
+            ? data.filter(d => d.stationId === project.stations[0].id)
+            : data.filter(d => d.stationId === selectedStationId);
+        
+        finalChartData = stationData.map(d => ({
+            date: format(parseISO(d.date), 'yyyy-MM-dd'),
+            ndvi: d.indexValue,
+            ndmi: d.ndmiValue,
+            temperature: d.temperature,
+        }));
+
+        config.ndvi = { label: "NDVI", color: "hsl(var(--chart-1))" };
+        config.ndmi = { label: "NDMI", color: "hsl(var(--chart-2))" };
+        config.temperature = { label: "Temperature", color: tempColor };
+
+        lines.push({ dataKey: "ndvi", color: config.ndvi.color, name: "NDVI (Vegetation)", yAxis: "left"});
+        lines.push({ dataKey: "ndmi", color: config.ndmi.color, name: "NDMI (Moisture)", yAxis: "left"});
+        lines.push({ dataKey: "temperature", color: tempColor, name: "Temperature", yAxis: "right"});
+    } else if (isLakeProject && aggregatedData) {
         const selectedPointData = selectedStationId !== 'all' 
             ? data.filter(d => d.stationId === selectedStationId)
             : [];
@@ -102,10 +122,16 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
     }
 
     return { chartData: finalChartData, chartConfig: config, visibleLines: lines };
-  }, [data, aggregatedData, selectedStationId, project, isLakeProject]);
+  }, [data, aggregatedData, selectedStationId, project, isLakeProject, isVineyardProject]);
   
-  const title = isLakeProject ? "Environmental Drivers" : "NDSI & Temperature Trend";
-  const description = isLakeProject ? "Correlation between water temperature and average algal concentration (NDCI)." : `Snow index and mean temperature for ${selectedStationId === 'all' ? 'All Stations' : project.stations.find(s=>s.id === selectedStationId)?.name}.`;
+  const title = isVineyardProject ? "Vineyard Health Indices" : isLakeProject ? "Environmental Drivers" : "NDSI & Temperature Trend";
+  const description = isVineyardProject
+    ? `Vegetation (NDVI) & Moisture (NDMI) trends for ${selectedStationId === 'all' ? project.stations[0].name : project.stations.find(s=>s.id === selectedStationId)?.name}.`
+    : isLakeProject
+    ? "Correlation between water temperature and average algal concentration (NDCI)."
+    : `Snow index and mean temperature for ${selectedStationId === 'all' ? 'All Stations' : project.stations.find(s=>s.id === selectedStationId)?.name}.`;
+
+  const leftDomain = isVineyardProject ? [0, 1] : isLakeProject ? [-0.2, 0.4] : [0, 1];
 
   return (
     <>
@@ -131,7 +157,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              domain={isLakeProject ? [-0.2, 0.4] : [0, 1]}
+              domain={leftDomain}
               style={{ fontSize: '0.75rem' }}
             />
             <YAxis

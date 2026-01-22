@@ -22,7 +22,6 @@ const getDailyLakeAverage = (dataForDay: IndexDataPoint[], totalPoints: number) 
 const calculateBloomProbability = (ndci: number | null, temp: number | null): number | null => {
     if (ndci === null || temp === null) return null;
 
-    // Step A: Thermal Factor
     let thermalFactor = 0;
     if (temp >= 12 && temp <= 25) {
         thermalFactor = (temp - 12) / 13;
@@ -30,7 +29,6 @@ const calculateBloomProbability = (ndci: number | null, temp: number | null): nu
         thermalFactor = 1.0;
     }
 
-    // Step B: Biomass Factor (Normalized NDCI)
     let biomassFactor = 0;
     if (ndci > 0 && ndci <= 0.4) {
         biomassFactor = ndci / 0.4;
@@ -38,7 +36,6 @@ const calculateBloomProbability = (ndci: number | null, temp: number | null): nu
         biomassFactor = 1.0;
     }
 
-    // Step C: Final Probability
     return thermalFactor * biomassFactor * 100;
 };
 
@@ -130,6 +127,21 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
       const { aggregatedData, kpi } = processLakeAnalytics(rawIndexData, project.stations.length);
       kpiData.push(kpi);
       chartData = { raw: rawIndexData, aggregated: aggregatedData.filter(d => d.temperature !== null && d.indexValue !== null) };
+  } else if (project.id.includes('vineyard')) {
+    kpiData = project.stations.map(station => {
+        const stationData = rawIndexData.filter(d => d.stationId === station.id);
+        const latestReading = [...stationData]
+          .filter(d => d.indexValue !== null && !d.isInterpolated)
+          .pop();
+        return {
+            stationId: station.id,
+            name: station.name,
+            latestIndexValue: latestReading?.indexValue ?? null,
+            latestNdmiValue: latestReading?.ndmiValue ?? null,
+            latestDate: latestReading?.date ?? null,
+        }
+    });
+    chartData = { raw: rawIndexData, aggregated: [] };
   } else { 
       kpiData = project.stations.map(station => {
           const stationData = rawIndexData.filter(d => d.stationId === station.id);

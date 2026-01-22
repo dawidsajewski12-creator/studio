@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 type KpiCardProps = {
   title: string;
   value: string | number;
+  ndmiValue?: string | number | null;
   date: string | null;
   icon: React.ReactNode;
   onClick: () => void;
@@ -14,7 +15,7 @@ type KpiCardProps = {
   coverage?: number | null;
 };
 
-export default function KpiCard({ title, value, date, icon, onClick, isSelected, coverage }: KpiCardProps) {
+export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, isSelected, coverage }: KpiCardProps) {
     const coverageText = coverage !== null && coverage !== undefined
     ? `Pokrycie: ${coverage.toFixed(0)}%`
     : null;
@@ -32,8 +33,15 @@ export default function KpiCard({ title, value, date, icon, onClick, isSelected,
         {icon}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-primary">{value}</div>
-        <p className="text-xs text-muted-foreground">
+        {ndmiValue !== undefined ? (
+            <>
+                <div className="text-xl font-bold text-primary">{`NDVI: ${value}`}</div>
+                <div className="text-xl font-bold text-muted-foreground">{`NDMI: ${ndmiValue}`}</div>
+            </>
+        ) : (
+            <div className="text-2xl font-bold text-primary">{value}</div>
+        )}
+        <p className="text-xs text-muted-foreground mt-1">
           {date ? `📅 Dane z dnia: ${format(parseISO(date), 'yyyy-MM-dd')}` : 'Brak aktualnych danych'}
         </p>
          {coverageText && (

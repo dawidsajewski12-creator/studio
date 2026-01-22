@@ -1,4 +1,3 @@
-
 import type { Project, IndexDataPoint, Station } from './types';
 import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDays, addDays, isBefore } from 'date-fns';
 import { promises as fs } from 'fs';
@@ -18,72 +17,46 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: [
-      { bands: ["B04", "B03", "B02", "SCL"], units: "DN" }
-    ],
-    output: {
-      bands: 4,
-      sampleType: "UINT8"
-    }
+    input: [{ bands: ["B04", "B03", "B02", "SCL"], units: "DN" }],
+    output: { bands: 4, sampleType: "UINT8" }
   };
 }
 
 function evaluatePixel(sample) {
-  if ([1, 3, 8, 9, 10, 11].includes(sample.SCL)) {
+  if ([3, 8, 9, 10, 11].includes(sample.SCL) || sample.SCL === 1) { 
     return [0, 0, 0, 0];
   }
+  
   const gain = 2.5;
-  let r = 255 * (gain * sample.B04 / 3000);
-  let g = 255 * (gain * sample.B03 / 3000);
-  let b = 255 * (gain * sample.B02 / 3000);
-  return [
-      Math.max(0, Math.min(255, r)), 
-      Math.max(0, Math.min(255, g)), 
-      Math.max(0, Math.min(255, b)), 
-      255
-  ];
+  const r = Math.max(0, Math.min(255, 255 * (gain * sample.B04 / 3000)));
+  const g = Math.max(0, Math.min(255, 255 * (gain * sample.B03 / 3000)));
+  const b = Math.max(0, Math.min(255, 255 * (gain * sample.B02 / 3000)));
+
+  return [r, g, b, 255];
 }
 `;
 
 // --- Caching Configuration ---
 const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
 type CacheData = {
-    [id: string]: { date: string; value: number | null }[]; // id can be stationId or cellId
+    [id: string]: { date: string; value: number | null; ndmiValue?: number | null }[];
 };
 
 
 // --- Evalscripts for different indices ---
 const EVALSCRIPTS: Record<string, string> = {
   NDSI: `
-    //VERSION=3
-    function setup() {
-      return {
-        input: [{ bands: ["B03", "B11", "SCL"], units: "DN" }],
-        output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-      };
-    }
-    function evaluatePixel(sample) {
-      let ndsi = (sample.B03 - sample.B11) / (sample.B03 + sample.B11);
-      const isCloud = [3, 8, 9, 10].includes(sample.SCL);
-      const isNoData = [0, 1, 2, 7].includes(sample.SCL);
-      return { index: [ndsi], dataMask: [isCloud || isNoData ? 0 : 1] };
-    }`,
+//VERSION=3
+function setup(){return{input:[{bands:["B03","B11","SCL"],units:"DN"}],output:[{id:"index",bands:1,sampleType:"FLOAT32"},{id:"dataMask",bands:1,sampleType:"UINT8"}]}}
+function evaluatePixel(e){let t=(e.B03-e.B11)/(e.B03+e.B11);return{index:[t],dataMask:[[3,8,9,10].includes(e.SCL)||0==e.B03&&0==e.B11?0:1]}}`,
   NDCI: `
-    //VERSION=3
-    function setup() {
-        return {
-            input: [{ bands: ["B04", "B05", "SCL"], units: "DN" }],
-            output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-        };
-    }
-    function evaluatePixel(sample) {
-        const isWaterLike = [2, 4, 5, 6, 7].includes(sample.SCL);
-        if (isWaterLike) {
-          let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-          return { index: [ndci], dataMask: [1] };
-        }
-        return { index: [0], dataMask: [0] };
-    }`,
+//VERSION=3
+function setup(){return{input:[{bands:["B04","B05","SCL"],units:"DN"}],output:[{id:"index",bands:1,sampleType:"FLOAT32"},{id:"dataMask",bands:1,sampleType:"UINT8"}]}}
+function evaluatePixel(e){if([2,4,5,6,7].includes(e.SCL)){let t=(e.B05-e.B04)/(e.B05+e.B04);return{index:[t],dataMask:[1]}}return{index:[0],dataMask:[0]}}`,
+  "NDVI/NDMI": `
+//VERSION=3
+function setup(){return{input:[{bands:["B04","B08","B11","SCL"],units:"DN"}],output:[{id:"INDICES",bands:2,sampleType:"FLOAT32"}]}}
+function evaluatePixel(e){if(![4,5].includes(e.SCL))return{INDICES:[NaN,NaN]};let t=(e.B08-e.B04)/(e.B08+e.B04),a=(e.B08-e.B11)/(e.B08+e.B11);return{INDICES:[t,a]}}`,
 };
 
 // --- API Helper Functions ---
@@ -128,7 +101,7 @@ async function fetchWeatherHistory(station: Station, startDate: string, endDate:
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_mean`;
   
   try {
-    const response = await fetch(url, { next: { revalidate: 86400 } }); // Cache weather data for a day
+    const response = await fetch(url, { next: { revalidate: 86400 } });
     if (!response.ok) {
       console.error(`Failed to fetch weather data for station ${station.id}: ${response.statusText}`);
       return new Map();
@@ -145,7 +118,6 @@ async function fetchWeatherHistory(station: Station, startDate: string, endDate:
   }
 }
 
-// This function fetches and processes data from the Copernicus and Open-Meteo APIs.
 export async function getProjectData(project: Project): Promise<IndexDataPoint[]> {
   try {
     const token = await getToken();
@@ -157,7 +129,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         throw new Error(`No evalscript found for index: ${project.index.name}`);
     }
     
-    // --- Caching Logic ---
     let cache: CacheData = {};
     try {
         const cacheFileContent = await fs.readFile(CACHE_FILE, 'utf-8');
@@ -167,7 +138,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     }
     let isCacheUpdated = false;
 
-    // --- OPTIMIZATION: Fetch weather data once per project ---
     const representativeStation = project.stations[0];
     const weatherDataMap = representativeStation 
         ? await fetchWeatherHistory(representativeStation, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'))
@@ -179,7 +149,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         
         const allTaskDataPromises = fetchTasks.map(async (task) => {
             const taskCache = cache[task.cellId] || [];
-            let sparseDataFromCache: { date: Date; value: number | null }[] = [];
+            let sparseDataFromCache: { date: Date; value: number | null; ndmiValue?: number | null }[] = [];
             let fetchFromDate = yearAgo;
             let needsApiCall = true;
 
@@ -188,7 +158,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                 const lastRecordedDate = parseISO(sortedTaskCache[sortedTaskCache.length - 1].date);
                 const daysDiff = differenceInDays(today, lastRecordedDate);
                 
-                sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value }));
+                sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value, ndmiValue: d.ndmiValue }));
 
                 if (daysDiff < 7) {
                     needsApiCall = false;
@@ -224,22 +194,28 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                     console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
                 } else {
                     const apiResponse = await satelliteResponse.json();
-                    const newSparseDataFromApi: { date: Date; value: number | null }[] = apiResponse.data
+                    const newSparseDataFromApi = apiResponse.data
                         .map((item: any) => {
-                            const stats = item.outputs.index.bands.B0.stats;
-                            if (stats && stats.sampleCount > 0 && stats.mean !== null && !isNaN(stats.mean) && stats.mean !== -Infinity && stats.mean !== Infinity) {
-                                return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
+                            if (project.index.name === 'NDVI/NDMI') {
+                                const statsNdvi = item.outputs.INDICES.bands.B0.stats;
+                                const statsNdmi = item.outputs.INDICES.bands.B1.stats;
+                                const ndvi = (statsNdvi.sampleCount > 0 && statsNdvi.mean !== null && !isNaN(statsNdvi.mean)) ? Math.max(-1, Math.min(1, statsNdvi.mean)) : null;
+                                const ndmi = (statsNdmi.sampleCount > 0 && statsNdmi.mean !== null && !isNaN(statsNdmi.mean)) ? Math.max(-1, Math.min(1, statsNdmi.mean)) : null;
+                                return { date: parseISO(item.interval.from), value: ndvi, ndmiValue: ndmi };
+                            } else {
+                                const stats = item.outputs.index.bands.B0.stats;
+                                const value = (stats && stats.sampleCount > 0 && stats.mean !== null && !isNaN(stats.mean)) ? Math.max(-1, Math.min(stats.mean, 1)) : null;
+                                return { date: parseISO(item.interval.from), value };
                             }
-                            return { date: parseISO(item.interval.from), value: null };
                         });
 
                     if (newSparseDataFromApi.length > 0) {
                         isCacheUpdated = true;
                         const combinedData = [...finalSparseData, ...newSparseDataFromApi];
-                        const dataMap = new Map<string, { date: Date; value: number | null }>();
+                        const dataMap = new Map<string, { date: Date; value: number | null; ndmiValue?: number | null }>();
                         combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
                         finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
-                        cache[task.cellId] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
+                        cache[task.cellId] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value, ndmiValue: d.ndmiValue }));
                     }
                 }
             }
@@ -249,24 +225,24 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             
             const allDays = eachDayOfInterval({ start: yearAgo, end: today });
             const dailySeries: IndexDataPoint[] = [];
-            const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), d.value]));
+            const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), { value: d.value, ndmiValue: d.ndmiValue }]));
 
             for (const day of allDays) {
                 const dateStr = format(day, 'yyyy-MM-dd');
-                const hasRealValue = sparseDataMap.has(dateStr);
-                const indexValue = sparseDataMap.get(dateStr) ?? null;
+                const dataPoint = sparseDataMap.get(dateStr);
 
                 dailySeries.push({
                     date: day.toISOString(),
                     stationId: station.id,
                     cellId: task.cellId,
-                    indexValue: indexValue,
-                    isInterpolated: !hasRealValue,
+                    indexValue: dataPoint?.value ?? null,
+                    ndmiValue: dataPoint?.ndmiValue ?? null,
+                    isInterpolated: !dataPoint,
                     temperature: weatherDataMap.get(dateStr) ?? null,
                 });
             }
 
-            // Interpolation step
+            // Interpolation step for primary index
             for (let i = 0; i < dailySeries.length; i++) {
                 if (dailySeries[i].indexValue === null) {
                     let prevIndex = i - 1;
@@ -279,13 +255,29 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                         const prevPoint = dailySeries[prevIndex];
                         const nextPoint = dailySeries[nextIndex];
                         if (prevPoint.indexValue !== null && nextPoint.indexValue !== null) {
-                            const prevValue = prevPoint.indexValue;
-                            const nextValue = nextPoint.indexValue;
-                            const prevTime = parseISO(prevPoint.date).getTime();
-                            const nextTime = parseISO(nextPoint.date).getTime();
-                            const currentTime = parseISO(dailySeries[i].date).getTime();
-                            const fraction = (currentTime - prevTime) / (nextTime - prevTime);
-                            dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
+                             const fraction = (parseISO(dailySeries[i].date).getTime() - parseISO(prevPoint.date).getTime()) / (parseISO(nextPoint.date).getTime() - parseISO(prevPoint.date).getTime());
+                            dailySeries[i].indexValue = prevPoint.indexValue + fraction * (nextPoint.indexValue - prevPoint.indexValue);
+                        }
+                    }
+                }
+            }
+             // Interpolation step for secondary index (NDMI)
+            if (project.index.name === 'NDVI/NDMI') {
+                for (let i = 0; i < dailySeries.length; i++) {
+                    if (dailySeries[i].ndmiValue === null) {
+                        let prevIndex = i - 1;
+                        while (prevIndex >= 0 && dailySeries[prevIndex].ndmiValue === null) prevIndex--;
+                        
+                        let nextIndex = i + 1;
+                        while (nextIndex < dailySeries.length && dailySeries[nextIndex].ndmiValue === null) nextIndex++;
+                        
+                        if (prevIndex >= 0 && nextIndex < dailySeries.length) {
+                             const prevPoint = dailySeries[prevIndex];
+                            const nextPoint = dailySeries[nextIndex];
+                            if (prevPoint.ndmiValue !== null && nextPoint.ndmiValue !== null) {
+                                 const fraction = (parseISO(dailySeries[i].date).getTime() - parseISO(prevPoint.date).getTime()) / (parseISO(nextPoint.date).getTime() - parseISO(prevPoint.date).getTime());
+                                dailySeries[i].ndmiValue = prevPoint.ndmiValue + fraction * (nextPoint.ndmiValue - prevPoint.ndmiValue);
+                            }
                         }
                     }
                 }
@@ -325,16 +317,14 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
         
-        const bufferKm = 0.5; // Creates a ~1km x 1km box
+        const bufferKm = 0.5;
         const { lat, lng } = station.location;
         const buffer = bufferKm / 111.32;
         const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
 
         const requestBody = {
             input: {
-                bounds: {
-                    bbox
-                },
+                bounds: { bbox },
                 data: [{
                     type: "sentinel-2-l2a",
                     dataFilter: {
@@ -377,13 +367,18 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
             } else {
                 console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`, errorBodyText);
             }
-            return null; // Return null in any error case.
+            return null;
         }
 
         const imageBlob = await response.blob();
         
         if (imageBlob.type !== 'image/png') {
-            console.error(`API returned an unexpected content type: ${imageBlob.type}`);
+            const errorBodyText = await imageBlob.text();
+            if (errorBodyText.includes("No data found")) {
+                console.warn(`No cloud-free visual found for ${station.id} (after checking blob).`);
+            } else {
+                 console.error(`API returned an unexpected content type: ${imageBlob.type}`, errorBodyText);
+            }
             return null;
         }
         

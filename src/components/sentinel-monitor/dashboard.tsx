@@ -23,7 +23,6 @@ const ChartLoader = () => (
 
 const EnvironmentalDriversChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
 const BloomProbabilityChart = dynamic(() => import('@/components/sentinel-monitor/BloomProbabilityChart'), { ssr: false, loading: ChartLoader });
-const IndexChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
 
 
 type DashboardProps = {
@@ -34,8 +33,8 @@ type DashboardProps = {
 
 const projectIcons: Record<string, React.ReactNode> = {
   'snow-watch': <Satellite className="size-6 text-primary" />,
-  'vineyard-vitality': <Leaf className="size-6 text-primary" />,
-  'urban-greenery': <Droplets className="size-6 text-primary" />,
+  'tuscany-vineyard': <Leaf className="size-6 text-primary" />,
+  'bordeaux-vineyard': <Leaf className="size-6 text-primary" />,
   'maggiore-lake': <Waves className="size-6 text-primary" />,
   'sniardwy-lake': <Waves className="size-6 text-primary" />,
 };
@@ -59,7 +58,10 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
 
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
-  const initialZoom = useMemo(() => project.id.includes('lake') ? 10 : 9, [project.id]);
+  const initialZoom = useMemo(() => project.id.includes('lake') ? 10 : project.id.includes('vineyard') ? 12 : 9, [project.id]);
+  const isLakeProject = project.id.includes('lake');
+  const isVineyardProject = project.id.includes('vineyard');
+
 
   const mapFeatures = useMemo(() => {
     return project.stations.map(station => {
@@ -104,6 +106,7 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
               key={kpi.stationId}
               title={kpi.name}
               value={kpi.latestIndexValue !== null ? kpi.latestIndexValue.toFixed(3) : 'N/A'}
+              ndmiValue={kpi.latestNdmiValue !== undefined ? (kpi.latestNdmiValue !== null ? kpi.latestNdmiValue.toFixed(3) : 'N/A') : undefined}
               date={kpi.latestDate}
               icon={stationIcon}
               onClick={() => handleKpiClick(kpi.stationId)}
@@ -112,7 +115,7 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
             />
           ))}
         </div>
-        {project.id.includes('lake') ? (
+        {isLakeProject ? (
           <>
             <Card>
                 <EnvironmentalDriversChart data={chartData.raw} aggregatedData={chartData.aggregated} selectedStationId={selectedStation} project={project} />
@@ -123,7 +126,7 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
           </>
         ) : (
           <Card className="flex-grow">
-              <IndexChart data={chartData.raw} selectedStationId={selectedStation} project={project} />
+              <EnvironmentalDriversChart data={chartData.raw} selectedStationId={selectedStation} project={project} />
           </Card>
         )}
       </div>
