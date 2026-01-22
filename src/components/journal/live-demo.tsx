@@ -129,6 +129,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
           <p className="text-muted-foreground mt-1">{project.description}</p>
         </header>
         <Dashboard 
+          key={project.id}
           project={project}
           chartData={chartData}
           kpiData={kpiData}
