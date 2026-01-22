@@ -28,17 +28,31 @@ export const PROJECTS: Project[] = [
         { 
             id: 'maggiore', 
             name: 'Jezioro Maggiore (IT/CH)', 
-            location: { lat: 45.975, lng: 8.65 },
+            location: { lat: 45.965, lng: 8.634 },
             bbox: [8.48, 45.8, 8.8, 46.15],
-            gridShape: [8, 12]
+            gridShape: [6, 10]
         },
         { 
             id: 'sniardwy', 
             name: 'Jezioro Śniardwy (PL)', 
-            location: { lat: 53.755, lng: 21.725 },
+            location: { lat: 53.760, lng: 21.730 },
             bbox: [21.55, 53.7, 21.85, 53.8],
             gridShape: [8, 5]
         },
+        {
+            id: 'mar-menor',
+            name: 'Mar Menor (ES) [Hotspot]',
+            location: { lat: 37.730, lng: -0.780 },
+            bbox: [-0.9, 37.65, -0.7, 37.85],
+            gridShape: [5, 4]
+        },
+        {
+            id: 'balaton',
+            name: 'Jezioro Balaton (HU)',
+            location: { lat: 46.900, lng: 17.800 },
+            bbox: [17.6, 46.8, 18.0, 47.0],
+            gridShape: [8, 5]
+        }
     ],
     dataConfig: {
         base: 0.0,

@@ -68,12 +68,18 @@ const EVALSCRIPTS: Record<string, string> = {
         };
     }
     function evaluatePixel(sample) {
-        const isWaterOrAlgae = [2, 4, 5, 6, 7].includes(sample.SCL);
-        if (!isWaterOrAlgae) {
-            return { index: [0], dataMask: [0] };
+        // Relaxed water mask to include potential algal blooms misclassified as vegetation/soil
+        // and dark water areas common in winter.
+        // SCL Classes: 2(Dark Area), 4(Vegetation), 5(Bare Soil), 6(Water)
+        const isWaterOrAlgae = [2, 4, 5, 6].includes(sample.SCL);
+        
+        if (isWaterOrAlgae) {
+          let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
+          return { index: [ndci], dataMask: [1] };
         }
-        let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-        return { index: [ndci], dataMask: [1] };
+    
+        // For all other pixels (clouds, shadow, etc.), return a masked value.
+        return { index: [0], dataMask: [0] };
     }`,
 };
 
@@ -358,7 +364,6 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
                 'Content-Type': 'application/json',
                 'Accept': 'image/png'
             },
-            body: JSON.stringify(requestBody),
             cache: 'no-store',
         });
 
