@@ -1,10 +1,9 @@
 import type { Project } from './types';
 
 const maggioreStations = [
-  { lat: 45.965, lng: 8.634 }, { lat: 45.910, lng: 8.560 }, { lat: 46.030, lng: 8.710 },
+  { lat: 45.965, lng: 8.634 }, { lat: 45.910, lng: 8.560 }, 
   { lat: 45.935, lng: 8.610 }, { lat: 46.010, lng: 8.680 }, { lat: 45.985, lng: 8.650 },
-  { lat: 45.820, lng: 8.580 }, { lat: 45.885, lng: 8.545 }, { lat: 45.945, lng: 8.595 },
-  { lat: 46.050, lng: 8.730 }
+  { lat: 45.820, lng: 8.580 }, { lat: 45.885, lng: 8.545 }, { lat: 46.050, lng: 8.730 }
 ].map((loc, i) => ({
   id: `maggiore_${i}`,
   name: `Maggiore Pt. ${i + 1}`,

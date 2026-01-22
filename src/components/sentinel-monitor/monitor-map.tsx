@@ -58,8 +58,8 @@ const getMarkerColor = (value: number | null, projectId: string) => {
 
     if (projectId.includes('lake')) { // NDCI for lakes
         if (value < -0.1) return 'blue';
-        if (value <= 0.1) return 'cyan';
-        if (value <= 0.2) return 'lime';
+        if (value < 0.1) return 'cyan';
+        if (value < 0.3) return 'lime';
         return 'red';
     } else { // NDSI for snow
         if (value < 0.2) return '#8B4513';
