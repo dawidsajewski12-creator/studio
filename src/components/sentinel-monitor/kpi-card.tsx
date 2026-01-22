@@ -11,9 +11,14 @@ type KpiCardProps = {
   icon: React.ReactNode;
   onClick: () => void;
   isSelected: boolean;
+  coverage?: number | null;
 };
 
-export default function KpiCard({ title, value, date, icon, onClick, isSelected }: KpiCardProps) {
+export default function KpiCard({ title, value, date, icon, onClick, isSelected, coverage }: KpiCardProps) {
+    const coverageText = coverage !== null && coverage !== undefined
+    ? `Pokrycie: ${coverage.toFixed(0)}%`
+    : null;
+    
   return (
     <Card 
       className={cn(
@@ -31,6 +36,11 @@ export default function KpiCard({ title, value, date, icon, onClick, isSelected 
         <p className="text-xs text-muted-foreground">
           {date ? `📅 Dane z dnia: ${format(parseISO(date), 'yyyy-MM-dd')}` : 'Brak aktualnych danych'}
         </p>
+         {coverageText && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {coverageText}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -101,16 +101,16 @@ export default function MonitorMap({ project, features, center, zoom, selectedSt
     if (project.id === 'lake-quality') {
         fillColorExpression = [
             'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(255, 0, 0, 0.5)',
-            ['<=', ['get', 'indexValue'], 0.0], '#0000FF',
-            ['<=', ['get', 'indexValue'], 0.1], '#00FFFF',
-            ['<=', ['get', 'indexValue'], 0.2], '#00FF00',
-            '#A52A2A'
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(128, 128, 128, 0.4)',
+            ['<', ['get', 'indexValue'], -0.1], 'blue',
+            ['<=', ['get', 'indexValue'], 0.1], 'cyan',
+            ['<=', ['get', 'indexValue'], 0.2], 'lime',
+            'red'
         ];
     } else { // snow-watch
         fillColorExpression = [
             'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(255, 0, 0, 0.5)',
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 'rgba(128, 128, 128, 0.4)',
             ['<', ['get', 'indexValue'], 0.2], '#8B4513',
             ['<=', ['get', 'indexValue'], 0.5], '#00FFFF',
             '#4169E1'
@@ -129,15 +129,15 @@ export default function MonitorMap({ project, features, center, zoom, selectedSt
                 id: 'polygons-fill', type: 'fill', source: 'feature-polygons',
                 paint: {
                     'fill-color': fillColorExpression,
-                    'fill-opacity': 0.7
+                    'fill-opacity': 0.5
                 }
             },
             {
                 id: 'polygons-outline', type: 'line', source: 'feature-polygons',
                 paint: {
                     'line-color': '#000000',
-                    'line-width': 3,
-                    'line-opacity': 0.8
+                    'line-width': 1,
+                    'line-opacity': 0.5
                 }
             }
         ]

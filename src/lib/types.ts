@@ -23,6 +23,7 @@ export type KpiData = {
   name:string;
   latestIndexValue: number | null;
   latestDate: string | null;
+  spatialCoverage?: number | null;
 };
 
 export type Project = {

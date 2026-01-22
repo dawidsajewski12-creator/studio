@@ -4,31 +4,29 @@ import type { IndexDataPoint, KpiData, Project, Station } from '@/lib/types';
 import Dashboard from '@/components/sentinel-monitor/dashboard';
 import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isSameDay } from 'date-fns';
+import { getGridCellsForStation } from '@/lib/gis-utils';
 
-// Helper function to find the latest valid reading from a data series
+// Helper function to find the latest valid reading from an aggregated data series
 const getLatestReading = (data: IndexDataPoint[]) => {
   return data
-    .filter(d => !d.isInterpolated && d.indexValue !== null)
+    .filter(d => d.indexValue !== null)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 };
 
 // Helper to aggregate raw grid data into a single series for charts and KPIs
 const aggregateGridData = (data: IndexDataPoint[], stationId: string): IndexDataPoint[] => {
-    const dailyAggregates: { [date: string]: { sum: number; count: number; tempSum: number; tempCount: number, anyReal: boolean } } = {};
+    const dailyAggregates: { [date: string]: { sum: number; count: number; tempSum: number; tempCount: number } } = {};
 
     // Filter for the specific station and aggregate cell data
     data.filter(p => p.stationId === stationId).forEach(point => {
         const dateStr = format(parseISO(point.date), 'yyyy-MM-dd');
         if (!dailyAggregates[dateStr]) {
-            dailyAggregates[dateStr] = { sum: 0, count: 0, tempSum: 0, tempCount: 0, anyReal: false };
+            dailyAggregates[dateStr] = { sum: 0, count: 0, tempSum: 0, tempCount: 0 };
         }
         if (point.indexValue !== null) {
             dailyAggregates[dateStr].sum += point.indexValue;
             dailyAggregates[dateStr].count++;
-            if (!point.isInterpolated) {
-              dailyAggregates[dateStr].anyReal = true;
-            }
         }
         if (point.temperature !== null) {
             dailyAggregates[dateStr].tempSum += point.temperature;
@@ -44,7 +42,7 @@ const aggregateGridData = (data: IndexDataPoint[], stationId: string): IndexData
             date: parseISO(date).toISOString(),
             stationId: stationId,
             indexValue: avgIndex,
-            isInterpolated: !values.anyReal, // A day is "real" if at least one cell was real
+            isInterpolated: false, // Aggregated data is not "interpolated" in the same way. It's an average.
             temperature: avgTemp,
         };
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -66,10 +64,30 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
 
   project.stations.forEach(station => {
     let stationDataForKpiAndChart: IndexDataPoint[];
+    let spatialCoverage: number | null = null;
 
     if (project.analysisType === 'grid') {
       stationDataForKpiAndChart = aggregateGridData(rawIndexData, station.id);
-    } else {
+      
+      const latestReading = getLatestReading(stationDataForKpiAndChart);
+      if (latestReading) {
+        const latestDate = latestReading.date;
+        const cellsForStation = getGridCellsForStation(station, project);
+        const totalCells = cellsForStation.length;
+        
+        const validCellsOnLatestDate = new Set(rawIndexData.filter(d => 
+          d.stationId === station.id &&
+          isSameDay(parseISO(d.date), parseISO(latestDate)) &&
+          d.indexValue !== null &&
+          !d.isInterpolated
+        ).map(d => d.cellId)).size;
+        
+        if (totalCells > 0) {
+          spatialCoverage = (validCellsOnLatestDate / totalCells) * 100;
+        }
+      }
+
+    } else { // 'point' analysis
       stationDataForKpiAndChart = rawIndexData.filter(d => d.stationId === station.id);
     }
     
@@ -81,6 +99,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
       name: station.name,
       latestIndexValue: latestReading?.indexValue ?? null,
       latestDate: latestReading?.date ?? null,
+      spatialCoverage: spatialCoverage,
     });
   });
 

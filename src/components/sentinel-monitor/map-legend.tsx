@@ -8,15 +8,15 @@ const snowLegendItems = [
   { color: '#4169E1', label: 'Deep Snow (> 0.5)' },
   { color: '#00FFFF', label: 'Patchy Snow (0.2-0.5)' },
   { color: '#8B4513', label: 'No Snow (< 0.2)' },
-  { color: 'rgba(255, 0, 0, 0.5)', label: 'No Data' }
+  { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data' }
 ];
 
 const waterLegendItems = [
-  { color: '#A52A2A', label: 'Strong Bloom (> 0.2)' },
-  { color: '#00FF00', label: 'Bloom Risk (0.1-0.2)' },
-  { color: '#00FFFF', label: 'Turbid (0.0-0.1)' },
-  { color: '#0000FF', label: 'Clear Water (< 0.0)' },
-  { color: 'rgba(255, 0, 0, 0.5)', label: 'No Data' }
+  { color: 'blue', label: 'Very Clear (< -0.1)' },
+  { color: 'cyan', label: 'Clear (-0.1 to 0.1)' },
+  { color: 'lime', label: 'Bloom Risk (0.1 to 0.2)' },
+  { color: 'red', label: 'Strong Bloom (> 0.2)' },
+  { color: 'rgba(128, 128, 128, 0.4)', label: 'No Data / Land' }
 ];
 
 export default function MapLegend({ projectId }: MapLegendProps) {
@@ -25,7 +25,7 @@ export default function MapLegend({ projectId }: MapLegendProps) {
   const title = isWaterProject ? 'NDCI (Algae Index)' : 'NDSI (Snow Index)';
 
   return (
-    <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg w-48 text-card-foreground z-10 border border-border">
+    <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg w-52 text-card-foreground z-10 border border-border">
       <h4 className="font-semibold text-sm mb-2 text-foreground">{title}</h4>
       <div className="space-y-1">
         {legendItems.map(item => (
