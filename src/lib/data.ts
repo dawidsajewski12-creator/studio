@@ -114,7 +114,8 @@ const EVALSCRIPTS: Record<string, string> = {
       // Allow Water(6), Vegetation(4), Bare Soil(5), Dark Area(2), and Unclassified(7) to capture thick algal blooms and winter conditions.
       const isValid = [2, 4, 5, 6, 7].includes(sample.SCL);
       if (!isValid) {
-        return { dataMask: [0] };
+        // If pixel is not valid (e.g., cloud, land), mask it out and return all output bands.
+        return { index: [0], dataMask: [0] };
       }
       let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
       return { index: [ndci], dataMask: [1] };
