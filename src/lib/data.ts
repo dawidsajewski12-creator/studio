@@ -12,7 +12,7 @@ const TRUE_COLOR_EVALSCRIPT = `
 //VERSION=3
 function setup() {
   return {
-    input: ["B04", "B03", "B02"],
+    input: ["B04", "B03", "B02", "SCL"],
     output: {
       bands: 3,
       sampleType: "UINT8"
@@ -196,7 +196,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const satelliteResponse = await fetch(STATS_URL, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            // Default Next.js caching will apply here
+            body: JSON.stringify(satelliteRequestBody),
         });
 
         if (!satelliteResponse.ok) {
@@ -330,6 +330,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
                 'Content-Type': 'application/json',
                 'Accept': 'image/png'
             },
+            body: JSON.stringify(requestBody),
             cache: 'no-store',
         });
 
