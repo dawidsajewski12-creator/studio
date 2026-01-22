@@ -121,7 +121,7 @@ async function getToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
-    next: { revalidate: 3600 } // Cache the token fetch itself for an hour
+    cache: 'no-store' // Do not use Next.js's fetch cache for the token
   });
 
   if (!response.ok) {
@@ -196,7 +196,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         const satelliteResponse = await fetch(STATS_URL, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(satelliteRequestBody),
             // Default Next.js caching will apply here
         });
 
@@ -331,7 +330,6 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
                 'Content-Type': 'application/json',
                 'Accept': 'image/png'
             },
-            body: JSON.stringify(requestBody),
             cache: 'no-store',
         });
 
