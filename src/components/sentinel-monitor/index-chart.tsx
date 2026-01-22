@@ -34,9 +34,9 @@ const selectedPointColor = 'hsl(var(--chart-1))';
 
 // Custom dot renderer for satellite observations
 const renderDot = (props: any) => {
-  const { cx, cy, payload, stroke } = props;
+  const { cx, cy, payload, stroke, index } = props;
   if (payload && !payload.isInterpolated) {
-    return <Dot cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
+    return <Dot key={index} cx={cx} cy={cy} r={3} stroke={stroke} strokeWidth={1} fill={"hsl(var(--background))"} />;
   }
   return null;
 };
