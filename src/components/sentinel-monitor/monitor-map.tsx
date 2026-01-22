@@ -3,9 +3,30 @@
 import type { Station } from '@/lib/types';
 import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/maplibre';
 import { Satellite } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { FeatureCollection } from 'geojson';
 import MapLegend from './map-legend';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+
+// --- Base Layer Definitions ---
+const baseLayers = {
+  topo: {
+    name: 'Mapa Topograficzna',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
+  },
+  satellite: {
+    name: 'Satelita (Esri)',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+  },
+  street: {
+    name: 'Mapa Drogowa',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }
+};
 
 type StationWithExtras = Station & { 
   bbox: [number, number, number, number];
@@ -19,32 +40,24 @@ type MonitorMapProps = {
   onMarkerClick: (stationId: Station['id']) => void;
 };
 
+// --- Layer Control Component ---
+const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: string, onLayerChange: (key: string) => void }) => (
+  <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm p-3 rounded-lg shadow-lg z-10 border border-border text-card-foreground w-52">
+    <h4 className="font-semibold text-sm mb-2 text-foreground">Base Map</h4>
+    <RadioGroup defaultValue={activeLayerKey} onValueChange={onLayerChange} className="gap-3">
+      {Object.entries(baseLayers).map(([key, layer]) => (
+         <div key={key} className="flex items-center space-x-2">
+            <RadioGroupItem value={key} id={`layer-${key}`} />
+            <Label htmlFor={`layer-${key}`} className="text-sm font-normal cursor-pointer">{layer.name}</Label>
+         </div>
+      ))}
+    </RadioGroup>
+  </div>
+);
+
 export default function MonitorMap({ stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
-
-  // State to hold resolved theme colors
-  const [themeColors, setThemeColors] = useState({
-    accent: 'hsl(19, 52%, 63%)', // Default fallback
-    primary: 'hsl(188, 45%, 65%)', // Default fallback
-  });
-
-  // Effect to get computed styles on the client
-  useEffect(() => {
-    // This code runs only on the client, after the component has mounted.
-    const style = getComputedStyle(document.documentElement);
-    const accentColor = style.getPropertyValue('--accent').trim();
-    const primaryColor = style.getPropertyValue('--primary').trim();
-    
-    // HSL values from CSS variables are just numbers, so we wrap them
-    const formatHsl = (hslString: string) => `hsl(${hslString})`;
-
-    if (accentColor && primaryColor) {
-      setThemeColors({
-        accent: formatHsl(accentColor),
-        primary: formatHsl(primaryColor),
-      });
-    }
-  }, []);
+  const [activeLayerKey, setActiveLayerKey] = useState('topo');
 
   const geojson: FeatureCollection = useMemo(() => ({
     type: 'FeatureCollection',
@@ -75,11 +88,11 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
   const mapStyle = useMemo(() => ({
     version: 8,
     sources: {
-      'osm-tiles': {
+      'base-tiles': {
         type: 'raster',
-        tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png', 'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tiles: [baseLayers[activeLayerKey as keyof typeof baseLayers].url.replace('{s}', 'a')],
         tileSize: 256,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: baseLayers[activeLayerKey as keyof typeof baseLayers].attribution
       },
       'station-bboxes': {
         type: 'geojson',
@@ -87,23 +100,24 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
       }
     },
     layers: [
-      { id: 'osm-tiles', type: 'raster', source: 'osm-tiles' },
+      { id: 'base-tiles', type: 'raster', source: 'base-tiles' },
       {
         id: 'bboxes-fill',
         type: 'fill',
         source: 'station-bboxes',
         paint: {
           'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['coalesce', ['get', 'ndsiValue'], -1], // Use -1 for null (no data)
-            -1, 'hsla(225, 13%, 40%, 0.2)', // No data color: transparent grey
-            -0.2, 'hsl(30, 20%, 60%)',    // No Snow: Brownish
-            0.2, 'hsl(180, 30%, 75%)',   // Patchy Snow: Light Cyan
-            0.4, 'hsl(195, 80%, 85%)',   // Snow: Light Blue
-            1.0, 'hsl(210, 100%, 98%)'   // Deep Snow: Almost White
+            'case',
+            ['==', ['coalesce', ['get', 'ndsiValue'], -999], -999], '#FF0000',
+            ['<', ['get', 'ndsiValue'], 0.2], '#8B4513',
+            ['<=', ['get', 'ndsiValue'], 0.5], '#00FFFF',
+            '#4169E1'
           ],
-          'fill-opacity': 0.65
+          'fill-opacity': [
+            'case',
+            ['==', ['coalesce', ['get', 'ndsiValue'], -999], -999], 0.5,
+            0.7
+          ]
         }
       },
       {
@@ -111,27 +125,17 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
         type: 'line',
         source: 'station-bboxes',
         paint: {
-           'line-color': [
-            'case',
-            ['==', ['get', 'id'], selectedStationId],
-            themeColors.accent,
-            themeColors.primary
-          ],
-          'line-width': [
-            'case',
-            ['==', ['get', 'id'], selectedStationId],
-            2.5,
-            1
-          ],
-          'line-opacity': 0.9
+          'line-color': '#000000',
+          'line-width': 3,
+          'line-opacity': 0.8
         }
       }
     ]
-  }), [geojson, selectedStationId, themeColors]);
+  }), [geojson, activeLayerKey]);
 
   return (
     <Map
-      key={`${center.lat}-${center.lng}-${selectedStationId}`} // Force re-render
+      key={`${center.lat}-${center.lng}-${activeLayerKey}`}
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
@@ -142,6 +146,8 @@ export default function MonitorMap({ stations, center, selectedStationId, onMark
       attributionControl={true}
     >
       <MapLegend />
+      <LayerControl activeLayerKey={activeLayerKey} onLayerChange={setActiveLayerKey} />
+      
       {stations.map((station) => (
         <Marker
           key={station.id}
