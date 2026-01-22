@@ -1,5 +1,28 @@
 import type { Project } from './types';
 
+const maggioreStations = [
+  { lat: 45.965, lng: 8.634 }, { lat: 45.910, lng: 8.560 }, { lat: 46.030, lng: 8.710 },
+  { lat: 45.935, lng: 8.610 }, { lat: 46.010, lng: 8.680 }, { lat: 45.985, lng: 8.650 },
+  { lat: 45.820, lng: 8.580 }, { lat: 45.885, lng: 8.545 }, { lat: 45.945, lng: 8.595 },
+  { lat: 46.050, lng: 8.730 }
+].map((loc, i) => ({
+  id: `maggiore_${i}`,
+  name: `Maggiore Pt. ${i + 1}`,
+  location: { lat: loc.lat, lng: loc.lng }
+}));
+
+const sniardwyStations = [
+  { lat: 53.755, lng: 21.725 }, { lat: 53.740, lng: 21.780 }, { lat: 53.725, lng: 21.680 },
+  { lat: 53.770, lng: 21.650 }, { lat: 53.785, lng: 21.750 }, { lat: 53.710, lng: 21.730 },
+  { lat: 53.735, lng: 21.840 }, { lat: 53.765, lng: 21.810 }, { lat: 53.695, lng: 21.760 },
+  { lat: 53.750, lng: 21.690 }
+].map((loc, i) => ({
+  id: `sniardwy_${i}`,
+  name: `Śniardwy Pt. ${i + 1}`,
+  location: { lat: loc.lat, lng: loc.lng }
+}));
+
+
 export const PROJECTS: Project[] = [
   {
     id: 'snow-watch',
@@ -24,18 +47,7 @@ export const PROJECTS: Project[] = [
     analysisType: 'point',
     description: '10-point analysis of chlorophyll concentration (NDCI) in Lake Maggiore.',
     index: { name: 'NDCI', unit: '' },
-    stations: [
-      { id: 'maggiore_0', name: 'Maggiore Pt. 1', location: { lat: 45.965, lng: 8.634 } },
-      { id: 'maggiore_1', name: 'Maggiore Pt. 2', location: { lat: 45.910, lng: 8.560 } },
-      { id: 'maggiore_2', name: 'Maggiore Pt. 3', location: { lat: 46.030, lng: 8.710 } },
-      { id: 'maggiore_3', name: 'Maggiore Pt. 4', location: { lat: 45.850, lng: 8.540 } },
-      { id: 'maggiore_4', name: 'Maggiore Pt. 5', location: { lat: 46.080, lng: 8.760 } },
-      { id: 'maggiore_5', name: 'Maggiore Pt. 6', location: { lat: 45.935, lng: 8.610 } },
-      { id: 'maggiore_6', name: 'Maggiore Pt. 7', location: { lat: 45.880, lng: 8.520 } },
-      { id: 'maggiore_7', name: 'Maggiore Pt. 8', location: { lat: 46.010, lng: 8.680 } },
-      { id: 'maggiore_8', name: 'Maggiore Pt. 9', location: { lat: 45.985, lng: 8.650 } },
-      { id: 'maggiore_9', name: 'Maggiore Pt. 10', location: { lat: 45.820, lng: 8.580 } },
-    ],
+    stations: maggioreStations,
     dataConfig: {
       base: 0.0,
       seasonalAmplitude: 0.15,
@@ -48,18 +60,7 @@ export const PROJECTS: Project[] = [
     analysisType: 'point',
     description: '10-point analysis of chlorophyll concentration (NDCI) in Lake Śniardwy.',
     index: { name: 'NDCI', unit: '' },
-    stations: [
-        { id: 'sniardwy_0', name: 'Śniardwy Pt. 1', location: { lat: 53.755, lng: 21.725 } },
-        { id: 'sniardwy_1', name: 'Śniardwy Pt. 2', location: { lat: 53.740, lng: 21.780 } },
-        { id: 'sniardwy_2', name: 'Śniardwy Pt. 3', location: { lat: 53.725, lng: 21.680 } },
-        { id: 'sniardwy_3', name: 'Śniardwy Pt. 4', location: { lat: 53.770, lng: 21.650 } },
-        { id: 'sniardwy_4', name: 'Śniardwy Pt. 5', location: { lat: 53.785, lng: 21.750 } },
-        { id: 'sniardwy_5', name: 'Śniardwy Pt. 6', location: { lat: 53.710, lng: 21.730 } },
-        { id: 'sniardwy_6', name: 'Śniardwy Pt. 7', location: { lat: 53.735, lng: 21.840 } },
-        { id: 'sniardwy_7', name: 'Śniardwy Pt. 8', location: { lat: 53.765, lng: 21.810 } },
-        { id: 'sniardwy_8', name: 'Śniardwy Pt. 9', location: { lat: 53.695, lng: 21.760 } },
-        { id: 'sniardwy_9', name: 'Śniardwy Pt. 10', location: { lat: 53.750, lng: 21.690 } },
-    ],
+    stations: sniardwyStations,
     dataConfig: {
       base: 0.0,
       seasonalAmplitude: 0.15,
