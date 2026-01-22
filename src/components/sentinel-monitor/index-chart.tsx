@@ -103,7 +103,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
         ? project.stations.map(s => s.id)
         : [selectedStationId]) as Station['id'][];
     
-    const observationCount = data.filter(p => !p.isInterpolated).length;
+    const observationCount = data.filter(p => !p.isInterpolated && p.indexValue !== null).length;
 
     return { chartData: sortedChartData, chartConfig: config, visibleStations: stationsToShow, cloudFreeDaysCount: observationCount };
   }, [data, project, selectedStationId, isWaterProject]);
@@ -198,7 +198,7 @@ export default function IndexChart({ data, selectedStationId, project }: IndexCh
                 />
              )}
             {isWaterProject ? (
-              <ReferenceLine y={0.1} yAxisId="left" label={{ value: 'Algal Bloom Risk', position: 'insideTopRight', fill: 'hsl(var(--destructive))', fontSize: 12 }} stroke="hsl(var(--destructive))" strokeDasharray="4 4" />
+              <ReferenceLine y={0.1} yAxisId="left" label={{ value: 'Algal Bloom Risk', position: 'insideTopRight', fill: 'hsl(var(--accent))', fontSize: 12 }} stroke="hsl(var(--accent))" strokeDasharray="4 4" />
             ) : (
               <ReferenceLine y={0} yAxisId="right" stroke={tempColor} strokeDasharray="3 3" strokeOpacity={0.5} />
             )}

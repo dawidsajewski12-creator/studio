@@ -26,7 +26,7 @@ export const PROJECTS: Project[] = [
         { id: 'geneva', name: 'Jezioro Genewskie (CH/FR)', location: { lat: 46.452, lng: 6.665 } },
         { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
         { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.755, lng: 21.725 } },
-        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL)', location: { lat: 54.316, lng: 19.554 } },
+        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL)', location: { lat: 54.390, lng: 19.450 } },
     ],
     dataConfig: {
         base: 0.0,

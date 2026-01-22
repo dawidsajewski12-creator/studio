@@ -45,6 +45,7 @@ type MonitorMapProps = {
   project: Project;
   stations: StationWithExtras[];
   center: { lat: number; lng: number };
+  zoom: number;
   selectedStationId: Station['id'] | 'all';
   onMarkerClick: (stationId: Station['id']) => void;
 };
@@ -64,7 +65,7 @@ const LayerControl = ({ activeLayerKey, onLayerChange }: { activeLayerKey: strin
   </div>
 );
 
-export default function MonitorMap({ project, stations, center, selectedStationId, onMarkerClick }: MonitorMapProps) {
+export default function MonitorMap({ project, stations, center, zoom, selectedStationId, onMarkerClick }: MonitorMapProps) {
   const [hoveredStation, setHoveredStation] = useState<Station | null>(null);
   const [activeLayerKey, setActiveLayerKey] = useState('topo');
 
@@ -100,19 +101,19 @@ export default function MonitorMap({ project, stations, center, selectedStationI
     if (project.id === 'lake-quality') {
         fillColorExpression = [
             'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000', // Missing data -> Red
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000',  // Missing data -> Red
             ['<', ['get', 'indexValue'], 0.0], '#0000FF',  // < 0.0: Blue (Clean water)
             ['<=', ['get', 'indexValue'], 0.1], '#00FFFF', // 0.0-0.1: Turquoise (Turbid)
             ['<=', ['get', 'indexValue'], 0.2], '#00FF00', // 0.1-0.2: Green (Bloom risk)
             '#A52A2A' // > 0.2: Red/Brown (Strong bloom)
         ];
-    } else { // Default to snow-watch
+    } else { // Default to snow-watch, as requested
         fillColorExpression = [
             'case',
-            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000',
-            ['<', ['get', 'indexValue'], 0.2], '#8B4513',
-            ['<=', ['get', 'indexValue'], 0.5], '#00FFFF',
-            '#4169E1'
+            ['==', ['coalesce', ['get', 'indexValue'], -999], -999], '#FF0000', // Missing data -> Red
+            ['<', ['get', 'indexValue'], 0.2], '#8B4513',   // No Snow
+            ['<=', ['get', 'indexValue'], 0.5], '#00FFFF',  // Patchy Snow
+            '#4169E1'  // Deep Snow
         ];
     }
 
@@ -140,7 +141,7 @@ export default function MonitorMap({ project, stations, center, selectedStationI
                     'fill-color': fillColorExpression,
                     'fill-opacity': [
                         'case',
-                        ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 0.5,
+                        ['==', ['coalesce', ['get', 'indexValue'], -999], -999], 0.5, // Opacity for missing data
                         0.7
                     ]
                 }
@@ -167,7 +168,7 @@ export default function MonitorMap({ project, stations, center, selectedStationI
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,
-        zoom: 7
+        zoom: zoom
       }}
       style={{width: '100%', height: '100%'}}
       mapStyle={mapStyle}

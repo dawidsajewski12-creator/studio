@@ -65,18 +65,20 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
   
   const mapCenter = useMemo(() => getMapCenter(project.stations), [project.stations]);
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
+  const initialZoom = useMemo(() => project.id === 'lake-quality' ? 6 : 9, [project.id]);
 
   // Augment stations with BBox and latest Index value for the map
   const stationsForMap = useMemo(() => {
+    const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
     return project.stations.map(station => {
       const kpi = kpiData.find(k => k.stationId === station.id);
       return {
         ...station,
-        bbox: getBoundingBox(station, 0.5),
+        bbox: getBoundingBox(station, bufferKm),
         latestIndexValue: kpi?.latestIndexValue ?? null,
       };
     });
-  }, [project.stations, kpiData]);
+  }, [project.stations, kpiData, project.id]);
 
 
   return (
@@ -86,6 +88,7 @@ export default function Dashboard({ project, indexData, kpiData }: DashboardProp
           project={project}
           stations={stationsForMap}
           center={mapCenter}
+          zoom={initialZoom}
           selectedStationId={selectedStation}
           onMarkerClick={(stationId) => setSelectedStation(prev => prev === stationId ? 'all' : stationId)}
         />

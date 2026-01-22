@@ -4,6 +4,7 @@ import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDa
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getBoundingBox } from './gis-utils';
+import { PROJECTS } from './projects';
 
 
 // --- Copernicus API Configuration ---
@@ -39,7 +40,7 @@ function evaluatePixel(sample) {
 // --- Caching Configuration ---
 const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
 type CacheData = {
-    [stationId: string]: { date: string; value: number }[];
+    [stationId: string]: { date: string; value: number | null }[];
 };
 
 
@@ -200,10 +201,9 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     }
     let isCacheUpdated = false;
 
-
     const stationPromises = project.stations.map(async (station) => {
         const stationCache = cache[station.id] || [];
-        let sparseDataFromCache: { date: Date; value: number }[] = [];
+        let sparseDataFromCache: { date: Date; value: number | null }[] = [];
         let fetchFromDate = yearAgo;
         let needsApiCall = true;
 
@@ -229,9 +229,10 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         let finalSparseData = sparseDataFromCache;
 
         if (needsApiCall && isBefore(fetchFromDate, today)) {
+             const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
              const satelliteRequestBody = {
                 input: {
-                    bounds: { bbox: getBoundingBox(station, 0.5) },
+                    bounds: { bbox: getBoundingBox(station, bufferKm) },
                     data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
                 },
                 aggregation: {
@@ -253,20 +254,20 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                 console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
             } else {
                 const apiResponse = await satelliteResponse.json();
-                const newSparseDataFromApi: { date: Date; value: number }[] = apiResponse.data
+                const newSparseDataFromApi: { date: Date; value: number | null }[] = apiResponse.data
                     .map((item: any) => {
                         const stats = item.outputs.index.bands.B0.stats;
                         if (stats && stats.sampleCount > 0 && stats.mean !== null && stats.mean !== -Infinity && stats.mean !== Infinity) {
                             return { date: parseISO(item.interval.from), value: Math.max(-1, Math.min(stats.mean, 1)) };
                         }
-                        return null;
-                    })
-                    .filter((item: any): item is { date: Date; value: number } => item !== null);
+                        // Return a record with null value if there was no valid data (e.g. all masked out)
+                        return { date: parseISO(item.interval.from), value: null };
+                    });
 
                 if (newSparseDataFromApi.length > 0) {
                     isCacheUpdated = true;
                     const combinedData = [...finalSparseData, ...newSparseDataFromApi];
-                    const dataMap = new Map<string, { date: Date; value: number }>();
+                    const dataMap = new Map<string, { date: Date; value: number | null }>();
                     combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
                     finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
                     cache[station.id] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
@@ -282,36 +283,29 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
         const allDays = eachDayOfInterval({ start: yearAgo, end: today });
         const dailySeries: IndexDataPoint[] = [];
-        let sparseIndex = 0;
+        
+        const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), d.value]));
 
         for (const day of allDays) {
             const dateStr = format(day, 'yyyy-MM-dd');
-            let pointToAdd: IndexDataPoint;
-            if (sparseIndex < sparseData.length && isSameDay(day, sparseData[sparseIndex].date)) {
-                pointToAdd = {
-                    date: day.toISOString(),
-                    stationId: station.id,
-                    indexValue: sparseData[sparseIndex].value,
-                    isInterpolated: false,
-                    temperature: weatherDataMap.get(dateStr) ?? null,
-                };
-                sparseIndex++;
-            } else {
-                pointToAdd = {
-                    date: day.toISOString(),
-                    stationId: station.id,
-                    indexValue: null,
-                    isInterpolated: true,
-                    temperature: weatherDataMap.get(dateStr) ?? null,
-                };
-            }
-            dailySeries.push(pointToAdd);
+            const hasRealValue = sparseDataMap.has(dateStr);
+            const indexValue = sparseDataMap.get(dateStr) ?? null;
+
+            dailySeries.push({
+                date: day.toISOString(),
+                stationId: station.id,
+                indexValue: indexValue,
+                isInterpolated: !hasRealValue,
+                temperature: weatherDataMap.get(dateStr) ?? null,
+            });
         }
 
+        // Interpolation step
         for (let i = 0; i < dailySeries.length; i++) {
             if (dailySeries[i].indexValue === null) {
                 let prevIndex = i - 1;
                 while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) prevIndex--;
+                
                 let nextIndex = i + 1;
                 while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) nextIndex++;
                 
@@ -323,11 +317,12 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                     const prevTime = parseISO(prevPoint.date).getTime();
                     const nextTime = parseISO(nextPoint.date).getTime();
                     const currentTime = parseISO(dailySeries[i].date).getTime();
+                    
                     const fraction = (currentTime - prevTime) / (nextTime - prevTime);
                     dailySeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
-                } else if (prevIndex >= 0) {
+                } else if (prevIndex >= 0) { // Extrapolate backward
                     dailySeries[i].indexValue = dailySeries[prevIndex].indexValue;
-                } else if (nextIndex < dailySeries.length) {
+                } else if (nextIndex < dailySeries.length) { // Extrapolate forward
                     dailySeries[i].indexValue = dailySeries[nextIndex].indexValue;
                 }
             }
@@ -360,10 +355,14 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const today = new Date();
         const sixtyDaysAgo = subDays(today, 60);
 
+        const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
+        if (!project) return null;
+        const bufferKm = project.id === 'lake-quality' ? 2.5 : 0.5;
+
         const requestBody = {
             input: {
                 bounds: {
-                    bbox: getBoundingBox(station, 0.5)
+                    bbox: getBoundingBox(station, bufferKm)
                 },
                 data: [{
                     type: "sentinel-2-l2a",
