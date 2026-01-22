@@ -7,7 +7,7 @@ import { Satellite, Leaf, Building2, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getGridCells } from '@/lib/gis-utils';
+import { getGridCellsForStation } from '@/lib/gis-utils';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
@@ -68,43 +68,27 @@ export default function Dashboard({ project, rawIndexData, chartIndexData, kpiDa
   const stationIcon = projectIcons[project.id] || <Satellite className="size-6 text-primary" />;
   const initialZoom = useMemo(() => project.id === 'lake-quality' ? 8 : 9, [project.id]);
 
-  // Augment stations with BBox and latest Index value for the map
   const featuresForMap = useMemo(() => {
     return project.stations.flatMap(station => {
-      if (project.analysisType === 'grid') {
-        const gridCells = getGridCells(station, 3, 1);
+        const gridCells = getGridCellsForStation(station);
         return gridCells.map(cell => {
           const cellData = rawIndexData.filter(d => d.cellId === cell.cellId && d.indexValue !== null && !d.isInterpolated);
           const latestReading = cellData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
           return {
             id: cell.cellId,
             stationId: station.id,
-            name: `${station.name} Cell`,
+            name: `${station.name} Cell ${cell.cellId.split('_').pop()}`,
             bbox: cell.bbox,
             latestIndexValue: latestReading?.indexValue ?? null,
-            location: station.location,
+            // For centering popups on grid cells, we need the cell's center
+            location: {
+              lat: (cell.bbox[1] + cell.bbox[3]) / 2,
+              lng: (cell.bbox[0] + cell.bbox[2]) / 2,
+            },
           }
         });
-      } else { // 'point'
-        const kpi = kpiData.find(k => k.stationId === station.id);
-        const bufferKm = 0.5;
-        // The getBoundingBox function expects a Station object. Let's provide a compatible one.
-        const pointStation = {
-          id: station.id,
-          name: station.name,
-          location: station.location
-        };
-        return [{
-          id: station.id,
-          stationId: station.id,
-          name: station.name,
-          bbox: getBoundingBox(pointStation, bufferKm),
-          latestIndexValue: kpi?.latestIndexValue ?? null,
-          location: station.location,
-        }];
-      }
     });
-  }, [project, rawIndexData, kpiData]);
+  }, [project, rawIndexData]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">

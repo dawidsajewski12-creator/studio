@@ -25,8 +25,20 @@ export const PROJECTS: Project[] = [
     description: 'Monitoring chlorophyll concentration and algal blooms in lakes.',
     index: { name: 'NDCI', unit: '' },
     stations: [
-        { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
-        { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.760, lng: 21.730 } },
+        { 
+            id: 'maggiore', 
+            name: 'Jezioro Maggiore (IT/CH)', 
+            location: { lat: 45.975, lng: 8.65 },
+            bbox: [8.48, 45.8, 8.8, 46.15],
+            gridShape: [8, 12]
+        },
+        { 
+            id: 'sniardwy', 
+            name: 'Jezioro Śniardwy (PL)', 
+            location: { lat: 53.755, lng: 21.725 },
+            bbox: [21.55, 53.7, 21.85, 53.8],
+            gridShape: [8, 5]
+        },
     ],
     dataConfig: {
         base: 0.0,

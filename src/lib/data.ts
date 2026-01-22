@@ -2,7 +2,7 @@ import type { Project, IndexDataPoint, Station } from './types';
 import { subDays, format, eachDayOfInterval, parseISO, isSameDay, differenceInDays, addDays, isBefore } from 'date-fns';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { getBoundingBox, getGridCells } from './gis-utils';
+import { getGridCellsForStation } from './gis-utils';
 import { PROJECTS } from './projects';
 
 
@@ -62,18 +62,18 @@ const EVALSCRIPTS: Record<string, string> = {
   NDCI: `
     //VERSION=3
     function setup() {
-      return {
-        input: [{ bands: ["B04", "B05", "SCL"], units: "DN" }],
-        output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
-      };
+        return {
+            input: [{ bands: ["B04", "B05", "SCL"], units: "DN" }],
+            output: [ { id: "index", bands: 1, sampleType: "FLOAT32" }, { id: "dataMask", bands: 1, sampleType: "UINT8" }]
+        };
     }
     function evaluatePixel(sample) {
-      const isValid = [2, 4, 5, 6, 7].includes(sample.SCL);
-      if (!isValid) {
-        return { index: [0], dataMask: [0] };
-      }
-      let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-      return { index: [ndci], dataMask: [1] };
+        const isWaterOrAlgae = [2, 4, 5, 6, 7].includes(sample.SCL);
+        if (!isWaterOrAlgae) {
+            return { index: [0], dataMask: [0] };
+        }
+        let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
+        return { index: [ndci], dataMask: [1] };
     }`,
 };
 
@@ -159,20 +159,12 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     let isCacheUpdated = false;
 
     const stationPromises = project.stations.map(async (station) => {
-        let fetchTasks: { id: string; bbox: [number, number, number, number] }[] = [];
-
-        if (project.analysisType === 'grid') {
-            const gridCells = getGridCells(station, 3, 1);
-            fetchTasks = gridCells.map(cell => ({ id: cell.cellId, bbox: cell.bbox }));
-        } else {
-            const bufferKm = 0.5;
-            fetchTasks.push({ id: station.id, bbox: getBoundingBox(station, bufferKm) });
-        }
+        let fetchTasks = getGridCellsForStation(station);
         
         const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
 
         const allTaskDataPromises = fetchTasks.map(async (task) => {
-            const taskCache = cache[task.id] || [];
+            const taskCache = cache[task.cellId] || [];
             let sparseDataFromCache: { date: Date; value: number | null }[] = [];
             let fetchFromDate = yearAgo;
             let needsApiCall = true;
@@ -215,7 +207,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                 });
 
                 if (!satelliteResponse.ok) {
-                    console.error(`Failed to fetch satellite data for task ${task.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
+                    console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
                 } else {
                     const apiResponse = await satelliteResponse.json();
                     const newSparseDataFromApi: { date: Date; value: number | null }[] = apiResponse.data
@@ -233,7 +225,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                         const dataMap = new Map<string, { date: Date; value: number | null }>();
                         combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
                         finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
-                        cache[task.id] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
+                        cache[task.cellId] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value }));
                     }
                 }
             }
@@ -253,7 +245,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                 dailySeries.push({
                     date: day.toISOString(),
                     stationId: station.id,
-                    cellId: project.analysisType === 'grid' ? task.id : undefined,
+                    cellId: task.cellId,
                     indexValue: indexValue,
                     isInterpolated: !hasRealValue,
                     temperature: weatherDataMap.get(dateStr) ?? null,
@@ -318,12 +310,22 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
-        const bufferKm = 2.5;
+        
+        let bbox: [number, number, number, number];
+        if (project.analysisType === 'grid' && station.bbox) {
+            bbox = station.bbox;
+        } else {
+            const bufferKm = 2.5;
+            const { lat, lng } = station.location;
+            const buffer = bufferKm / 111.32;
+            bbox = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
+        }
+
 
         const requestBody = {
             input: {
                 bounds: {
-                    bbox: getBoundingBox(station, bufferKm)
+                    bbox
                 },
                 data: [{
                     type: "sentinel-2-l2a",

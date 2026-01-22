@@ -1,56 +1,49 @@
 import type { Station } from './types';
 
 /**
- * Calculates a square bounding box around a given geographic point.
- * @param station - The station object with latitude and longitude.
- * @param bufferKm - The buffer distance in kilometers from the center to the edge.
- * @returns A bounding box array: [minLng, minLat, maxLng, maxLat].
- */
-export function getBoundingBox(station: Station, bufferKm = 0.5): [number, number, number, number] {
-    const { lat, lng } = station.location;
-    // Approximate conversion: 1 degree of latitude is ~111.32 km.
-    const buffer = bufferKm / 111.32;
-    return [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
-}
-
-/**
- * Generates a 3x3 grid of bounding boxes around a central station point.
- * @param station - The central station.
- * @param gridSize - The number of cells along one axis (e.g., 3 for a 3x3 grid).
- * @param cellSizeKm - The size of each cell in kilometers.
+ * Generates analysis cells for a given station.
+ * If the station has a bbox and gridShape, it creates a grid over that area.
+ * Otherwise, it creates a single 1km x 1km cell around the station's point location.
+ * @param station - The station object.
  * @returns An array of objects, each with a cellId and a bbox.
  */
-export function getGridCells(station: Station, gridSize: number = 3, cellSizeKm: number = 1): { cellId: string; bbox: [number, number, number, number] }[] {
-    const cells = [];
-    const { lat: centerLat, lng: centerLng } = station.location;
-    
-    // Degrees per km (approximate)
-    const latDegPerKm = 1 / 111.32;
-    const lngDegPerKm = 1 / (111.32 * Math.cos(centerLat * Math.PI / 180));
+export function getGridCellsForStation(station: Station): { cellId: string; bbox: [number, number, number, number] }[] {
+    // --- Grid Analysis Logic (for entire BBox) ---
+    if (station.bbox && station.gridShape) {
+        const { bbox, gridShape, id: stationId } = station;
+        const [minLng, minLat, maxLng, maxLat] = bbox;
+        const [gridWidth, gridHeight] = gridShape;
+        const cells = [];
 
-    const cellStepLat = cellSizeKm * latDegPerKm;
-    const cellStepLng = cellSizeKm * lngDegPerKm;
+        const totalLatDiff = maxLat - minLat;
+        const totalLngDiff = maxLng - minLng;
+        const cellLat = totalLatDiff / gridHeight;
+        const cellLng = totalLngDiff / gridWidth;
 
-    const startLat = centerLat + cellStepLat * (Math.floor(gridSize / 2));
-    const startLng = centerLng - cellStepLng * (Math.floor(gridSize / 2));
-    
-    const cellBufferLat = cellStepLat / 2;
-    const cellBufferLng = cellStepLng / 2;
-
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            const cellCenterLat = startLat - (i * cellStepLat);
-            const cellCenterLng = startLng + (j * cellStepLng);
-            
-            const cellId = `${station.id}_${i*gridSize + j}`;
-            const bbox: [number, number, number, number] = [
-                cellCenterLng - cellBufferLng,
-                cellCenterLat - cellBufferLat,
-                cellCenterLng + cellBufferLng,
-                cellCenterLat + cellBufferLat,
-            ];
-            cells.push({ cellId, bbox });
+        for (let i = 0; i < gridHeight; i++) {
+            for (let j = 0; j < gridWidth; j++) {
+                const cellMinLat = minLat + (i * cellLat);
+                const cellMaxLat = cellMinLat + cellLat;
+                const cellMinLng = minLng + (j * cellLng);
+                const cellMaxLng = cellMinLng + cellLng;
+                
+                const cellId = `${stationId}_${i}_${j}`;
+                const cellBbox: [number, number, number, number] = [cellMinLng, cellMinLat, cellMaxLng, cellMaxLat];
+                cells.push({ cellId, bbox: cellBbox });
+            }
         }
+        return cells;
     }
-    return cells;
+
+    // --- Point Analysis Logic (fallback) ---
+    const { lat, lng } = station.location;
+    const bufferKm = 0.5; // Creates a 1km x 1km box
+    // Approximate conversion: 1 degree of latitude is ~111.32 km.
+    const buffer = bufferKm / 111.32;
+    const pointBbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
+
+    return [{
+        cellId: station.id, // For point analysis, cellId is the stationId
+        bbox: pointBbox
+    }];
 }

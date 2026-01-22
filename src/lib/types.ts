@@ -5,6 +5,8 @@ export type Station = {
     lat: number;
     lng: number;
   };
+  bbox?: [number, number, number, number];
+  gridShape?: [number, number]; // e.g., [width, height] in cells
 };
 
 export type IndexDataPoint = {
