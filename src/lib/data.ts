@@ -32,8 +32,8 @@ const gain = 2.5;
 
 function evaluatePixel(sample) {
   // Mask clouds, shadows, and snow
-  if ([3, 8, 9, 10, 11].includes(sample.SCL)) {
-    return [0, 0, 0, 0]; // Return a transparent pixel
+  if ([1, 3, 8, 9, 10, 11].includes(sample.SCL)) {
+    return [0, 0, 0, 0]; // Return a transparent pixel for clouds/snow/shadows
   }
 
   // With units: "DN", input values are 0-10000.
@@ -336,7 +336,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
         
-        const bufferKm = 1.4; // Creates a ~2.8km x 2.8km box for a more reliable visual
+        const bufferKm = 0.5; // Creates a ~1km x 1km box, much safer for the process API
         const { lat, lng } = station.location;
         const buffer = bufferKm / 111.32;
         const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
