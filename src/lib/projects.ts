@@ -25,9 +25,8 @@ export const PROJECTS: Project[] = [
     stations: [
         { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
         { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.760, lng: 21.730 } },
-        { id: 'geneva', name: 'Jezioro Genewskie (CH/FR)', location: { lat: 46.452, lng: 6.665 } },
-        { id: 'bodensee', name: 'Jezioro Bodeńskie (DE/CH/AT)', location: { lat: 47.590, lng: 9.450 } },
-        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL)', location: { lat: 54.400, lng: 19.450 } },
+        { id: 'mar-menor', name: 'Mar Menor (ES) [Hotspot]', location: { lat: 37.730, lng: -0.780 } },
+        { id: 'balaton', name: 'Jezioro Balaton (HU)', location: { lat: 46.900, lng: 17.800 } },
     ],
     dataConfig: {
         base: 0.0,
