@@ -6,7 +6,6 @@ import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 
-// Helper to calculate the lake-wide average and spatial coverage for a given date
 const getDailyLakeAverage = (dataForDay: IndexDataPoint[], totalPoints: number) => {
     const validPoints = dataForDay.filter(d => d.indexValue !== null && !d.isInterpolated);
     if (validPoints.length === 0) {
@@ -20,8 +19,30 @@ const getDailyLakeAverage = (dataForDay: IndexDataPoint[], totalPoints: number) 
     };
 };
 
-// This function processes raw point data into an aggregated series for the whole lake
-const aggregateLakeData = (rawData: IndexDataPoint[], totalPoints: number): { aggregatedData: IndexDataPoint[], kpi: KpiData } => {
+const calculateBloomProbability = (ndci: number | null, temp: number | null): number | null => {
+    if (ndci === null || temp === null) return null;
+
+    // Step A: Thermal Factor
+    let thermalFactor = 0;
+    if (temp >= 12 && temp <= 25) {
+        thermalFactor = (temp - 12) / 13;
+    } else if (temp > 25) {
+        thermalFactor = 1.0;
+    }
+
+    // Step B: Biomass Factor (Normalized NDCI)
+    let biomassFactor = 0;
+    if (ndci > 0 && ndci <= 0.4) {
+        biomassFactor = ndci / 0.4;
+    } else if (ndci > 0.4) {
+        biomassFactor = 1.0;
+    }
+
+    // Step C: Final Probability
+    return thermalFactor * biomassFactor * 100;
+};
+
+const processLakeAnalytics = (rawData: IndexDataPoint[], totalPoints: number): { aggregatedData: IndexDataPoint[], kpi: KpiData } => {
     const groupedByDate: { [date: string]: IndexDataPoint[] } = {};
     rawData.forEach(point => {
         const dateStr = format(parseISO(point.date), 'yyyy-MM-dd');
@@ -33,20 +54,20 @@ const aggregateLakeData = (rawData: IndexDataPoint[], totalPoints: number): { ag
 
     const aggregatedSeries: IndexDataPoint[] = Object.entries(groupedByDate).map(([date, points]) => {
         const { avgIndex, coverage } = getDailyLakeAverage(points, totalPoints);
-        // We take the temperature from the first point as a representative sample for the day
         const representativeTemp = points[0]?.temperature ?? null;
+        const bloomProbability = calculateBloomProbability(avgIndex, representativeTemp);
 
         return {
             date: parseISO(date).toISOString(),
-            stationId: 'lake-average', // A special ID for the aggregated series
+            stationId: 'lake-average',
             indexValue: avgIndex,
-            isInterpolated: avgIndex === null, // Mark as 'interpolated' if no real data was found for that day
+            isInterpolated: avgIndex === null,
             temperature: representativeTemp,
             spatialCoverage: coverage,
+            bloomProbability,
         };
     });
 
-    // Interpolate gaps in the aggregated series
     for (let i = 0; i < aggregatedSeries.length; i++) {
         if (aggregatedSeries[i].indexValue === null) {
             let prevIndex = i - 1;
@@ -65,8 +86,13 @@ const aggregateLakeData = (rawData: IndexDataPoint[], totalPoints: number): { ag
                     const nextTime = parseISO(nextPoint.date).getTime();
                     const currentTime = parseISO(aggregatedSeries[i].date).getTime();
                     const fraction = (currentTime - prevTime) / (nextTime - prevTime);
-                    aggregatedSeries[i].indexValue = prevValue + fraction * (nextValue - prevValue);
-                    aggregatedSeries[i].isInterpolated = true; // Now it's truly interpolated
+                    const interpolatedValue = prevValue + fraction * (nextValue - prevValue);
+                    aggregatedSeries[i].indexValue = interpolatedValue;
+                    aggregatedSeries[i].isInterpolated = true;
+
+                    if (aggregatedSeries[i].temperature !== null) {
+                        aggregatedSeries[i].bloomProbability = calculateBloomProbability(interpolatedValue, aggregatedSeries[i].temperature);
+                    }
                 }
             }
         }
@@ -101,10 +127,10 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
   let chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] } = { raw: [], aggregated: [] };
 
   if (project.id.includes('lake')) {
-      const { aggregatedData, kpi } = aggregateLakeData(rawIndexData, project.stations.length);
+      const { aggregatedData, kpi } = processLakeAnalytics(rawIndexData, project.stations.length);
       kpiData.push(kpi);
-      chartData = { raw: rawIndexData, aggregated: aggregatedData };
-  } else { // For point-based projects like Snow Watch
+      chartData = { raw: rawIndexData, aggregated: aggregatedData.filter(d => d.temperature !== null && d.indexValue !== null) };
+  } else { 
       kpiData = project.stations.map(station => {
           const stationData = rawIndexData.filter(d => d.stationId === station.id);
           const latestReading = [...stationData]
@@ -117,7 +143,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
               latestDate: latestReading?.date ?? null,
           }
       });
-      chartData = { raw: rawIndexData, aggregated: [] }; // No separate aggregated view for simple points
+      chartData = { raw: rawIndexData, aggregated: [] };
   }
 
 

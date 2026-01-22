@@ -15,6 +15,7 @@ export type IndexDataPoint = {
   isInterpolated: boolean;
   temperature: number | null;
   spatialCoverage?: number;
+  bloomProbability?: number;
 };
 
 export type KpiData = {

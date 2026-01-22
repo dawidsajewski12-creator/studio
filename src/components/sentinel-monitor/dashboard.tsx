@@ -2,31 +2,31 @@
 
 import type { Project, IndexDataPoint, KpiData, Station } from '@/lib/types';
 import KpiCard from '@/components/sentinel-monitor/kpi-card';
-import { Card, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Satellite, Leaf, Droplets, Waves } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from '../ui/skeleton';
 
 const MonitorMap = dynamic(() => import('@/components/sentinel-monitor/monitor-map'), { 
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-full bg-muted"><p className="text-muted-foreground">Loading map...</p></div>
 });
 
-const IndexChart = dynamic(() => import('@/components/sentinel-monitor/index-chart'), {
-    ssr: false,
-    loading: () => (
-        <>
-            <CardHeader>
-                <Skeleton className="h-8 w-3/4 mb-2" />
-                <Skeleton className="h-5 w-1/2" />
-            </CardHeader>
-            <div className="h-[300px] md:h-[400px] w-full px-2 pb-4">
-                 <Skeleton className="h-full w-full" />
-            </div>
-        </>
-    ),
-});
+const ChartLoader = () => (
+    <div className='p-4 h-[450px]'>
+        <Skeleton className="h-8 w-3/4 mb-4" />
+        <Skeleton className="h-5 w-1/2 mb-6" />
+        <Skeleton className="h-full w-full" />
+    </div>
+);
+
+const EnvironmentalDriversChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
+const RiskClusterChart = dynamic(() => import('@/components/sentinel-monitor/RiskClusterChart'), { ssr: false, loading: ChartLoader });
+const BloomProbabilityChart = dynamic(() => import('@/components/sentinel-monitor/BloomProbabilityChart'), { ssr: false, loading: ChartLoader });
+const IndexChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
+
 
 type DashboardProps = {
   project: Project;
@@ -56,7 +56,6 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
   const [selectedStation, setSelectedStation] = useState<Station['id'] | 'all'>('all');
 
   useEffect(() => {
-    // Reset selected station when the project changes to avoid invalid state
     setSelectedStation('all');
   }, [project.id]);
 
@@ -76,23 +75,41 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
   }, [project.stations, chartData.raw]);
 
   const handleFeatureClick = (stationId: string) => {
-    // For lake projects, clicking a point on the map selects it for the chart
-    if (project.id.includes('lake')) {
       setSelectedStation(prev => prev === stationId ? 'all' : stationId);
-    } else { // For snow project, it toggles between all and one station
-      setSelectedStation(prev => prev === stationId ? 'all' : stationId);
-    }
   };
 
   const handleKpiClick = (stationId: string) => {
-    // If it's a lake KPI (average), clicking it resets the view to 'all'
     if (stationId === 'lake-average') {
       setSelectedStation('all');
-    } else { // For snow KPIs, it toggles
+    } else {
       setSelectedStation(prev => prev === stationId ? 'all' : stationId);
     }
   };
 
+  const renderCharts = () => {
+    if (project.id.includes('lake')) {
+      return (
+        <Tabs defaultValue="drivers" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="drivers">Environmental Drivers</TabsTrigger>
+            <TabsTrigger value="risk">Risk Cluster</TabsTrigger>
+            <TabsTrigger value="probability">Bloom Probability</TabsTrigger>
+          </TabsList>
+          <TabsContent value="drivers">
+            <EnvironmentalDriversChart data={chartData.raw} aggregatedData={chartData.aggregated} selectedStationId={selectedStation} project={project} />
+          </TabsContent>
+          <TabsContent value="risk">
+            <RiskClusterChart data={chartData.aggregated} />
+          </TabsContent>
+          <TabsContent value="probability">
+            <BloomProbabilityChart data={chartData.aggregated} />
+          </TabsContent>
+        </Tabs>
+      )
+    }
+    // Fallback for snow-watch project
+    return <IndexChart data={chartData.raw} selectedStationId={selectedStation} project={project} />;
+  }
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
@@ -122,12 +139,7 @@ export default function Dashboard({ project, chartData, kpiData }: DashboardProp
           ))}
         </div>
         <Card className="flex-grow">
-          <IndexChart 
-            data={chartData.raw} 
-            aggregatedData={chartData.aggregated}
-            selectedStationId={selectedStation} 
-            project={project} 
-            />
+          {renderCharts()}
         </Card>
       </div>
     </div>

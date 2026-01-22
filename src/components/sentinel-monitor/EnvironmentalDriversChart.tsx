@@ -10,10 +10,10 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Dot, ReferenceLine } from 'recharts';
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Dot } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
-type IndexChartProps = {
+type ChartProps = {
   data: IndexDataPoint[];
   aggregatedData?: IndexDataPoint[];
   selectedStationId: Station['id'] | 'all';
@@ -28,11 +28,9 @@ const stationColors: string[] = [
   'hsl(var(--chart-5))',
 ];
 const tempColor = 'hsl(var(--destructive))';
-const avgColor = 'hsl(var(--chart-3))';
-const selectedPointColor = 'hsl(var(--chart-1))';
+const avgColor = 'hsl(var(--chart-1))';
+const selectedPointColor = 'hsl(var(--chart-2))';
 
-
-// Custom dot renderer for satellite observations
 const renderDot = (props: any) => {
   const { cx, cy, payload, stroke, index } = props;
   if (payload && !payload.isInterpolated) {
@@ -41,7 +39,7 @@ const renderDot = (props: any) => {
   return null;
 };
 
-export default function IndexChart({ data, aggregatedData, selectedStationId, project }: IndexChartProps) {
+export default function EnvironmentalDriversChart({ data, aggregatedData, selectedStationId, project }: ChartProps) {
   const isLakeProject = project.id.includes('lake');
 
   const { chartData, chartConfig, visibleLines } = useMemo(() => {
@@ -50,7 +48,6 @@ export default function IndexChart({ data, aggregatedData, selectedStationId, pr
     const lines: { dataKey: string, color: string, name: string, yAxis: 'left' | 'right' }[] = [];
 
     if (isLakeProject && aggregatedData) {
-        // --- LAKE PROJECT LOGIC ---
         const selectedPointData = selectedStationId !== 'all' 
             ? data.filter(d => d.stationId === selectedStationId)
             : [];
@@ -70,22 +67,23 @@ export default function IndexChart({ data, aggregatedData, selectedStationId, pr
             }
         });
 
-        config.average = { label: 'Lake Average', color: avgColor };
-        lines.push({ dataKey: 'average', color: avgColor, name: 'Lake Average', yAxis: 'left' });
+        config.average = { label: 'Lake Average NDCI', color: avgColor };
+        lines.push({ dataKey: 'average', color: avgColor, name: 'Lake Average NDCI', yAxis: 'left' });
+        config.temperature = { label: 'Temperature', color: tempColor };
+        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'right' });
 
         if (selectedStationId !== 'all') {
             const stationName = project.stations.find(s => s.id === selectedStationId)?.name || 'Selected Point';
             config.selectedPoint = { label: stationName, color: selectedPointColor };
             lines.push({ dataKey: 'selectedPoint', color: selectedPointColor, name: stationName, yAxis: 'left' });
         }
-    } else {
-        // --- SNOW PROJECT LOGIC ---
+    } else { // Snow Project Logic
         const groupedByDate = data.reduce((acc, curr) => {
             const dateStr = format(parseISO(curr.date), 'yyyy-MM-dd');
             if (!acc[dateStr]) acc[dateStr] = { date: dateStr };
             acc[dateStr][curr.stationId] = curr.indexValue;
             acc[dateStr][`${curr.stationId}_interpolated`] = curr.isInterpolated;
-            acc[dateStr].temperature = curr.temperature; // Temp is the same for all stations in snow watch
+            acc[dateStr].temperature = curr.temperature;
             return acc;
         }, {} as any);
         
@@ -97,30 +95,23 @@ export default function IndexChart({ data, aggregatedData, selectedStationId, pr
         config.temperature = { label: 'Temperature', color: tempColor };
         
         const stationsToShow = selectedStationId === 'all' ? project.stations.map(s => s.id) : [selectedStationId];
-        stationsToShow.forEach(id => lines.push({ dataKey: id, color: config[id].color, name: config[id].label, yAxis: 'left' }));
+        stationsToShow.forEach(id => {
+            if(config[id]) lines.push({ dataKey: id, color: config[id].color, name: config[id].label, yAxis: 'left' });
+        });
         lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'right' });
     }
 
     return { chartData: finalChartData, chartConfig: config, visibleLines: lines };
   }, [data, aggregatedData, selectedStationId, project, isLakeProject]);
   
-  const selectedStationName = selectedStationId === 'all' 
-    ? 'All Stations' 
-    : project.stations.find(s => s.id === selectedStationId)?.name || 'Average';
-
-  const chartTitle = isLakeProject
-    ? `NDCI Trend for ${project.name}`
-    : `NDSI & Temp Trend (Last 365 Days)`;
-
-  const chartDescription = isLakeProject
-    ? `Lake-wide average vs. individual sensor data for ${selectedStationName}.`
-    : `Snow index and mean temperature for ${selectedStationName}.`;
+  const title = isLakeProject ? "Environmental Drivers" : "NDSI & Temperature Trend";
+  const description = isLakeProject ? "Correlation between water temperature and average algal concentration (NDCI)." : `Snow index and mean temperature for ${selectedStationId === 'all' ? 'All Stations' : project.stations.find(s=>s.id === selectedStationId)?.name}.`;
 
   return (
     <>
       <CardHeader>
-        <CardTitle>{chartTitle}</CardTitle>
-        <CardDescription>{chartDescription}</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
         <ChartContainer config={chartConfig} className="w-full h-full aspect-auto">
@@ -140,21 +131,19 @@ export default function IndexChart({ data, aggregatedData, selectedStationId, pr
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              domain={isLakeProject ? [-0.2, 0.4] : [project.index.name === 'NDBI' ? -0.5 : 0, 1]}
+              domain={isLakeProject ? [-0.2, 0.4] : [0, 1]}
               style={{ fontSize: '0.75rem' }}
             />
-            {!isLakeProject && (
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                domain={[-20, 30]}
-                tickFormatter={(value) => `${value}°C`}
-                style={{ fontSize: '0.75rem' }}
-              />
-            )}
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              domain={[-20, 30]}
+              tickFormatter={(value) => `${value}°C`}
+              style={{ fontSize: '0.75rem' }}
+            />
             <ChartTooltip
               cursor={true}
               content={<ChartTooltipContent indicator="line" labelFormatter={(label, payload) => {
@@ -168,19 +157,15 @@ export default function IndexChart({ data, aggregatedData, selectedStationId, pr
                 dataKey={line.dataKey}
                 stroke={line.color}
                 strokeWidth={line.dataKey === 'average' ? 2.5 : 2}
-                strokeOpacity={line.dataKey === 'temperature' ? 0.8 : 1}
+                strokeOpacity={1}
                 dot={line.dataKey === 'selectedPoint' ? renderDot : false}
                 activeDot={{ r: 4 }}
                 name={line.name}
                 connectNulls={true}
                 yAxisId={line.yAxis}
+                strokeDasharray={line.dataKey === 'temperature' ? "5 5" : "1"}
               />
             ))}
-            {isLakeProject ? (
-              <ReferenceLine y={0.1} yAxisId="left" label={{ value: 'Algal Bloom Risk', position: 'insideTopRight', fill: 'hsl(var(--accent))', fontSize: 12 }} stroke="hsl(var(--accent))" strokeDasharray="4 4" />
-            ) : (
-              <ReferenceLine y={0} yAxisId="right" stroke={tempColor} strokeDasharray="3 3" strokeOpacity={0.5} />
-            )}
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>

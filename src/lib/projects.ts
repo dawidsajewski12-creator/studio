@@ -1,7 +1,7 @@
 import type { Project } from './types';
 
 const maggioreStations = [
-  { lat: 45.965, lng: 8.634 }, { lat: 45.910, lng: 8.560 }, 
+  { lat: 45.965, lng: 8.634 }, { lat: 45.910, lng: 8.560 },
   { lat: 45.935, lng: 8.610 }, { lat: 46.010, lng: 8.680 }, { lat: 45.985, lng: 8.650 },
   { lat: 45.820, lng: 8.580 }, { lat: 45.885, lng: 8.545 }, { lat: 46.050, lng: 8.730 }
 ].map((loc, i) => ({
@@ -44,7 +44,7 @@ export const PROJECTS: Project[] = [
     id: 'maggiore-lake',
     name: 'Jezioro Maggiore (IT/CH)',
     analysisType: 'point',
-    description: '10-point analysis of chlorophyll concentration (NDCI) in Lake Maggiore.',
+    description: '8-point analysis of chlorophyll concentration (NDCI) in Lake Maggiore.',
     index: { name: 'NDCI', unit: '' },
     stations: maggioreStations,
     dataConfig: {
