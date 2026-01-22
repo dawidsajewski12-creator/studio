@@ -23,10 +23,10 @@ export const PROJECTS: Project[] = [
     description: 'Monitoring chlorophyll concentration and algal blooms in lakes.',
     index: { name: 'NDCI', unit: '' },
     stations: [
-        { id: 'geneva', name: 'Jezioro Genewskie (CH/FR)', location: { lat: 46.452, lng: 6.665 } },
-        { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.965, lng: 8.634 } },
-        { id: 'sniardwy', name: 'Jezioro Śniardwy (PL)', location: { lat: 53.755, lng: 21.725 } },
-        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL)', location: { lat: 54.390, lng: 19.450 } },
+        { id: 'lugano', name: 'Jezioro Lugano (CH/IT) [Hotspot]', location: { lat: 45.967, lng: 8.950 } },
+        { id: 'maggiore', name: 'Jezioro Maggiore (IT/CH)', location: { lat: 45.913, lng: 8.552 } },
+        { id: 'vistula-lagoon', name: 'Zalew Wiślany (PL) [Central]', location: { lat: 54.395, lng: 19.550 } },
+        { id: 'balaton', name: 'Jezioro Balaton (HU) [Reference]', location: { lat: 46.865, lng: 17.725 } },
     ],
     dataConfig: {
         base: 0.0,

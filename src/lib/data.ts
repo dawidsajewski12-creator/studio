@@ -112,11 +112,10 @@ const EVALSCRIPTS: Record<string, string> = {
     }
     function evaluatePixel(sample) {
       let ndci = (sample.B05 - sample.B04) / (sample.B05 + sample.B04);
-      // We want stats for pixels that are water (6) and not cloudy/no-data
-      const isWater = sample.SCL == 6;
-      const isCloudOrNodata = [0, 1, 2, 3, 7, 8, 9, 10].includes(sample.SCL);
-      const dataMask = isWater && !isCloudOrNodata ? 1 : 0;
-      return { index: [ndci], dataMask: [dataMask] };
+      // Allow Water(6), Vegetation(4), and Not Vegetated(5) to capture thick algal blooms.
+      // Exclude clouds, shadows, snow etc.
+      const isValid = [4, 5, 6].includes(sample.SCL);
+      return { index: [ndci], dataMask: [isValid ? 1 : 0] };
     }`,
 };
 
