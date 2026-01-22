@@ -163,11 +163,16 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
     }
     let isCacheUpdated = false;
 
+    // --- OPTIMIZATION: Fetch weather data once per project ---
+    const representativeStation = project.stations[0];
+    const weatherDataMap = representativeStation 
+        ? await fetchWeatherHistory(representativeStation, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'))
+        : new Map<string, number>();
+
+
     const stationPromises = project.stations.map(async (station) => {
         let fetchTasks = getGridCellsForStation(station, project);
         
-        const weatherDataMap = await fetchWeatherHistory(station, format(yearAgo, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'));
-
         const allTaskDataPromises = fetchTasks.map(async (task) => {
             const taskCache = cache[task.cellId] || [];
             let sparseDataFromCache: { date: Date; value: number | null }[] = [];
