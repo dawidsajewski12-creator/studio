@@ -336,7 +336,7 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         const project = PROJECTS.find(p => p.stations.some(s => s.id === station.id));
         if (!project) return null;
         
-        const bufferKm = 0.5; // Creates a ~1km x 1km box, much safer for the process API
+        const bufferKm = 0.5; // Creates a ~1km x 1km box
         const { lat, lng } = station.location;
         const buffer = bufferKm / 111.32;
         const bbox: [number, number, number, number] = [lng - buffer, lat - buffer, lng + buffer, lat + buffer];
@@ -380,19 +380,25 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
             cache: 'no-store',
         });
 
-        if (!response.ok || !response.body) {
-            console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`);
-            return null;
+        if (!response.ok) {
+            // The response is not OK (e.g. 400, 401, 500). Read the body to get more info.
+            const errorBodyText = await response.text();
+            
+            // Check if it's the specific "No data found" error, which is a common, non-critical case.
+            if (errorBodyText.includes("No data found")) {
+                console.warn(`No cloud-free visual found for ${station.id} in the last 60 days.`);
+            } else {
+                // For all other errors, log the full details for debugging.
+                console.error(`Failed to fetch latest visual for station ${station.id}: ${response.statusText}`, errorBodyText);
+            }
+            return null; // Return null in any error case.
         }
 
         const imageBlob = await response.blob();
+        
+        // This is a fallback check. If the response was OK but not a PNG, something is wrong.
         if (imageBlob.type !== 'image/png') {
-            const errorText = await imageBlob.text();
-            if (errorText.includes("No data found")) {
-                console.warn(`No cloud-free visual found for ${station.id} in the last 60 days.`);
-            } else {
-                console.error(`API returned an error instead of an image: ${errorText}`);
-            }
+            console.error(`API returned an unexpected content type: ${imageBlob.type}`);
             return null;
         }
         
