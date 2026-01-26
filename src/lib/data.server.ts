@@ -144,6 +144,8 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
 
     for (const station of project.stations) {
         const stationDataPromises = getGridCellsForStation(station, project).map(async (task) => {
+            console.log(`Cache status for ${task.cellId}: Found ${cache[task.cellId]?.length || 0} records.`);
+
             const taskCache = cache[task.cellId] || [];
             let sparseDataFromCache: { date: Date; value: number | null; ndmiValue?: number | null }[] = [];
             let fetchFromDate = dateLimit;
@@ -152,15 +154,18 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             if (taskCache.length > 0) {
                 const sortedTaskCache = taskCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
                 const lastRecordedDate = parseISO(sortedTaskCache[sortedTaskCache.length - 1].date);
-                const daysDiff = differenceInDays(today, lastRecordedDate);
                 
                 sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value, ndmiValue: d.ndmiValue }));
 
-                if (daysDiff < 7) {
+                if (differenceInDays(today, lastRecordedDate) < 7) {
                     needsApiCall = false;
+                    console.log(`Data for ${task.cellId} is recent. Skipping API call.`);
                 } else {
                     fetchFromDate = addDays(lastRecordedDate, 1);
+                    console.log(`Fetching delta for ${task.cellId} from ${format(fetchFromDate, 'yyyy-MM-dd')}`);
                 }
+            } else {
+                 console.log(`Cache empty for ${task.cellId}. Fetching full year.`);
             }
             
             let finalSparseData = sparseDataFromCache;
@@ -238,42 +243,6 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
                 });
             }
             
-            // Interpolation step
-            for (let i = 0; i < dailySeries.length; i++) {
-                if (dailySeries[i].indexValue === null) {
-                    let prevIndex = i - 1;
-                    while (prevIndex >= 0 && dailySeries[prevIndex].indexValue === null) prevIndex--;
-                    
-                    let nextIndex = i + 1;
-                    while (nextIndex < dailySeries.length && dailySeries[nextIndex].indexValue === null) nextIndex++;
-                    
-                    if (prevIndex >= 0 && nextIndex < dailySeries.length) {
-                        const prevPoint = dailySeries[prevIndex];
-                        const nextPoint = dailySeries[nextIndex];
-                        if (prevPoint.indexValue !== null && nextPoint.indexValue !== null) {
-                            const fraction = (parseISO(dailySeries[i].date).getTime() - parseISO(prevPoint.date).getTime()) / (parseISO(nextPoint.date).getTime() - parseISO(prevPoint.date).getTime());
-                            dailySeries[i].indexValue = prevPoint.indexValue + fraction * (nextPoint.indexValue - prevPoint.indexValue);
-                        }
-                    }
-                }
-                if (project.index.name === 'NDVI/NDMI' && dailySeries[i].ndmiValue === null) {
-                     let prevIndex = i - 1;
-                    while (prevIndex >= 0 && dailySeries[prevIndex].ndmiValue === null) prevIndex--;
-                    
-                    let nextIndex = i + 1;
-                    while (nextIndex < dailySeries.length && dailySeries[nextIndex].ndmiValue === null) nextIndex++;
-                    
-                    if (prevIndex >= 0 && nextIndex < dailySeries.length) {
-                        const prevPoint = dailySeries[prevIndex];
-                        const nextPoint = dailySeries[nextIndex];
-                        if (prevPoint.ndmiValue !== null && nextPoint.ndmiValue !== null) {
-                            const fraction = (parseISO(dailySeries[i].date).getTime() - parseISO(prevPoint.date).getTime()) / (parseISO(nextPoint.date).getTime() - parseISO(prevPoint.date).getTime());
-                            dailySeries[i].ndmiValue = prevPoint.ndmiValue + fraction * (nextPoint.ndmiValue - prevPoint.ndmiValue);
-                        }
-                    }
-                }
-            }
-
             return dailySeries;
         });
 
@@ -285,6 +254,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
             console.log(`DEBUG: Found ${validOpticalPoints} valid optical points for ${station.name} in the last 365 days.`);
         }
 
+        await new Promise(resolve => setTimeout(resolve, 250));
     }
     
     if (isCacheUpdated) {

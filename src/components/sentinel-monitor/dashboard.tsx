@@ -24,11 +24,14 @@ const ChartLoader = () => (
 const EnvironmentalDriversChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
 const BloomProbabilityChart = dynamic(() => import('@/components/sentinel-monitor/BloomProbabilityChart'), { ssr: false, loading: ChartLoader });
 const WaterStressChart = dynamic(() => import('@/components/sentinel-monitor/WaterStressChart'), { ssr: false, loading: ChartLoader });
+const RiskClusterChart = dynamic(() => import('@/components/sentinel-monitor/RiskClusterChart'), { ssr: false, loading: ChartLoader });
+
 
 type FeatureForMap = Station & { 
   latestIndexValue: number | null; 
   latestNdmiValue?: number | null;
   bloomProbability?: number | null;
+  waterStress?: number | null;
 };
 
 type DashboardProps = {
@@ -80,6 +83,12 @@ export default function Dashboard({ project, chartData, kpiData, mapFeatures }: 
       setSelectedStation(prev => prev === stationId ? 'all' : stationId);
     }
   };
+  
+  const singleStationData = useMemo(() => {
+    if (!isVineyardProject) return [];
+    const targetStationId = selectedStation === 'all' ? project.stations[0].id : selectedStation;
+    return chartData.raw.filter(d => d.stationId === targetStationId);
+  }, [chartData.raw, selectedStation, isVineyardProject, project.stations]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 h-full">
@@ -113,23 +122,26 @@ export default function Dashboard({ project, chartData, kpiData, mapFeatures }: 
           ))}
         </div>
         {isLakeProject ? (
-          <>
+          <div className="grid grid-cols-1 gap-6">
             <Card>
                 <EnvironmentalDriversChart data={chartData.raw} aggregatedData={chartData.aggregated} selectedStationId={selectedStation} project={project} />
+            </Card>
+             <Card>
+                <RiskClusterChart data={chartData.aggregated} />
             </Card>
             <Card>
                 <BloomProbabilityChart data={chartData.aggregated} />
             </Card>
-          </>
+          </div>
         ) : isVineyardProject ? (
-            <>
+            <div className="grid grid-cols-1 gap-6">
                 <Card className="flex-grow">
                     <EnvironmentalDriversChart data={chartData.raw} selectedStationId={selectedStation} project={project} />
                 </Card>
                 <Card>
-                    <WaterStressChart data={chartData.raw} />
+                    <WaterStressChart data={singleStationData} />
                 </Card>
-            </>
+            </div>
         ) : (
           <Card className="flex-grow">
               <EnvironmentalDriversChart data={chartData.raw} selectedStationId={selectedStation} project={project} />

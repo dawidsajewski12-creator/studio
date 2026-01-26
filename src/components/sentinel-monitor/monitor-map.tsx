@@ -29,6 +29,7 @@ type FeatureForMap = Station & {
   latestIndexValue: number | null; 
   latestNdmiValue?: number | null;
   bloomProbability?: number | null;
+  waterStress?: number | null;
 };
 
 type MonitorMapProps = {
@@ -64,26 +65,11 @@ const getMarkerColor = (feature: FeatureForMap, projectId: string) => {
     }
     
     if (projectId.includes('vineyard')) {
-        const ndvi = feature.latestIndexValue;
-        const ndmi = feature.latestNdmiValue;
-
-        if (ndvi === null || ndvi === undefined) {
-            return 'rgba(128, 128, 128, 0.6)'; // No Data
-        }
-        
-        // Low Vigor based on NDVI
-        if (ndvi < 0.5) {
-            return 'brown';
-        }
-
-        if (ndmi === null || ndmi === undefined) {
-            return 'rgba(128, 128, 128, 0.6)'; // No moisture data
-        }
-
-        // Water Stress based on NDMI for healthy vines
-        if (ndmi < -0.05) return 'brown'; // Critical Stress
-        if (ndmi <= 0.1) return 'orange'; // Stress Warning
-        return 'green'; // Healthy
+        const stress = feature.waterStress;
+        if (stress === null || stress === undefined) return 'rgba(128, 128, 128, 0.6)'; // No data
+        if (stress > 66) return 'brown';    // High stress
+        if (stress > 33) return 'orange';  // Medium stress
+        return 'green'; // Low stress
     }
 
     // Default snow logic
