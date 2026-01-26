@@ -128,7 +128,10 @@ const processLakeAnalytics = (rawData: IndexDataPoint[], totalPoints: number): {
 };
 
 const processVineyardAnalytics = (rawData: IndexDataPoint[]): IndexDataPoint[] => {
-    return rawData.map(d => {
+    const radarValues = rawData.map(d => d.radarValue);
+    const filledRadarValues = forwardFill(radarValues);
+    
+    return rawData.map((d, i) => {
         let waterStress: number | null = null;
         const ndvi = d.indexValue; // indexValue is NDVI for vineyards
         const ndmi = d.ndmiValue;
@@ -144,6 +147,7 @@ const processVineyardAnalytics = (rawData: IndexDataPoint[]): IndexDataPoint[] =
         
         return {
             ...d,
+            radarValue: filledRadarValues[i], // Use the forward-filled radar value
             waterStress: waterStress,
         };
     });

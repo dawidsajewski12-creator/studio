@@ -34,9 +34,11 @@ function evaluatePixel(sample) {
 }`;
 
 // --- Caching Configuration ---
-const CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
+const OPTICAL_CACHE_FILE = path.join(process.cwd(), 'data_cache.json');
+const RADAR_CACHE_FILE = path.join(process.cwd(), 'radar_cache.json');
+
 type CacheData = {
-    [id: string]: { date: string; value: number | null; ndmiValue?: number | null }[];
+    [id: string]: { date: string; value: number | null; ndmiValue?: number | null, radarValue?: number | null }[];
 };
 
 
@@ -54,6 +56,10 @@ function evaluatePixel(e){if(![3,8,9,10,11].includes(e.SCL)&&[2,4,5,6,7].include
 //VERSION=3
 function setup(){return{input:[{bands:["B04","B08","B11","SCL"],units:"DN"}],output:[{id:"INDICES",bands:2,sampleType:"FLOAT32"},{id:"dataMask",bands:1,sampleType:"UINT8"}]}}
 function evaluatePixel(e){if(![4,5].includes(e.SCL))return{INDICES:[NaN,NaN],dataMask:[0]};let t=(e.B08-e.B04)/(e.B08+e.B04),a=(e.B08-e.B11)/(e.B08+e.B11);return{INDICES:[t,a],dataMask:[1]}}`,
+  RADAR: `
+//VERSION=3
+function setup() {return {input: ["VV", "dataMask"],output: { id:"default", bands: 1, sampleType: "FLOAT32" }};}
+function evaluatePixel(sample) {return [20 * Math.log10(sample.VV)];}`
 };
 
 // --- API Helper Functions ---
@@ -115,158 +121,204 @@ async function fetchWeatherHistory(station: Station, startDate: string, endDate:
   }
 }
 
+async function getAndCacheSensorData(
+    tasks: { cellId: string, bbox: [number, number, number, number] }[],
+    dataType: 'optical' | 'radar',
+    project: Project,
+    token: string,
+    dateLimit: Date,
+    today: Date
+): Promise<{ date: string; value: number | null; ndmiValue?: number | null; cellId: string }[]> {
+    const cacheFile = dataType === 'optical' ? OPTICAL_CACHE_FILE : RADAR_CACHE_FILE;
+    const isVineyard = project.index.name === 'NDVI/NDMI';
+    const collection = dataType === 'optical' ? "sentinel-2-l2a" : "sentinel-1-grd";
+    const evalscript = dataType === 'optical' ? EVALSCRIPTS[project.index.name] : EVALSCRIPTS.RADAR;
+    
+    let processingOptions = {};
+    if (dataType === 'radar') {
+        processingOptions = { backCoeff: "GAMMA0_TERRAIN", orthorectify: true };
+    }
+
+    let cache: CacheData = {};
+    try {
+        const cacheFileContent = await fs.readFile(cacheFile, 'utf-8');
+        cache = JSON.parse(cacheFileContent);
+    } catch (error) {
+        console.log(`Cache file ${cacheFile} not found or invalid. A new one will be created.`);
+    }
+
+    let isCacheUpdated = false;
+    let allSensorData: { date: string; value: number | null; ndmiValue?: number | null, cellId: string }[] = [];
+
+    for (const task of tasks) {
+        const taskCache = cache[task.cellId] || [];
+        let sparseDataFromCache: { date: Date; value: number | null; ndmiValue?: number | null }[] = [];
+        let fetchFromDate = dateLimit;
+
+        if (taskCache.length > 0) {
+            const sortedTaskCache = taskCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+            const lastRecordedDate = parseISO(sortedTaskCache[sortedTaskCache.length - 1].date);
+            sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value, ndmiValue: d.ndmiValue }));
+
+            if (differenceInDays(today, lastRecordedDate) < 7) {
+                console.log(`Data for ${task.cellId} (${dataType}) is recent. Using cache.`);
+            } else {
+                fetchFromDate = addDays(lastRecordedDate, 1);
+                console.log(`Fetching delta for ${task.cellId} (${dataType}) from ${format(fetchFromDate, 'yyyy-MM-dd')}`);
+            }
+        } else {
+            console.log(`Cache empty for ${task.cellId} (${dataType}). Fetching full year.`);
+        }
+
+        if (isBefore(fetchFromDate, today)) {
+             const satelliteRequestBody = {
+                input: {
+                    bounds: { bbox: task.bbox },
+                    data: [{ 
+                        dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, 
+                        type: collection,
+                        processing: processingOptions
+                    }]
+                },
+                aggregation: {
+                    evalscript,
+                    timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
+                    aggregationInterval: { of: "P1D" },
+                    width: 1,
+                    height: 1,
+                },
+            };
+
+            const response = await fetch(STATS_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(satelliteRequestBody),
+            });
+
+            if (response.ok) {
+                const apiResponse = await response.json();
+                const newApiData = apiResponse.data.map((item: any) => {
+                    let value: number | null = null;
+                    let ndmiValue: number | null = null;
+                    if (dataType === 'optical' && isVineyard) {
+                        const statsNdvi = item.outputs.INDICES.bands.B0.stats;
+                        const statsNdmi = item.outputs.INDICES.bands.B1.stats;
+                        value = (statsNdvi.sampleCount > 0 && statsNdvi.mean !== null && !isNaN(statsNdvi.mean)) ? Math.max(-1, Math.min(1, statsNdvi.mean)) : null;
+                        ndmiValue = (statsNdmi.sampleCount > 0 && statsNdmi.mean !== null && !isNaN(statsNdmi.mean)) ? Math.max(-1, Math.min(1, statsNdmi.mean)) : null;
+                    } else { // Optical (non-vineyard) and Radar
+                        const stats = item.outputs.index?.bands?.B0?.stats || item.outputs.default?.bands?.B0?.stats;
+                        value = (stats && stats.sampleCount > 0 && stats.mean !== null && !isNaN(stats.mean)) ? stats.mean : null;
+                    }
+                    return { date: item.interval.from, value, ndmiValue };
+                }).filter((d: any) => d.value !== null || d.ndmiValue !== null);
+
+                const dataMap = new Map(sparseDataFromCache.map(d => [format(d.date, 'yyyy-MM-dd'), { value: d.value, ndmiValue: d.ndmiValue }]));
+                newApiData.forEach((d: any) => dataMap.set(format(parseISO(d.date), 'yyyy-MM-dd'), { value: d.value, ndmiValue: d.ndmiValue }));
+
+                const combinedSortedData = Array.from(dataMap.entries())
+                    .map(([date, data]) => ({ date, value: data.value, ndmiValue: data.ndmiValue }))
+                    .sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+
+                cache[task.cellId] = combinedSortedData.map(d => ({...d, date: parseISO(d.date).toISOString()}));
+                isCacheUpdated = true;
+            } else {
+                 console.error(`Failed to fetch ${dataType} data for task ${task.cellId}: ${response.statusText}`, await response.text());
+            }
+        }
+
+        allSensorData.push(...(cache[task.cellId] || []).map(d => ({...d, cellId: task.cellId })));
+    }
+    
+    if (isCacheUpdated) {
+        try {
+            await fs.writeFile(cacheFile, JSON.stringify(cache, null, 2));
+            console.log(`Cache file ${cacheFile} updated.`);
+        } catch (error) {
+            console.error(`Failed to write to cache file ${cacheFile}:`, error);
+        }
+    }
+
+    return allSensorData;
+}
+
+
 export async function getProjectData(project: Project): Promise<IndexDataPoint[]> {
   try {
     const token = await getToken();
     const today = new Date();
     const dateLimit = subDays(today, 365);
-    const evalscript = EVALSCRIPTS[project.index.name];
-
-    if (!evalscript) {
-        throw new Error(`No evalscript found for index: ${project.index.name}`);
-    }
-    
-    let cache: CacheData = {};
-    try {
-        const cacheFileContent = await fs.readFile(CACHE_FILE, 'utf-8');
-        cache = JSON.parse(cacheFileContent);
-    } catch (error) {
-        console.log("Cache file not found or invalid. A new one will be created.");
-    }
-    let isCacheUpdated = false;
 
     const representativeStation = project.stations[0];
     const weatherDataMap = representativeStation 
         ? await fetchWeatherHistory(representativeStation, format(dateLimit, 'yyyy-MM-dd'), format(today, 'yyyy-MM-dd'))
         : new Map<string, number>();
 
-    const allStationsData: IndexDataPoint[] = [];
+    const allTasks = project.stations.flatMap(station => getGridCellsForStation(station, project));
+    
+    const opticalData = await getAndCacheSensorData(allTasks, 'optical', project, token, dateLimit, today);
 
-    for (const station of project.stations) {
-        const stationDataPromises = getGridCellsForStation(station, project).map(async (task) => {
-            console.log(`Cache status for ${task.cellId}: Found ${cache[task.cellId]?.length || 0} records.`);
+    let radarData: { date: string; value: number | null; cellId: string }[] = [];
+    if (project.id.includes('vineyard')) {
+        radarData = await getAndCacheSensorData(allTasks, 'radar', project, token, dateLimit, today);
+    }
+    
+    const mappedRadarData = radarData.map(item => ({
+        date: item.date,
+        radarValue: item.value,
+        cellId: item.cellId
+    }));
 
-            const taskCache = cache[task.cellId] || [];
-            let sparseDataFromCache: { date: Date; value: number | null; ndmiValue?: number | null }[] = [];
-            let fetchFromDate = dateLimit;
-            let needsApiCall = true;
+    const allDataMap = new Map<string, Partial<IndexDataPoint>>();
 
-            if (taskCache.length > 0) {
-                const sortedTaskCache = taskCache.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-                const lastRecordedDate = parseISO(sortedTaskCache[sortedTaskCache.length - 1].date);
-                
-                sparseDataFromCache = sortedTaskCache.map(d => ({ date: parseISO(d.date), value: d.value, ndmiValue: d.ndmiValue }));
-
-                if (differenceInDays(today, lastRecordedDate) < 7) {
-                    needsApiCall = false;
-                    console.log(`Data for ${task.cellId} is recent. Skipping API call.`);
-                } else {
-                    fetchFromDate = addDays(lastRecordedDate, 1);
-                    console.log(`Fetching delta for ${task.cellId} from ${format(fetchFromDate, 'yyyy-MM-dd')}`);
-                }
+    const processData = (data: any[], isRadar: boolean = false) => {
+        data.forEach(d => {
+            const dateStr = format(parseISO(d.date), 'yyyy-MM-dd');
+            const key = `${dateStr}-${d.cellId}`;
+            const existing = allDataMap.get(key) || { date: d.date, cellId: d.cellId };
+            
+            if (isRadar) {
+                existing.radarValue = d.radarValue;
             } else {
-                 console.log(`Cache empty for ${task.cellId}. Fetching full year.`);
+                existing.indexValue = d.value;
+                if (d.ndmiValue !== undefined) existing.ndmiValue = d.ndmiValue;
             }
-            
-            let finalSparseData = sparseDataFromCache;
+            allDataMap.set(key, existing);
+        });
+    };
 
-            if (needsApiCall && isBefore(fetchFromDate, today)) {
-                const satelliteRequestBody = {
-                    input: {
-                        bounds: { bbox: task.bbox },
-                        data: [{ dataFilter: { timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() }}, type: "sentinel-2-l2a" }]
-                    },
-                    aggregation: {
-                        evalscript,
-                        timeRange: { from: fetchFromDate.toISOString(), to: today.toISOString() },
-                        aggregationInterval: { of: "P1D" },
-                        width: 1,
-                        height: 1,
-                    },
-                };
+    processData(opticalData);
+    processData(mappedRadarData, true);
 
-                const satelliteResponse = await fetch(STATS_URL, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(satelliteRequestBody),
-                });
+    const allDays = eachDayOfInterval({ start: dateLimit, end: today });
+    const finalData: IndexDataPoint[] = [];
 
-                if (!satelliteResponse.ok) {
-                    console.error(`Failed to fetch satellite data for station ${station.id}: ${satelliteResponse.statusText}`, await satelliteResponse.text());
-                } else {
-                    const apiResponse = await satelliteResponse.json();
-                    const newSparseDataFromApi = apiResponse.data
-                        .map((item: any) => {
-                            if (project.index.name === 'NDVI/NDMI') {
-                                const statsNdvi = item.outputs.INDICES.bands.B0.stats;
-                                const statsNdmi = item.outputs.INDICES.bands.B1.stats;
-                                const ndvi = (statsNdvi.sampleCount > 0 && statsNdvi.mean !== null && !isNaN(statsNdvi.mean)) ? Math.max(-1, Math.min(1, statsNdvi.mean)) : null;
-                                const ndmi = (statsNdmi.sampleCount > 0 && statsNdmi.mean !== null && !isNaN(statsNdmi.mean)) ? Math.max(-1, Math.min(1, statsNdmi.mean)) : null;
-                                return { date: parseISO(item.interval.from), value: ndvi, ndmiValue: ndmi };
-                            } else {
-                                const stats = item.outputs.index.bands.B0.stats;
-                                const value = (stats && stats.sampleCount > 0 && stats.mean !== null && !isNaN(stats.mean)) ? Math.max(-1, Math.min(stats.mean, 1)) : null;
-                                return { date: parseISO(item.interval.from), value };
-                            }
-                        });
+    project.stations.forEach(station => {
+        getGridCellsForStation(station, project).forEach(cell => {
+             const sparseDataMap = new Map(
+                Array.from(allDataMap.values())
+                    .filter(d => d.cellId === cell.cellId)
+                    .map(d => [format(parseISO(d.date!), 'yyyy-MM-dd'), d])
+            );
 
-                    if (newSparseDataFromApi.length > 0) {
-                        isCacheUpdated = true;
-                        const combinedData = [...finalSparseData, ...newSparseDataFromApi];
-                        const dataMap = new Map<string, { date: Date; value: number | null; ndmiValue?: number | null }>();
-                        combinedData.forEach(d => dataMap.set(format(d.date, 'yyyy-MM-dd'), d));
-                        finalSparseData = Array.from(dataMap.values()).sort((a,b) => a.date.getTime() - b.date.getTime());
-                        cache[task.cellId] = finalSparseData.map(d => ({ date: d.date.toISOString(), value: d.value, ndmiValue: d.ndmiValue }));
-                    }
-                }
-            }
-
-            const sparseData = finalSparseData.filter(d => isSameDay(d.date, dateLimit) || isBefore(dateLimit, d.date));
-            if (sparseData.length === 0) return [];
-            
-            const allDays = eachDayOfInterval({ start: dateLimit, end: today });
-            const dailySeries: IndexDataPoint[] = [];
-            const sparseDataMap = new Map(sparseData.map(d => [format(d.date, 'yyyy-MM-dd'), { value: d.value, ndmiValue: d.ndmiValue }]));
-
-            for (const day of allDays) {
+            allDays.forEach(day => {
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const dataPoint = sparseDataMap.get(dateStr);
-
-                dailySeries.push({
+                finalData.push({
                     date: day.toISOString(),
                     stationId: station.id,
-                    cellId: task.cellId,
-                    indexValue: dataPoint?.value ?? null,
+                    cellId: cell.cellId,
+                    indexValue: dataPoint?.indexValue ?? null,
                     ndmiValue: dataPoint?.ndmiValue ?? null,
-                    isInterpolated: !dataPoint,
+                    radarValue: dataPoint?.radarValue ?? null,
+                    isInterpolated: !dataPoint || dataPoint.indexValue === null,
                     temperature: weatherDataMap.get(dateStr) ?? null,
                 });
-            }
-            
-            return dailySeries;
+            });
         });
+    });
 
-        const stationResults = await Promise.all(stationDataPromises);
-        allStationsData.push(...stationResults.flat());
-        
-        if (project.id.includes('vineyard')) {
-            const validOpticalPoints = stationResults.flat().filter(p => p.indexValue !== null && !p.isInterpolated).length;
-            console.log(`DEBUG: Found ${validOpticalPoints} valid optical points for ${station.name} in the last 365 days.`);
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 250));
-    }
-    
-    if (isCacheUpdated) {
-        try {
-            await fs.writeFile(CACHE_FILE, JSON.stringify(cache, null, 2));
-            console.log("Cache file updated.");
-        } catch (error) {
-            console.error("Failed to write to cache file:", error);
-        }
-    }
-    
-    return allStationsData;
+    console.log(`Final processed data points: ${finalData.length}`);
+    return finalData;
 
   } catch (error) {
     console.error("An error occurred in the main data pipeline:", error);
