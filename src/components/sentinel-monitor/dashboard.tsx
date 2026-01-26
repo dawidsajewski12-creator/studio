@@ -24,7 +24,6 @@ const ChartLoader = () => (
 const EnvironmentalDriversChart = dynamic(() => import('@/components/sentinel-monitor/EnvironmentalDriversChart'), { ssr: false, loading: ChartLoader });
 const BloomProbabilityChart = dynamic(() => import('@/components/sentinel-monitor/BloomProbabilityChart'), { ssr: false, loading: ChartLoader });
 const WaterStressChart = dynamic(() => import('@/components/sentinel-monitor/WaterStressChart'), { ssr: false, loading: ChartLoader });
-const RiskClusterChart = dynamic(() => import('@/components/sentinel-monitor/RiskClusterChart'), { ssr: false, loading: ChartLoader });
 
 
 type FeatureForMap = Station & { 
@@ -125,9 +124,6 @@ export default function Dashboard({ project, chartData, kpiData, mapFeatures }: 
           <div className="grid grid-cols-1 gap-6">
             <Card>
                 <EnvironmentalDriversChart data={chartData.raw} aggregatedData={chartData.aggregated} selectedStationId={selectedStation} project={project} />
-            </Card>
-             <Card>
-                <RiskClusterChart data={chartData.aggregated} />
             </Card>
             <Card>
                 <BloomProbabilityChart data={chartData.aggregated} />
