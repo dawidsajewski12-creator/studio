@@ -30,6 +30,7 @@ const stationColors: string[] = [
 const tempColor = 'hsl(var(--destructive))';
 const avgColor = 'hsl(var(--chart-1))';
 const selectedPointColor = 'hsl(var(--chart-2))';
+const radarColor = '#8b5cf6';
 
 const renderDot = (props: any) => {
   const { cx, cy, payload, stroke, index } = props;
@@ -46,7 +47,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
   const { chartData, chartConfig, visibleLines } = useMemo(() => {
     let finalChartData: any[] = [];
     const config: any = {};
-    const lines: { dataKey: string, color: string, name: string, yAxis: 'left' | 'right' }[] = [];
+    const lines: { dataKey: string, color: string, name: string, yAxis: 'left' | 'temp' | 'radar' }[] = [];
 
     if (isVineyardProject) {
         const stationData = selectedStationId === 'all'
@@ -58,15 +59,19 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
             ndvi: d.indexValue,
             ndmi: d.ndmiValue,
             temperature: d.temperature,
+            radarValue: d.radarValue,
         }));
 
         config.ndvi = { label: "NDVI", color: "hsl(var(--chart-1))" };
         config.ndmi = { label: "NDMI", color: "hsl(var(--chart-2))" };
         config.temperature = { label: "Temperature", color: tempColor };
+        config.radarValue = { label: "Radar VV", color: radarColor };
 
-        lines.push({ dataKey: "ndvi", color: config.ndvi.color, name: "NDVI (Vegetation)", yAxis: "left"});
+        lines.push({ dataKey: "ndvi", color: config.ndvi.color, name: "NDVI (Vigor)", yAxis: "left"});
         lines.push({ dataKey: "ndmi", color: config.ndmi.color, name: "NDMI (Moisture)", yAxis: "left"});
-        lines.push({ dataKey: "temperature", color: tempColor, name: "Temperature", yAxis: "right"});
+        lines.push({ dataKey: "temperature", color: tempColor, name: "Temperature", yAxis: "temp"});
+        lines.push({ dataKey: "radarValue", color: radarColor, name: "Radar (Soil Moisture Proxy)", yAxis: "radar"});
+
     } else if (isLakeProject && aggregatedData) {
         const selectedPointData = selectedStationId !== 'all' 
             ? data.filter(d => d.stationId === selectedStationId)
@@ -90,7 +95,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
         config.average = { label: 'Lake Average NDCI', color: avgColor };
         lines.push({ dataKey: 'average', color: avgColor, name: 'Lake Average NDCI', yAxis: 'left' });
         config.temperature = { label: 'Temperature', color: tempColor };
-        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'right' });
+        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'temp' });
 
         if (selectedStationId !== 'all') {
             const stationName = project.stations.find(s => s.id === selectedStationId)?.name || 'Selected Point';
@@ -118,7 +123,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
         stationsToShow.forEach(id => {
             if(config[id]) lines.push({ dataKey: id, color: config[id].color, name: config[id].label, yAxis: 'left' });
         });
-        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'right' });
+        lines.push({ dataKey: 'temperature', color: tempColor, name: 'Temperature', yAxis: 'temp' });
     }
 
     return { chartData: finalChartData, chartConfig: config, visibleLines: lines };
@@ -126,7 +131,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
   
   const title = isVineyardProject ? "Vineyard Health Indices" : isLakeProject ? "Environmental Drivers" : "NDSI & Temperature Trend";
   const description = isVineyardProject
-    ? `Vegetation (NDVI) & Moisture (NDMI) trends for ${selectedStationId === 'all' ? project.stations[0].name : project.stations.find(s=>s.id === selectedStationId)?.name}.`
+    ? `Vegetation (NDVI), Moisture (NDMI & Radar), and Temperature trends for ${selectedStationId === 'all' ? project.stations[0].name : project.stations.find(s=>s.id === selectedStationId)?.name}.`
     : isLakeProject
     ? "Correlation between water temperature and average algal concentration (NDCI)."
     : `Snow index and mean temperature for ${selectedStationId === 'all' ? 'All Stations' : project.stations.find(s=>s.id === selectedStationId)?.name}.`;
@@ -141,7 +146,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
       </CardHeader>
       <div className="h-[300px] md:h-[400px] px-2">
         <ChartContainer config={chartConfig} className="w-full h-full aspect-auto">
-          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 40, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
             <XAxis
               dataKey="date"
@@ -161,7 +166,7 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
               style={{ fontSize: '0.75rem' }}
             />
             <YAxis
-              yAxisId="right"
+              yAxisId="temp"
               orientation="right"
               tickLine={false}
               axisLine={false}
@@ -169,6 +174,17 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
               domain={[-20, 30]}
               tickFormatter={(value) => `${value}°C`}
               style={{ fontSize: '0.75rem' }}
+            />
+             <YAxis
+              yAxisId="radar"
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              domain={[-25, -5]}
+              tickFormatter={(value) => `${value}dB`}
+              style={{ fontSize: '0.75rem' }}
+              dx={40}
             />
             <ChartTooltip
               cursor={true}
@@ -184,12 +200,12 @@ export default function EnvironmentalDriversChart({ data, aggregatedData, select
                 stroke={line.color}
                 strokeWidth={line.dataKey === 'average' ? 2.5 : 2}
                 strokeOpacity={1}
-                dot={line.dataKey === 'selectedPoint' ? renderDot : false}
+                dot={line.dataKey === 'selectedPoint' ? renderDot : line.dataKey === 'radarValue' ? {r: 2, fill: radarColor, strokeWidth: 1} : false}
                 activeDot={{ r: 4 }}
                 name={line.name}
                 connectNulls={true}
                 yAxisId={line.yAxis}
-                strokeDasharray={line.dataKey === 'temperature' ? "5 5" : "1"}
+                strokeDasharray={(line.dataKey === 'temperature' || line.dataKey === 'radarValue') ? "3 5" : "1"}
               />
             ))}
             <ChartLegend content={<ChartLegendContent />} />
