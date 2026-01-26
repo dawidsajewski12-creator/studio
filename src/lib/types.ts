@@ -13,6 +13,7 @@ export type IndexDataPoint = {
   cellId?: string;
   indexValue: number | null; // NDSI or NDCI or NDVI
   ndmiValue?: number | null; // For vineyard project
+  radarValue?: number | null; // For vineyard project (Sentinel-1)
   isInterpolated: boolean;
   temperature: number | null;
   spatialCoverage?: number;
@@ -25,6 +26,7 @@ export type KpiData = {
   name:string;
   latestIndexValue: number | null; // Primary index
   latestNdmiValue?: number | null; // Secondary index for vineyards
+  latestRadarValue?: number | null; // Radar value for vineyards
   latestDate: string | null;
   spatialCoverage?: number | null;
   riskValue?: number | null;

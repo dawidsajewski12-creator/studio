@@ -6,10 +6,10 @@ import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 
-const forwardFill = (data: (number | null)[]): (number | null)[] => {
+const forwardFill = (data: (number | null | undefined)[]): (number | null)[] => {
     let lastValidValue: number | null = null;
     return data.map(value => {
-        if (value !== null) {
+        if (value !== null && value !== undefined) {
             lastValidValue = value;
         }
         return lastValidValue;
@@ -161,7 +161,7 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
   
   let kpiData: KpiData[] = [];
   let chartData: { raw: IndexDataPoint[], aggregated: IndexDataPoint[] } = { raw: [], aggregated: [] };
-  let mapFeatures: (Station & { latestIndexValue: number | null, latestNdmiValue?: number | null, bloomProbability?: number | null, waterStress?: number | null })[] = [];
+  let mapFeatures: (Station & { latestIndexValue: number | null, latestNdmiValue?: number | null, bloomProbability?: number | null, waterStress?: number | null, latestRadarValue?: number | null })[] = [];
 
   if (project.id.includes('lake')) {
       const { aggregatedData, kpi } = processLakeAnalytics(rawIndexData, project.stations.length);
@@ -196,13 +196,14 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
 
         const ffilledNdvi = forwardFill(stationData.map(d=>d.indexValue));
         const ffilledNdmi = forwardFill(stationData.map(d=>d.ndmiValue));
-        const ffilledStress = forwardFill(stationData.map(d=>d.waterStress));
+        const ffilledRadar = forwardFill(stationData.map(d=>d.radarValue));
 
         return {
             stationId: station.id,
             name: station.name,
             latestIndexValue: ffilledNdvi[ffilledNdvi.length - 1] ?? null,
             latestNdmiValue: ffilledNdmi[ffilledNdmi.length - 1] ?? null,
+            latestRadarValue: ffilledRadar[ffilledRadar.length - 1] ?? null,
             latestDate: latestValidOptical?.date ?? null,
         }
     });
@@ -212,12 +213,14 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
         const ffilledNdvi = forwardFill(stationData.map(d=>d.indexValue));
         const ffilledNdmi = forwardFill(stationData.map(d=>d.ndmiValue));
         const ffilledStress = forwardFill(stationData.map(d=>d.waterStress));
+        const ffilledRadar = forwardFill(stationData.map(d=>d.radarValue));
 
         return {
             ...station,
             latestIndexValue: ffilledNdvi[ffilledNdvi.length - 1] ?? null,
             latestNdmiValue: ffilledNdmi[ffilledNdmi.length - 1] ?? null,
             waterStress: ffilledStress[ffilledStress.length - 1] ?? null,
+            latestRadarValue: ffilledRadar[ffilledRadar.length - 1] ?? null,
         }
     });
 

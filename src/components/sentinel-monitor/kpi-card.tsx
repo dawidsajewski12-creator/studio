@@ -8,6 +8,7 @@ type KpiCardProps = {
   title: string;
   value: string | number;
   ndmiValue?: string | number | null;
+  radarValue?: string | number | null;
   date: string | null;
   icon: React.ReactNode;
   onClick: () => void;
@@ -17,7 +18,7 @@ type KpiCardProps = {
   riskLabel?: string;
 };
 
-export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, isSelected, coverage, riskValue, riskLabel }: KpiCardProps) {
+export default function KpiCard({ title, value, ndmiValue, radarValue, date, icon, onClick, isSelected, coverage, riskValue, riskLabel }: KpiCardProps) {
     const coverageText = coverage !== null && coverage !== undefined
     ? `Pokrycie: ${coverage.toFixed(0)}%`
     : null;
@@ -36,10 +37,13 @@ export default function KpiCard({ title, value, ndmiValue, date, icon, onClick, 
       </CardHeader>
       <CardContent>
         {ndmiValue !== undefined ? (
-            <>
-                <div className="text-xl font-bold text-primary">{`NDVI: ${value}`}</div>
-                <div className="text-xl font-bold text-muted-foreground">{`NDMI: ${ndmiValue}`}</div>
-            </>
+            <div className='space-y-1'>
+                <div className="text-lg font-bold text-primary">{`NDVI: ${value}`}</div>
+                <div className="text-md font-bold text-muted-foreground">{`NDMI: ${ndmiValue}`}</div>
+                {radarValue !== undefined && (
+                    <div className="text-sm font-bold text-muted-foreground/80">{`Radar: ${radarValue} dB`}</div>
+                )}
+            </div>
         ) : (
             <div className="text-2xl font-bold text-primary">{value}</div>
         )}

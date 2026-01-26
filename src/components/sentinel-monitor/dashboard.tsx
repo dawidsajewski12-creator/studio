@@ -31,6 +31,7 @@ type FeatureForMap = Station & {
   latestNdmiValue?: number | null;
   bloomProbability?: number | null;
   waterStress?: number | null;
+  latestRadarValue?: number | null;
 };
 
 type DashboardProps = {
@@ -110,6 +111,7 @@ export default function Dashboard({ project, chartData, kpiData, mapFeatures }: 
               title={kpi.name}
               value={kpi.latestIndexValue !== null ? kpi.latestIndexValue.toFixed(3) : 'N/A'}
               ndmiValue={kpi.latestNdmiValue !== undefined ? (kpi.latestNdmiValue !== null ? kpi.latestNdmiValue.toFixed(3) : 'N/A') : undefined}
+              radarValue={kpi.latestRadarValue !== undefined ? (kpi.latestRadarValue !== null ? kpi.latestRadarValue.toFixed(2) : 'N/A') : undefined}
               date={kpi.latestDate}
               icon={stationIcon}
               onClick={() => handleKpiClick(kpi.stationId)}
