@@ -71,7 +71,7 @@ function evaluatePixel(sample) {
     if (sample.dataMask === 0) {
         return { index: [NaN], dataMask: [0] };
     }
-    const db = 20 * Math.log10(sample.VV);
+    const db = 10 * Math.log10(sample.VV);
     if (!isFinite(db)) {
         return { index: [NaN], dataMask: [0] };
     }
@@ -153,7 +153,7 @@ async function getAndCacheSensorData(
     
     let processingOptions = {};
     if (dataType === 'radar') {
-        processingOptions = { backCoeff: "GAMMA0_TERRAIN", orthorectify: true };
+        processingOptions = { polarization: 'VV', backCoeff: 'GAMMA0_TERRAIN', orthorectify: true };
     }
 
     let cache: CacheData = {};
@@ -278,9 +278,15 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         opticalData.push(...await getAndCacheSensorData(task, 'optical', project, token, dateLimit, today));
         
         if (project.id.includes('vineyard')) {
+            // Add a delay to avoid hitting rate limits
             await new Promise(resolve => setTimeout(resolve, 250));
             radarData.push(...await getAndCacheSensorData(task, 'radar', project, token, dateLimit, today));
         }
+    }
+    
+    if (project.id.includes('vineyard')) {
+        const validOpticalCount = opticalData.filter(p=>p.value !== null).length;
+        console.log(`DEBUG: Found ${validOpticalCount} valid optical points and ${radarData.length} radar points in total across all cells.`);
     }
 
     const mappedRadarData = radarData.map(item => ({
@@ -288,10 +294,7 @@ export async function getProjectData(project: Project): Promise<IndexDataPoint[]
         radarValue: item.value,
         cellId: item.cellId
     }));
-    if (project.id.includes('vineyard')) {
-      console.log(`DEBUG: Found ${opticalData.filter(p=>p.value !== null).length} valid optical points and ${mappedRadarData.length} radar points in total.`);
-    }
-
+    
     const allDataMap = new Map<string, Partial<IndexDataPoint>>();
 
     const processData = (data: any[], isRadar: boolean = false) => {
@@ -434,3 +437,5 @@ export async function getLatestVisual(station: Station): Promise<string | null> 
         return null;
     }
 }
+
+    
