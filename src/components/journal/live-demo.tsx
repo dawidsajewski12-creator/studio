@@ -6,16 +6,13 @@ import TechnicalNote from '@/components/journal/technical-note';
 import { notFound } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 
-const forwardFill = (data: IndexDataPoint[], key: keyof IndexDataPoint): IndexDataPoint[] => {
+const forwardFill = (data: (number | null)[]): (number | null)[] => {
     let lastValidValue: number | null = null;
-    return data.map(point => {
-        if (point[key] !== null && typeof point[key] === 'number') {
-            lastValidValue = point[key] as number;
+    return data.map(value => {
+        if (value !== null) {
+            lastValidValue = value;
         }
-        return {
-            ...point,
-            [key]: lastValidValue,
-        };
+        return lastValidValue;
     });
 };
 
@@ -113,9 +110,9 @@ const processLakeAnalytics = (rawData: IndexDataPoint[], totalPoints: number): {
         .filter(d => d.indexValue !== null && !d.isInterpolated)
         .pop();
         
-    const latestReadingForKpi = [...forwardFill(interpolatedSeries, 'indexValue')]
-        .filter(d => d.temperature !== null)
-        .pop();
+    const indexValues = interpolatedSeries.map(d => d.indexValue);
+    const filledIndexValues = forwardFill(indexValues);
+    const latestReadingForKpi = interpolatedSeries.length > 0 ? { ...interpolatedSeries[interpolatedSeries.length - 1], indexValue: filledIndexValues[filledIndexValues.length - 1] } : null;
 
     const kpi: KpiData = {
       stationId: 'lake-average',
@@ -171,7 +168,9 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
       kpiData.push(kpi);
       chartData = { raw: rawIndexData, aggregated: aggregatedData.filter(d => d.temperature !== null) };
 
-      const latestAggregatedTemp = aggregatedData.filter(d => d.temperature !== null).pop()?.temperature ?? null;
+      const tempValues = aggregatedData.map(d => d.temperature);
+      const filledTempValues = forwardFill(tempValues);
+      const latestAggregatedTemp = filledTempValues[filledTempValues.length - 1] ?? null;
 
       mapFeatures = project.stations.map(station => {
         const latestReading = [...rawIndexData]
@@ -187,37 +186,38 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
 
   } else if (project.id.includes('vineyard')) {
     const processedData = processVineyardAnalytics(rawIndexData);
-
-    const ffilledNdvi = forwardFill(processedData, 'indexValue');
-    const ffilledNdmi = forwardFill(ffilledNdvi, 'ndmiValue');
-    const ffilledStress = forwardFill(ffilledNdmi, 'waterStress');
+    chartData = { raw: processedData, aggregated: [] };
 
     kpiData = project.stations.map(station => {
-        const latestValidOptical = [...processedData]
-          .filter(d => d.stationId === station.id && d.indexValue !== null && !d.isInterpolated)
+        const stationData = processedData.filter(d => d.stationId === station.id);
+        const latestValidOptical = [...stationData]
+          .filter(d => d.indexValue !== null && !d.isInterpolated)
           .pop();
-        const latestReadingForKpi = [...ffilledStress]
-          .filter(d => d.stationId === station.id)
-          .pop();
+
+        const ffilledNdvi = forwardFill(stationData.map(d=>d.indexValue));
+        const ffilledNdmi = forwardFill(stationData.map(d=>d.ndmiValue));
+        const ffilledStress = forwardFill(stationData.map(d=>d.waterStress));
+
         return {
             stationId: station.id,
             name: station.name,
-            latestIndexValue: latestReadingForKpi?.indexValue ?? null,
-            latestNdmiValue: latestReadingForKpi?.ndmiValue ?? null,
+            latestIndexValue: ffilledNdvi[ffilledNdvi.length - 1] ?? null,
+            latestNdmiValue: ffilledNdmi[ffilledNdmi.length - 1] ?? null,
             latestDate: latestValidOptical?.date ?? null,
         }
     });
-    chartData = { raw: processedData, aggregated: [] };
     
     mapFeatures = project.stations.map(station => {
-        const latestReading = [...ffilledStress]
-          .filter(d => d.stationId === station.id)
-          .pop();
+        const stationData = processedData.filter(d => d.stationId === station.id);
+        const ffilledNdvi = forwardFill(stationData.map(d=>d.indexValue));
+        const ffilledNdmi = forwardFill(stationData.map(d=>d.ndmiValue));
+        const ffilledStress = forwardFill(stationData.map(d=>d.waterStress));
+
         return {
             ...station,
-            latestIndexValue: latestReading?.indexValue ?? null,
-            latestNdmiValue: latestReading?.ndmiValue ?? null,
-            waterStress: latestReading?.waterStress ?? null,
+            latestIndexValue: ffilledNdvi[ffilledNdvi.length - 1] ?? null,
+            latestNdmiValue: ffilledNdmi[ffilledNdmi.length - 1] ?? null,
+            waterStress: ffilledStress[ffilledStress.length - 1] ?? null,
         }
     });
 
@@ -227,23 +227,26 @@ export default async function LiveDemo({ projectId }: { projectId: string }) {
           const latestReading = [...stationData]
             .filter(d => d.indexValue !== null && !d.isInterpolated)
             .pop();
-          const ffilledData = forwardFill(stationData, 'indexValue');
-          const latestForKpi = ffilledData.pop();
+
+          const ffilledValues = forwardFill(stationData.map(d => d.indexValue));
+          
           return {
               stationId: station.id,
               name: station.name,
-              latestIndexValue: latestForKpi?.indexValue ?? null,
+              latestIndexValue: ffilledValues[ffilledValues.length - 1] ?? null,
               latestDate: latestReading?.date ?? null,
           }
       });
       chartData = { raw: rawIndexData, aggregated: [] };
 
       mapFeatures = project.stations.map(station => {
-        const ffilledData = forwardFill(rawIndexData.filter(d => d.stationId === station.id), 'indexValue');
-        const latestReading = ffilledData.pop();
+        const stationData = rawIndexData.filter(d => d.stationId === station.id);
+        const ffilledValues = forwardFill(stationData.map(d => d.indexValue));
+        const latestValue = ffilledValues[ffilledValues.length - 1] ?? null;
+
         return {
             ...station,
-            latestIndexValue: latestReading?.indexValue ?? null,
+            latestIndexValue: latestValue,
         };
       });
   }
